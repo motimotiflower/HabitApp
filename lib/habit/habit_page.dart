@@ -19,20 +19,39 @@ class _HabitPageState extends State<HabitPage> {
       appBar: AppBar(title: Text("習慣")),
 
       //一覧=====================================
-      body: ListView(
-        //1つの項目 アイコン テキスト
-        //                  テキスト
-        children: [
-          Row(
-            children: [
-              Icon(Icons.abc),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Text("data"), Text("a")],
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: ListView(
+          //1つの項目 アイコン テキスト
+          //                  テキスト
+          children:[
+            Container(
+              margin:EdgeInsets.only(bottom:12),
+              padding: EdgeInsets.all(16),
+              
+              //1項目の見た目
+              decoration: BoxDecoration(
+                color:Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color.fromARGB(255, 172, 154, 154),
+                  width: 1,
+                ),
               ),
-            ],
-          ),
-        ],
+
+              child:Row(
+                children: [
+                  Icon(Icons.abc),
+                  SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [Text("data"), Text("a")],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
 
       //===============================
@@ -43,7 +62,6 @@ class _HabitPageState extends State<HabitPage> {
 
         child: Icon(Icons.add), //プラスアイコン
       ),
-      
     );
   }
 }
