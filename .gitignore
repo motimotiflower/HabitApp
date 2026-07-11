@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Envied / 秘密情報の隠し設定
+.env
+*.g.dart

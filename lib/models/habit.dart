@@ -1,3 +1,4 @@
+//モデルクラス
 class Habit {
   final String title;
   final String outline;

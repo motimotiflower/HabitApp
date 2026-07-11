@@ -2,8 +2,10 @@
 
 import 'package:flutter/material.dart';    //flutterの基本的なライブラリ
 import 'package:habitapp/habit/habit_page.dart';  //habit_pageをつかえるように
+import 'package:habitapp/core/env.dart';
 
 void main() {
+  print("APIキー: ${Env.apiKey}");
   runApp(const MyApp());
 }
 
