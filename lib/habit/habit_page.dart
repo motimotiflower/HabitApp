@@ -14,14 +14,14 @@ class HabitPage extends StatefulWidget {
 
 //HabitPageの値や見た目の管理(ここ限定）=======================
 class _HabitPageState extends State<HabitPage> {
+  //変数
+  List<Habit> habits = [
+    //habit(モデル)
+    Habit(title: "読書", icon: Icons.sunny),
+    Habit(title: "タスク", icon: Icons.abc),
+  ];
 
-//変数
-List<Habit> habits =[ //habit(モデル)
-  Habit(title: "読書",outline: "説明"),
-  Habit(title: "タスク",outline: "せつめい"),
-];
-
-//画面を作る処理==================================
+  //画面を作る処理==================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,14 +32,21 @@ List<Habit> habits =[ //habit(モデル)
       body: Padding(
         padding: const EdgeInsets.all(16),
 
-        child: ListView.builder(  //必要な数だけカードを作る
-          itemCount:habits.length ,  //作る数をカウント
+        child: ListView.builder(
+          //必要な数だけカードを作る
+          itemCount: habits.length, //作る数をカウント
+          //データ１件分(habit_card)
           itemBuilder: (context, index) {
             return HabitCard(
-              habit: habits[index],   //habit:はhabitっていう変数に値渡しますという意味
+              //habit:はhabitっていう変数に値渡しますという意味
+              habit: habits[index],
+
+              //チェックボタン
+              onChanged: () => setState(() {
+                habits[index].isDone = !habits[index].isDone;
+              }),
             );
           },
-
         ),
       ),
 
@@ -51,8 +58,6 @@ List<Habit> habits =[ //habit(モデル)
 
         child: Icon(Icons.add), //プラスアイコン
       ),
-
-
     );
   }
 }
