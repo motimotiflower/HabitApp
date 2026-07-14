@@ -1,9 +1,9 @@
 //習慣を表示するページ
 import 'package:flutter/material.dart';
-import 'dart:math';
 import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/habit/widgets/habit_card.dart';
-import 'package:habitapp/habit/widgets/habit_header.dart';
+import 'package:habitapp/widgets/app_header.dart';
+import 'package:habitapp/widgets/navigation_bar.dart';
 
 //習慣画面を表すWidget======================================
 class HabitPage extends StatefulWidget {
@@ -26,19 +26,10 @@ class _HabitPageState extends State<HabitPage> {
   //画面を作る処理==================================
   @override
   Widget build(BuildContext context) {
-    //変数-----------------------------------
-    //高さや幅
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final headerHeight = screenHeight * 0.26;
-
-    //==========================================================
     return Scaffold(
       body: Stack(
         //複数のwidgetを重ねる
-        children: [
-          HabitHeader(headerHeight: headerHeight, screenWidth: screenWidth),
-        ],
+        children: [AppHeader(title: "Habit", showCalender: true)],
       ),
 
       // Container(

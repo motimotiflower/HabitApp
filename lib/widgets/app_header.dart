@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
-class HabitHeader extends StatelessWidget {
-  const HabitHeader({
-    super.key,
-    required this.headerHeight,
-    required this.screenWidth,
-  });
+class AppHeader extends StatelessWidget {
+  const AppHeader({super.key, required this.title, required this.showCalender});
 
-  final double headerHeight;
-  final double screenWidth;
+  final String title;
+  final bool showCalender;
 
   @override
   Widget build(BuildContext context) {
     //変数-----------------------------------
     //高さや幅
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final headerHeight = showCalender
+        ? screenHeight * 0.26
+        : screenHeight * 0.16;
+
     final horizontalPadding = screenWidth > 700 ? 60.0 : screenWidth * 0.06;
 
     //タイトル
-    final titlePosition = headerHeight * 0.3;
+    final titlePosition = showCalender
+        ? headerHeight * 0.3
+        : headerHeight * 0.4;
     final titlePadding = min(screenWidth * 0.07, 60.0); //小さいほう使う
     final titleFontSize = min(screenWidth * 0.08, 36.0);
 
@@ -66,7 +70,7 @@ class HabitHeader extends StatelessWidget {
           left: titlePadding,
 
           child: Text(
-            "習慣",
+            title,
             style: TextStyle(
               color: Colors.white,
               fontSize: titleFontSize,
@@ -84,64 +88,65 @@ class HabitHeader extends StatelessWidget {
         ),
 
         //曜日----------------------------
-        Positioned(
-          top: dayPosition,
-          left: horizontalPadding,
-          right: horizontalPadding,
+        if (showCalender)
+          Positioned(
+            top: dayPosition,
+            left: horizontalPadding,
+            right: horizontalPadding,
 
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-            //曜日に番号を付ける
-            children: days.asMap().entries.map((entry) {
-              //変数-----------------------------
-              final index = entry.key;
-              final day = entry.value;
+              //曜日に番号を付ける
+              children: days.asMap().entries.map((entry) {
+                //変数-----------------------------
+                final index = entry.key;
+                final day = entry.value;
 
-              //表示------------------------------
-              return Column(
-                children: [
-                  //曜日
-                  Text(
-                    day,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: dayFontSize,
-                    ),
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  //日付
-                  Container(
-                    width: daySize,
-                    height: daySize,
-                    alignment: Alignment.center,
-
-                    //今日の日付に円
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-
-                      color: index == now.weekday - 1
-                          ? const Color(0xffa9a6f4)
-                          : Colors.transparent,
-                    ),
-
-                    child: Text(
-                      dates[index].toString(),
-
+                //表示------------------------------
+                return Column(
+                  children: [
+                    //曜日
+                    Text(
+                      day,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: dateFontSize,
-                        fontWeight: FontWeight.w500,
+                        fontSize: dayFontSize,
                       ),
                     ),
-                  ),
-                ],
-              );
-            }).toList(),
+
+                    const SizedBox(height: 4),
+
+                    //日付
+                    Container(
+                      width: daySize,
+                      height: daySize,
+                      alignment: Alignment.center,
+
+                      //今日の日付に円
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+
+                        color: index == now.weekday - 1
+                            ? const Color(0xffa9a6f4)
+                            : Colors.transparent,
+                      ),
+
+                      child: Text(
+                        dates[index].toString(),
+
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: dateFontSize,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
           ),
-        ),
       ],
     );
   }
