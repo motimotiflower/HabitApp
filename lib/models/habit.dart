@@ -1,4 +1,4 @@
-//モデルクラス
+//習慣のデータの型
 import 'package:flutter/material.dart';
 
 class Habit {

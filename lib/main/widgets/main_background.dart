@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
-class AppHeader extends StatelessWidget {
-  const AppHeader({super.key, required this.title, required this.showCalender});
+class MainBackground extends StatelessWidget {
+  const MainBackground({
+    super.key,
+    required this.title,
+    required this.showCalendar,
+  });
 
   final String title;
-  final bool showCalender;
+  final bool showCalendar;
+  static const double headerRatio = 0.26;
 
   @override
   Widget build(BuildContext context) {
@@ -13,16 +18,12 @@ class AppHeader extends StatelessWidget {
     //高さや幅
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    final headerHeight = showCalender
-        ? screenHeight * 0.26
-        : screenHeight * 0.16;
+    final headerHeight = screenHeight * headerRatio;
 
     final horizontalPadding = screenWidth > 700 ? 60.0 : screenWidth * 0.06;
 
     //タイトル
-    final titlePosition = showCalender
-        ? headerHeight * 0.3
-        : headerHeight * 0.4;
+    final titlePosition = headerHeight * 0.3;
     final titlePadding = min(screenWidth * 0.07, 60.0); //小さいほう使う
     final titleFontSize = min(screenWidth * 0.08, 36.0);
 
@@ -88,7 +89,7 @@ class AppHeader extends StatelessWidget {
         ),
 
         //曜日----------------------------
-        if (showCalender)
+        if (showCalendar)
           Positioned(
             top: dayPosition,
             left: horizontalPadding,

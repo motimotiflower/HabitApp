@@ -1,8 +1,7 @@
 //アプリを起動する場所
 
 import 'package:flutter/material.dart'; //flutterの基本的なライブラリ
-import 'package:habitapp/pages/habit_page.dart';
-import 'package:habitapp/pages/main_page.dart'; //habit_pageをつかえるように
+import 'package:habitapp/main/main_page.dart'; //habit_pageをつかえるように
 
 void main() {
   runApp(const MyApp());
