@@ -22,7 +22,6 @@ class MainContent extends StatelessWidget {
       bottom: 0,
 
       child: Container(
-        width: double.infinity,
         padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
 
         decoration: const BoxDecoration(

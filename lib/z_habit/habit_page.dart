@@ -26,8 +26,7 @@ class _HabitPageState extends State<HabitPage> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Stack(
-        children: [
+      child:
           //白いカード
           MainContent(
             //必要な数だけカードを作る------
@@ -47,8 +46,6 @@ class _HabitPageState extends State<HabitPage> {
               },
             ),
           ),
-        ],
-      ),
 
       // //追加ボタン-------------------
       // floatingActionButton: FloatingActionButton(

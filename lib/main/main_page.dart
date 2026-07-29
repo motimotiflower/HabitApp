@@ -33,16 +33,15 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //=============================================
       body: Stack(
         children: [
-          //背景
+          //背景========================================
           MainBackground(
             title: _pages[_currentIndex].title,
             showCalendar: _pages[_currentIndex].showCalendar,
           ),
 
-          // currentIndexに応じたページを表示
+          // currentIndexに応じたページを表示============
           _pages[_currentIndex].page,
         ],
       ),
