@@ -1,6 +1,7 @@
 //各ページの土台
 //背景や各ページ、ナビゲーションバーをもっている
 import 'package:flutter/material.dart';
+import 'package:habitapp/z_habit/sheets/add_habit_sheet.dart';
 import 'package:habitapp/z_home/home_page.dart';
 import 'package:habitapp/z_habit/habit_page.dart';
 import 'package:habitapp/z_task/task_page.dart';
@@ -30,6 +31,25 @@ class _MainPageState extends State<MainPage> {
     PageInfo(title: "Memo", page: MemoPage()),
   ];
 
+  //追加画面===============================
+  void _openAddSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, //画面を隠れにくくする
+      //上だけ角丸
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+
+      builder: (context) {
+        return SizedBox(
+          // height: MediaQuery.of(context).size.height * 0.80,
+          child: AddHabitSheet(onAddHabit: (habit) {}),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,6 +65,16 @@ class _MainPageState extends State<MainPage> {
           _pages[_currentIndex].page,
         ],
       ),
+
+      //追加ボタン========================================
+      floatingActionButton:
+          _currentIndex !=
+              0 //Home画面以外に表示
+          ? FloatingActionButton(
+              onPressed: _openAddSheet,
+              child: const Icon(Icons.add),
+            )
+          : null,
 
       // 共通のナビゲーションバー=======================
       bottomNavigationBar: AppNavigationBar(
