@@ -43,7 +43,7 @@ class _MainPageState extends State<MainPage> {
 
       builder: (context) {
         return SizedBox(
-          // height: MediaQuery.of(context).size.height * 0.80,
+          height: MediaQuery.of(context).size.height * 0.80,
           child: AddHabitSheet(onAddHabit: (habit) {}),
         );
       },
