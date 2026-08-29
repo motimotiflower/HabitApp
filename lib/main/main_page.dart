@@ -23,31 +23,55 @@ class _MainPageState extends State<MainPage> {
   // 現在選択中のページ
   int _currentIndex = 0;
 
-  // 表示するページ一覧を型に入れる
-  final List<PageInfo> _pages = [
-    PageInfo(title: "Home", page: HomePage()),
-    PageInfo(title: "Habit", page: HabitPage(), showCalendar: true),
-    PageInfo(title: "Task", page: TaskPage()),
-    PageInfo(title: "Memo", page: MemoPage()),
-  ];
+  //HabitPageを指定するためのKey
+  final GlobalKey<HabitPageState> _habitPageKey = GlobalKey<HabitPageState>();
+
+  // 表示するページ一覧
+  late final List<PageInfo> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _pages = [
+      PageInfo(title: "Home", page: HomePage()),
+      PageInfo(
+        title: "Habit",
+        page: HabitPage(key: _habitPageKey),
+        showCalendar: true,
+      ),
+      PageInfo(title: "Task", page: TaskPage()),
+      PageInfo(title: "Memo", page: MemoPage()),
+    ];
+  }
 
   //追加画面===============================
   void _openAddSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, //画面を隠れにくくする
-      //上だけ角丸
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
+    //Habitの追加画面
+    if (_currentIndex == 1) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
 
-      builder: (context) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.80,
-          child: AddHabitSheet(onAddHabit: (habit) {}),
-        );
-      },
-    );
+        builder: (context) {
+          return SizedBox(
+            height: MediaQuery.of(context).size.height * 0.80,
+            child: AddHabitSheet(
+              onAddHabit: (habit) {
+                _habitPageKey.currentState?.addHabit(habit);
+              },
+            ),
+          );
+        },
+      );
+
+      //Taskの追加画面はあとで作る
+    } else if (_currentIndex == 2) {
+      //Memoの追加画面はあとで作る
+    } else if (_currentIndex == 3) {}
   }
 
   @override

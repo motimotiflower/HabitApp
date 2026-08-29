@@ -10,11 +10,11 @@ class HabitPage extends StatefulWidget {
 
   // HabitPageと_HabitPageStateを結び付ける
   @override
-  State<HabitPage> createState() => _HabitPageState();
+  State<HabitPage> createState() => HabitPageState();
 }
 
 //HabitPageの値や見た目の管理(ここ限定）=======================
-class _HabitPageState extends State<HabitPage> {
+class HabitPageState extends State<HabitPage> {
   //変数-------------------------------------
   List<Habit> habits = [
     //habit(モデル)
@@ -23,7 +23,7 @@ class _HabitPageState extends State<HabitPage> {
   ];
 
   //データの追加
-  void _addHabit(Habit habit) {
+  void addHabit(Habit habit) {
     setState(() {
       habits.add(habit);
     });
