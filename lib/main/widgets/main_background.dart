@@ -55,7 +55,7 @@ class MainBackground extends StatelessWidget {
       children: [
         //背景--------------------------
         Container(
-          height: headerHeight,
+          height: double.infinity,
           width: double.infinity, //横いっぱいに
           decoration: const BoxDecoration(
             gradient: LinearGradient(

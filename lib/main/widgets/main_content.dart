@@ -15,18 +15,16 @@ class MainContent extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final headerHeight = screenHeight * MainBackground.headerRatio;
 
-    return Positioned(
-      top: headerHeight - overlap,
-      left: 0,
-      right: 0,
-      bottom: 0,
+    return Padding(
+      padding: EdgeInsets.only(top: headerHeight - overlap),
 
       child: Container(
+        width: double.infinity,
         padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
 
         decoration: const BoxDecoration(
           color: Color(0xfffbfaff),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          //borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         ),
 
         //各ページの中身
