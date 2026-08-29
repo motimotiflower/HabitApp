@@ -33,6 +33,7 @@ class HabitPageState extends State<HabitPage> {
   @override
   Widget build(BuildContext context) {
     return MainContent(
+      overlap: 10,
       //必要な数だけカードを作る------
       child: ListView.builder(
         itemCount: habits.length, //作る数をカウント

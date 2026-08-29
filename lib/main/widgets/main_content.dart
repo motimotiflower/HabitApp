@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:habitapp/main/widgets/main_background.dart';
 
 class MainContent extends StatelessWidget {
-  const MainContent({super.key, required this.child});
+  const MainContent({super.key, required this.child, this.overlap = 30.0});
 
   final Widget child;
+  final double overlap;
 
   @override
   Widget build(BuildContext context) {
     //変数
-    const overlap = 30.0;
     final screenHeight = MediaQuery.of(context).size.height;
     final headerHeight = screenHeight * MainBackground.headerRatio;
 
