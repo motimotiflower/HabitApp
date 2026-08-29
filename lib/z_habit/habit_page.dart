@@ -32,27 +32,23 @@ class HabitPageState extends State<HabitPage> {
   //画面を作る処理==================================
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child:
-          //白いカード
-          MainContent(
-            //必要な数だけカードを作る------
-            child: ListView.builder(
-              itemCount: habits.length, //作る数をカウント
-              //データ１件分(habit_card)
-              itemBuilder: (context, index) {
-                return HabitCard(
-                  //habit:はhabitっていう変数に値渡しますという意味
-                  habit: habits[index],
+    return MainContent(
+      //必要な数だけカードを作る------
+      child: ListView.builder(
+        itemCount: habits.length, //作る数をカウント
+        //データ１件分(habit_card)
+        itemBuilder: (context, index) {
+          return HabitCard(
+            //habit:はhabitっていう変数に値渡しますという意味
+            habit: habits[index],
 
-                  //チェックボタン
-                  onChanged: () => setState(() {
-                    habits[index].isDone = !habits[index].isDone;
-                  }),
-                );
-              },
-            ),
-          ),
+            //チェックボタン
+            onChanged: () => setState(() {
+              habits[index].isDone = !habits[index].isDone;
+            }),
+          );
+        },
+      ),
 
       // //追加ボタン-------------------
       // floatingActionButton: FloatingActionButton(
