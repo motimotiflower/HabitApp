@@ -20,7 +20,7 @@ class MainContent extends StatelessWidget {
 
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
 
         decoration: const BoxDecoration(
           color: Color(0xfffbfaff),

@@ -36,6 +36,7 @@ class HabitPageState extends State<HabitPage> {
       overlap: 10,
       //必要な数だけカードを作る------
       child: ListView.builder(
+        padding: EdgeInsets.zero, //ListView自身の余白はいらない
         itemCount: habits.length, //作る数をカウント
         //データ１件分(habit_card)
         itemBuilder: (context, index) {
