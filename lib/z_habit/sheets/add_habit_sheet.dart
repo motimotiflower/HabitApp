@@ -243,6 +243,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                   final habit = Habit(
                     title: titleController.text.trim(),
                     icon: Icons.check,
+                    days: List.from(selectedDays),
                     isDone: false,
                   );
 

@@ -6,10 +6,17 @@ class MainBackground extends StatelessWidget {
     super.key,
     required this.title,
     required this.showCalendar,
+    this.onDaySelected,
+    this.selectedDayIndex,
   });
 
   final String title;
   final bool showCalendar;
+
+  //曜日が押された時に、何番目の曜日かを親に渡す
+  final void Function(int)? onDaySelected;
+  final int? selectedDayIndex;
+
   static const double headerRatio = 0.26;
 
   @override
@@ -105,45 +112,48 @@ class MainBackground extends StatelessWidget {
                 final day = entry.value;
 
                 //表示------------------------------
-                return Column(
-                  children: [
-                    //曜日
-                    Text(
-                      day,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: dayFontSize,
-                      ),
-                    ),
+                return GestureDetector(
+                  onTap: () {
+                    onDaySelected?.call(index);
+                  },
 
-                    const SizedBox(height: 4),
-
-                    //日付
-                    Container(
-                      width: daySize,
-                      height: daySize,
-                      alignment: Alignment.center,
-
-                      //今日の日付に円
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-
-                        color: index == now.weekday - 1
-                            ? const Color(0xffa9a6f4)
-                            : Colors.transparent,
-                      ),
-
-                      child: Text(
-                        dates[index].toString(),
-
+                  child: Column(
+                    children: [
+                      //曜日
+                      Text(
+                        day,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: dateFontSize,
-                          fontWeight: FontWeight.w500,
+                          fontSize: dayFontSize,
                         ),
                       ),
-                    ),
-                  ],
+
+                      const SizedBox(height: 4),
+
+                      //日付
+                      Container(
+                        width: daySize,
+                        height: daySize,
+                        alignment: Alignment.center,
+
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: index == (selectedDayIndex ?? now.weekday - 1)
+                              ? const Color(0xffa9a6f4)
+                              : Colors.transparent,
+                        ),
+
+                        child: Text(
+                          dates[index].toString(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: dateFontSize,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               }).toList(),
             ),

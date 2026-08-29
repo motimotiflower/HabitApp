@@ -25,6 +25,8 @@ class _MainPageState extends State<MainPage> {
 
   //HabitPageを指定するためのKey
   final GlobalKey<HabitPageState> _habitPageKey = GlobalKey<HabitPageState>();
+  //カレンダーで選択中の曜日
+  int _selectedDayIndex = DateTime.now().weekday - 1;
 
   // 表示するページ一覧
   late final List<PageInfo> _pages;
@@ -83,6 +85,20 @@ class _MainPageState extends State<MainPage> {
           MainBackground(
             title: _pages[_currentIndex].title,
             showCalendar: _pages[_currentIndex].showCalendar,
+            selectedDayIndex: _selectedDayIndex,
+
+            onDaySelected: (index) {
+              //Habitページの時だけ曜日変更を伝える
+              if (_currentIndex == 1) {
+                //カレンダーの選択曜日を変更
+                setState(() {
+                  _selectedDayIndex = index;
+                });
+
+                //HabitPageの表示曜日も変更
+                _habitPageKey.currentState?.selectDay(index);
+              }
+            },
           ),
 
           // currentIndexに応じたページを表示============
