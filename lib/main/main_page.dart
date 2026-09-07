@@ -145,6 +145,9 @@ class _MainPageState extends State<MainPage> {
             onPreviousWeek: _goToPreviousWeek,
             onNextWeek: _goToNextWeek,
 
+            //今日に戻る
+            onToday: _goToToday,
+
             onDaySelected: (index) {
               //Habitページの時だけ曜日変更を伝える
               if (_currentIndex == 1) {

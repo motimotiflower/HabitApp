@@ -70,15 +70,6 @@ class MainBackground extends StatelessWidget {
     final startOfWeek =
         displayedMonday ?? now.subtract(Duration(days: now.weekday - 1));
 
-    //今週の月曜日
-    final currentMonday = now.subtract(Duration(days: now.weekday - 1));
-
-    //今週以外を表示しているか
-    final isOtherWeek =
-        startOfWeek.year != currentMonday.year ||
-        startOfWeek.month != currentMonday.month ||
-        startOfWeek.day != currentMonday.day;
-
     //月曜の日付から1週間分作る
     final dates = List.generate(7, (index) {
       return startOfWeek.add(Duration(days: index)).day;
@@ -114,24 +105,27 @@ class MainBackground extends StatelessWidget {
           ),
         ),
 
-        //今日に戻るボタン---------------------
-        if (showCalendar && isOtherWeek)
-          Positioned(
-            top: iconPosition,
-            right: horizontalPadding + 40,
-
-            child: TextButton(
-              onPressed: onToday,
-              child: const Text('今日', style: TextStyle(color: Colors.white)),
-            ),
-          ),
-
-        //設定アイコン---------------------
+        //今日ボタン・設定アイコン---------------------
         Positioned(
           top: iconPosition,
           right: horizontalPadding,
 
-          child: const Icon(Icons.settings_outlined, color: Colors.white),
+          child: Row(
+            children: [
+              //今日に戻るボタン
+              if (showCalendar)
+                TextButton(
+                  onPressed: onToday,
+                  child: const Text(
+                    '今日',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+
+              //設定アイコン
+              const Icon(Icons.settings_outlined, color: Colors.white),
+            ],
+          ),
         ),
 
         //週の切り替え----------------------------
@@ -141,27 +135,8 @@ class MainBackground extends StatelessWidget {
             left: horizontalPadding,
             right: horizontalPadding,
 
-            //表示中の年月
-            child: Center(
-              child: Text(
-                '${startOfWeek.year}年${startOfWeek.month}月${startOfWeek.day}日〜',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: dateFontSize,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-
-        //曜日----------------------------
-        if (showCalendar)
-          Positioned(
-            top: dayPosition,
-            left: horizontalPadding,
-            right: horizontalPadding,
-
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 //前の週へ
                 IconButton(
@@ -173,64 +148,15 @@ class MainBackground extends StatelessWidget {
                   ),
                 ),
 
-                //曜日を横いっぱいに並べる
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                    //曜日に番号を付ける
-                    children: days.asMap().entries.map((entry) {
-                      //変数-----------------------------
-                      final index = entry.key;
-                      final day = entry.value;
-
-                      //表示------------------------------
-                      return GestureDetector(
-                        onTap: () {
-                          onDaySelected?.call(index);
-                        },
-
-                        child: Column(
-                          children: [
-                            //曜日
-                            Text(
-                              day,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: dayFontSize,
-                              ),
-                            ),
-
-                            const SizedBox(height: 4),
-
-                            //日付
-                            Container(
-                              width: daySize,
-                              height: daySize,
-                              alignment: Alignment.center,
-
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color:
-                                    index ==
-                                        (selectedDayIndex ?? now.weekday - 1)
-                                    ? const Color(0xffa9a6f4)
-                                    : Colors.transparent,
-                              ),
-
-                              child: Text(
-                                dates[index].toString(),
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: dateFontSize,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                //表示中の年月
+                Text(
+                  '${startOfWeek.year}年'
+                  '${startOfWeek.month}月'
+                  '${startOfWeek.day}日〜',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: dateFontSize,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
 
@@ -244,6 +170,70 @@ class MainBackground extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+
+        //曜日----------------------------
+        if (showCalendar)
+          Positioned(
+            top: dayPosition,
+            left: horizontalPadding,
+            right: horizontalPadding,
+
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+              //曜日に番号を付ける
+              children: days.asMap().entries.map((entry) {
+                //変数-----------------------------
+                final index = entry.key;
+                final day = entry.value;
+
+                //表示------------------------------
+                return GestureDetector(
+                  onTap: () {
+                    onDaySelected?.call(index);
+                  },
+
+                  child: Column(
+                    children: [
+                      //曜日
+                      Text(
+                        day,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: dayFontSize,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      //日付
+                      Container(
+                        width: daySize,
+                        height: daySize,
+                        alignment: Alignment.center,
+
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: index == (selectedDayIndex ?? now.weekday - 1)
+                              ? const Color(0xffa9a6f4)
+                              : Colors.transparent,
+                        ),
+
+                        child: Text(
+                          dates[index].toString(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: dateFontSize,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
             ),
           ),
       ],
