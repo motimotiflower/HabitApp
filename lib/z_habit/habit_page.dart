@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/z_habit/widgets/habit_card.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //習慣画面を表すWidget======================================
 class HabitPage extends StatefulWidget {
@@ -31,6 +33,20 @@ class HabitPageState extends State<HabitPage> {
     setState(() {
       habits.add(habit);
     });
+
+    // 追加後の一覧を保存
+    _saveHabits();
+  }
+
+  // 習慣データを端末に保存
+  Future<void> _saveHabits() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Habit → Map → JSON文字列
+    final habitList = habits.map((habit) => habit.toJson()).toList();
+    final jsonString = jsonEncode(habitList);
+
+    await prefs.setString('habits', jsonString);
   }
 
   //表示する曜日を変更
