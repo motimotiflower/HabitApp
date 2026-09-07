@@ -21,13 +21,12 @@ class HabitPageState extends State<HabitPage> {
   //選択中の曜日
   int selectedDayIndex = DateTime.now().weekday - 1;
 
-  // 指定した日が含まれる週の月曜日を取得
+  //指定した日が含まれる週の月曜日を取得
   static DateTime _getMonday(DateTime date) {
     return date.subtract(Duration(days: date.weekday - 1));
   }
 
-  // 現在表示している週の月曜日
-  // 週を移動するとこの日付が7日ずつ変わる
+  //現在表示している週の月曜日
   DateTime displayedMonday = _getMonday(DateTime.now());
 
   //習慣一覧
@@ -42,8 +41,23 @@ class HabitPageState extends State<HabitPage> {
       habits.add(habit);
     });
 
-    // 追加後の習慣一覧を保存
+    //追加後の習慣一覧を保存
     HabitStorage.saveHabits(habits);
+  }
+
+  //表示する曜日を変更=============================
+  void selectDay(int index) {
+    setState(() {
+      selectedDayIndex = index;
+    });
+  }
+
+  //表示する週を変更===============================
+  //MainPageの週移動ボタンから呼ばれる
+  void changeDisplayedWeek(DateTime monday) {
+    setState(() {
+      displayedMonday = monday;
+    });
   }
 
   //保存データの読み込み===========================
@@ -51,22 +65,19 @@ class HabitPageState extends State<HabitPage> {
   void initState() {
     super.initState();
 
-    // HabitPageが最初に作られた時に読み込む
+    //HabitPageが最初に作られた時に保存データを読み込む
     _loadHabits();
   }
 
   Future<void> _loadHabits() async {
+    //保存されている習慣一覧を取得
     final loadedHabits = await HabitStorage.loadHabits();
+
+    //読み込み中にWidgetが破棄されていたら終了
+    if (!mounted) return;
 
     setState(() {
       habits = loadedHabits;
-    });
-  }
-
-  //表示する曜日を変更=============================
-  void selectDay(int index) {
-    setState(() {
-      selectedDayIndex = index;
     });
   }
 
@@ -87,6 +98,7 @@ class HabitPageState extends State<HabitPage> {
     }).toList();
 
     //表示中の週から、選択した曜日の日付を取得
+    //例：表示週が9/7(月)で火曜日を選択 → 9/8
     final selectedDate = displayedMonday.add(Duration(days: selectedDayIndex));
 
     //達成履歴で使用する日付キーを作成
@@ -96,88 +108,44 @@ class HabitPageState extends State<HabitPage> {
         '${selectedDate.month.toString().padLeft(2, '0')}-'
         '${selectedDate.day.toString().padLeft(2, '0')}';
 
-    //表示中の週の日曜日を取得
-    final displayedSunday = displayedMonday.add(const Duration(days: 6));
-
     //画面========================================
     return MainContent(
       overlap: 10,
 
-      child: Column(
-        children: [
-          //週の切り替え---------------------------
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              //前の週へ
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    displayedMonday = displayedMonday.subtract(
-                      const Duration(days: 7),
-                    );
-                  });
-                },
-                icon: const Icon(Icons.chevron_left),
-              ),
+      //習慣一覧
+      child: ListView.builder(
+        //ListView自身の余白はいらない
+        padding: EdgeInsets.zero,
 
-              //現在表示している週
-              Text(
-                '${displayedMonday.month}/${displayedMonday.day}'
-                ' 〜 '
-                '${displayedSunday.month}/${displayedSunday.day}',
-              ),
+        //表示する習慣の数
+        itemCount: selectedDayHabits.length,
 
-              //次の週へ
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    displayedMonday = displayedMonday.add(
-                      const Duration(days: 7),
-                    );
-                  });
-                },
-                icon: const Icon(Icons.chevron_right),
-              ),
-            ],
-          ),
+        //習慣1件分のカードを作成
+        itemBuilder: (context, index) {
+          //現在表示しているHabit
+          final habit = selectedDayHabits[index];
 
-          //習慣一覧--------------------------------
-          //Columnの残りの高さをListViewに使う
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
+          return HabitCard(
+            //HabitCardに習慣データを渡す
+            habit: habit,
 
-              //表示する習慣の数
-              itemCount: selectedDayHabits.length,
+            //選択した日の達成状態
+            //記録がまだなければ未達成(false)
+            isDone: habit.completionHistory[dateKey] ?? false,
 
-              //習慣1件分のカードを作成
-              itemBuilder: (context, index) {
-                final habit = selectedDayHabits[index];
+            //チェックボタンが押された時
+            onChanged: () {
+              setState(() {
+                //選択した日の達成状態を反転
+                habit.completionHistory[dateKey] =
+                    !(habit.completionHistory[dateKey] ?? false);
+              });
 
-                return HabitCard(
-                  habit: habit,
-
-                  //選択した日の達成状態
-                  //記録がなければ未達成(false)
-                  isDone: habit.completionHistory[dateKey] ?? false,
-
-                  //チェックボタン
-                  onChanged: () {
-                    setState(() {
-                      //選択した日の達成状態を反転
-                      habit.completionHistory[dateKey] =
-                          !(habit.completionHistory[dateKey] ?? false);
-                    });
-
-                    //変更後の達成状態を保存
-                    HabitStorage.saveHabits(habits);
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+              //変更後の達成状態を保存
+              HabitStorage.saveHabits(habits);
+            },
+          );
+        },
       ),
     );
   }

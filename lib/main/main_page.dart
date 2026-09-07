@@ -20,15 +20,26 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   //変数===================================
-  // 現在選択中のページ
-  int _currentIndex = 0;
+
+  //ページ関係----------------------
+  int _currentIndex = 0; // 現在選択中のページ
 
   //HabitPageを指定するためのKey
   final GlobalKey<HabitPageState> _habitPageKey = GlobalKey<HabitPageState>();
+
+  //日付関係------------------------
   //カレンダーで選択中の曜日
   int _selectedDayIndex = DateTime.now().weekday - 1;
 
-  // 表示するページ一覧
+  //表示している週の月曜日
+  DateTime _displayedMonday = _getMonday(DateTime.now());
+
+  //指定した日が含まれる週の月曜日を取得
+  static DateTime _getMonday(DateTime date) {
+    return date.subtract(Duration(days: date.weekday - 1));
+  }
+
+  // 表示するページ一覧====================
   late final List<PageInfo> _pages;
 
   @override
@@ -76,6 +87,46 @@ class _MainPageState extends State<MainPage> {
     } else if (_currentIndex == 3) {}
   }
 
+  //前の週へ=================================
+  void _goToPreviousWeek() {
+    setState(() {
+      //表示週を7日前にする
+      _displayedMonday = _displayedMonday.subtract(const Duration(days: 7));
+    });
+
+    //HabitPageにも変更を伝える
+    _habitPageKey.currentState?.changeDisplayedWeek(_displayedMonday);
+  }
+
+  //次の週へ=================================
+  void _goToNextWeek() {
+    setState(() {
+      //表示週を7日後にする
+      _displayedMonday = _displayedMonday.add(const Duration(days: 7));
+    });
+
+    //HabitPageにも変更を伝える
+    _habitPageKey.currentState?.changeDisplayedWeek(_displayedMonday);
+  }
+
+  //今日に戻る=================================
+  void _goToToday() {
+    final now = DateTime.now();
+
+    setState(() {
+      //今週に戻す
+      _displayedMonday = _getMonday(now);
+
+      //今日の曜日を選択
+      _selectedDayIndex = now.weekday - 1;
+    });
+
+    //HabitPageにも変更を伝える
+    _habitPageKey.currentState?.changeDisplayedWeek(_displayedMonday);
+
+    _habitPageKey.currentState?.selectDay(_selectedDayIndex);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,6 +137,13 @@ class _MainPageState extends State<MainPage> {
             title: _pages[_currentIndex].title,
             showCalendar: _pages[_currentIndex].showCalendar,
             selectedDayIndex: _selectedDayIndex,
+
+            //現在表示している週
+            displayedMonday: _displayedMonday,
+
+            //週移動
+            onPreviousWeek: _goToPreviousWeek,
+            onNextWeek: _goToNextWeek,
 
             onDaySelected: (index) {
               //Habitページの時だけ曜日変更を伝える
