@@ -7,11 +7,13 @@ class HabitCard extends StatelessWidget {
   const HabitCard({
     super.key,
     required this.habit, //このクラスのhabitに値入れる
+    required this.isDone,
     required this.onChanged,
   });
 
   //変数====================================
   final Habit habit; //データの型
+  final bool isDone; // 表示する日の達成状態
   final VoidCallback onChanged; //押された時に実行する関数を受け取る
 
   //========================================
@@ -40,7 +42,7 @@ class HabitCard extends StatelessWidget {
           Text(habit.title), //タイトル
           const Spacer(), //空白
           Checkbox(
-            value: habit.isDone,
+            value: isDone,
             onChanged: (value) {
               onChanged();
             },

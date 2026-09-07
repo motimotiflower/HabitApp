@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/z_habit/widgets/habit_card.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:habitapp/z_habit/habit_storage.dart';
 
 //習慣画面を表すWidget======================================
 class HabitPage extends StatefulWidget {
@@ -28,25 +27,30 @@ class HabitPageState extends State<HabitPage> {
     Habit(title: "タスク", icon: Icons.abc),
   ];
 
-  //データの追加
+  //データの追加==========================
   void addHabit(Habit habit) {
     setState(() {
       habits.add(habit);
     });
 
-    // 追加後の一覧を保存
-    _saveHabits();
+    // 保存処理はHabitStorageに任せる
+    HabitStorage.saveHabits(habits);
   }
 
-  // 習慣データを端末に保存
-  Future<void> _saveHabits() async {
-    final prefs = await SharedPreferences.getInstance();
+  // 保存データを取得======================
+  // HabitPageが作られた時に読み込む
+  @override
+  void initState() {
+    super.initState();
+    _loadHabits();
+  }
 
-    // Habit → Map → JSON文字列
-    final habitList = habits.map((habit) => habit.toJson()).toList();
-    final jsonString = jsonEncode(habitList);
+  Future<void> _loadHabits() async {
+    final loadedHabits = await HabitStorage.loadHabits();
 
-    await prefs.setString('habits', jsonString);
+    setState(() {
+      habits = loadedHabits;
+    });
   }
 
   //表示する曜日を変更
@@ -59,6 +63,7 @@ class HabitPageState extends State<HabitPage> {
   //画面を作る処理==================================
   @override
   Widget build(BuildContext context) {
+    //変数------------------
     //今日の曜日を取得
     const days = ["月", "火", "水", "木", "金", "土", "日"];
     //選択中の曜日
@@ -69,6 +74,20 @@ class HabitPageState extends State<HabitPage> {
       return habit.days.contains(selectedDay);
     }).toList();
 
+    final now = DateTime.now();
+
+    // 今週の月曜日を取得
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+
+    // 選択中の曜日の日付
+    final selectedDate = monday.add(Duration(days: selectedDayIndex));
+
+    // 保存用の日付キーを作る
+    final dateKey =
+        '${selectedDate.year}-'
+        '${selectedDate.month.toString().padLeft(2, '0')}-'
+        '${selectedDate.day.toString().padLeft(2, '0')}';
+    //------------------------
     return MainContent(
       overlap: 10,
 
@@ -82,23 +101,27 @@ class HabitPageState extends State<HabitPage> {
             //habit:はhabitっていう変数に値渡しますという意味
             habit: selectedDayHabits[index],
 
+            // 今日の達成状態を渡す
+            isDone:
+                selectedDayHabits[index].completionHistory[dateKey] ?? false,
+
             //チェックボタン
-            onChanged: () => setState(() {
-              selectedDayHabits[index].isDone =
-                  !selectedDayHabits[index].isDone;
-            }),
+            onChanged: () {
+              setState(() {
+                // 達成状態を切り替える
+                final habit = selectedDayHabits[index];
+
+                // 今日の達成状態を反転
+                habit.completionHistory[dateKey] =
+                    !(habit.completionHistory[dateKey] ?? false);
+              });
+
+              // 変更後の状態を保存
+              HabitStorage.saveHabits(habits);
+            },
           );
         },
       ),
-
-      // //追加ボタン-------------------
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     //押された時の処理
-      //   },
-
-      //   child: Icon(Icons.add), //プラスアイコン
-      // ),
     );
   }
 }

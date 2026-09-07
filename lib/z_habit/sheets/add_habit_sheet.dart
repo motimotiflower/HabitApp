@@ -244,7 +244,6 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     title: titleController.text.trim(),
                     icon: Icons.check,
                     days: List.from(selectedDays),
-                    isDone: false,
                   );
 
                   widget.onAddHabit(habit);
