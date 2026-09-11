@@ -18,28 +18,19 @@ class EditTaskSheet extends StatefulWidget {
 
 class _EditTaskSheetState extends State<EditTaskSheet> {
   late final TextEditingController _titleController;
-  DateTime? _deadline;
-  late String _category;
-  late int _priority;
+  late final TextEditingController _categoryController;
 
-  static const List<String> _categories = [
-    '未設定',
-    '勉強',
-    '仕事',
-    '生活',
-    '健康',
-    'サークル',
-    'その他',
-  ];
+  DateTime? _deadline;
 
   @override
   void initState() {
     super.initState();
 
     _titleController = TextEditingController(text: widget.task.title);
+    _categoryController = TextEditingController(
+      text: widget.task.category == '未設定' ? '' : widget.task.category,
+    );
     _deadline = widget.task.deadline;
-    _category = widget.task.category;
-    _priority = widget.task.priority;
   }
 
   //締切日を選ぶ
@@ -61,14 +52,15 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
   //編集内容を保存する
   void _saveTask() {
     final title = _titleController.text.trim();
+    final category = _categoryController.text.trim();
+
     if (title.isEmpty) return;
 
     widget.onSave(
       Task(
         title: title,
         deadline: _deadline,
-        category: _category,
-        priority: _priority,
+        category: category.isEmpty ? '未設定' : category,
         isDone: widget.task.isDone,
       ),
     );
@@ -93,6 +85,7 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
               'タスクを編集',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
+
             const SizedBox(height: 20),
 
             Expanded(
@@ -100,6 +93,7 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    //タスク名
                     TextField(
                       controller: _titleController,
                       decoration: const InputDecoration(
@@ -107,11 +101,16 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
                         border: OutlineInputBorder(),
                       ),
                     ),
+
                     const SizedBox(height: 20),
 
+                    //締切日
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.calendar_today),
+                      leading: const Icon(
+                        Icons.calendar_today,
+                        color: Color(0xff526FC5),
+                      ),
                       title: Text(
                         _deadline == null
                             ? '締切日を選択'
@@ -129,46 +128,21 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
                             ),
                       onTap: _selectDeadline,
                     ),
+
                     const SizedBox(height: 12),
 
-                    const Text(
-                      'ジャンル',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _categories.map((category) {
-                        return ChoiceChip(
-                          label: Text(category),
-                          selected: _category == category,
-                          onSelected: (_) {
-                            setState(() {
-                              _category = category;
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 20),
-
-                    const Text(
-                      '重要度',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _priorityChip('なし', 0),
-                        _priorityChip('低', 1),
-                        _priorityChip('中', 2),
-                        _priorityChip('高', 3),
-                      ],
+                    //ジャンル
+                    TextField(
+                      controller: _categoryController,
+                      decoration: const InputDecoration(
+                        labelText: 'ジャンル',
+                        hintText: '例：勉強、買い物、サークル',
+                        prefixIcon: Icon(
+                          Icons.folder_outlined,
+                          color: Color(0xff526FC5),
+                        ),
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ],
                 ),
@@ -180,6 +154,10 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff526FC5),
+                  foregroundColor: Colors.white,
+                ),
                 onPressed: _saveTask,
                 child: const Text('保存'),
               ),
@@ -190,21 +168,10 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
     );
   }
 
-  Widget _priorityChip(String label, int value) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: _priority == value,
-      onSelected: (_) {
-        setState(() {
-          _priority = value;
-        });
-      },
-    );
-  }
-
   @override
   void dispose() {
     _titleController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 }
