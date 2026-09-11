@@ -2,7 +2,7 @@
 class MemoMessage {
   final String content; //本文
   final DateTime createdAt; //投稿日時
-  final String? imageBase64; //添付画像（基本版はbase64で保存）
+  final String? imageBase64; //添付画像
 
   MemoMessage({
     required this.content,
@@ -31,14 +31,12 @@ class MemoMessage {
 
 class Memo {
   final String title; //部屋名
-  final String type; //メモの種類
   final DateTime updatedAt; //最終更新
   final bool isPinned; //Homeに表示するか
   final List<MemoMessage> messages; //壁打ちした投稿一覧
 
   Memo({
     required this.title,
-    this.type = 'メモ',
     required this.updatedAt,
     this.isPinned = false,
     this.messages = const [],
@@ -58,7 +56,6 @@ class Memo {
   Map<String, dynamic> toJson() {
     return {
       'title': title,
-      'type': type,
       'updatedAt': updatedAt.toIso8601String(),
       'isPinned': isPinned,
       'messages': messages.map((message) => message.toJson()).toList(),
@@ -66,7 +63,7 @@ class Memo {
   }
 
   factory Memo.fromJson(Map<String, dynamic> json) {
-    //旧Keep型メモを新しい「部屋＋投稿」形式へ移行
+    //旧Keep型メモもそのまま引き継ぐ
     if (json['messages'] == null) {
       final oldContent = (json['content'] ?? '').toString();
       final oldUpdatedAt = json['updatedAt'] != null
@@ -75,7 +72,6 @@ class Memo {
 
       return Memo(
         title: json['title'] ?? 'メモ',
-        type: 'メモ',
         updatedAt: oldUpdatedAt,
         isPinned: json['isPinned'] ?? false,
         messages: oldContent.isEmpty
@@ -91,7 +87,6 @@ class Memo {
 
     return Memo(
       title: json['title'] ?? 'メモ',
-      type: json['type'] ?? 'メモ',
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])
           : DateTime.now(),
