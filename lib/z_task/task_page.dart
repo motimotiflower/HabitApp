@@ -246,9 +246,12 @@ class TaskPageState extends State<TaskPage> {
   //絞り込みと並び替え
   List<Task> _getVisibleTasks() {
     final visibleTasks = tasks.where((task) {
+      //タブごとの表示条件
       final statusMatches =
-          _selectedStatus == 'すべて' ||
-          (_selectedStatus == '未完了' && !task.isDone) ||
+          (_selectedStatus == 'すべて' && !task.isDone) ||
+          (_selectedStatus == '期限あり' &&
+              !task.isDone &&
+              task.deadline != null) ||
           (_selectedStatus == '完了' && task.isDone);
 
       final categoryMatches =
@@ -287,9 +290,9 @@ class TaskPageState extends State<TaskPage> {
       right: 20,
       child: Column(
         children: [
-          //完了状態
+          //表示タブ：期限あり・すべて・完了
           Row(
-            children: ['すべて', '未完了', '完了'].map((status) {
+            children: ['期限あり', 'すべて', '完了'].map((status) {
               final selected = _selectedStatus == status;
 
               return Expanded(
