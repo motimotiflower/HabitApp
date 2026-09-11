@@ -232,89 +232,52 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                 ),
                               ),
 
-                            //Discordのように背景へ直接投稿を並べる
+                            //壁打ちメモなので本文と時刻だけをシンプルに表示
                             Padding(
                               padding: const EdgeInsets.only(
                                 left: 4,
                                 right: 4,
                                 bottom: 16,
                               ),
-                              child: Row(
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const CircleAvatar(
-                                    radius: 17,
-                                    backgroundColor: Color(0xffE8EDFC),
-                                    child: Icon(
-                                      Icons.person_outline,
-                                      size: 18,
-                                      color: Color(0xff526FC5),
+                                  if (message.content.isNotEmpty)
+                                    Text(
+                                      message.content,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        height: 1.45,
+                                        color: Color(0xff35415F),
+                                      ),
                                     ),
-                                  ),
 
-                                  const SizedBox(width: 10),
-
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Text(
-                                              '自分',
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w600,
-                                                color: Color(0xff35415F),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              _formatTime(message.createdAt),
-                                              style: const TextStyle(
-                                                fontSize: 11,
-                                                color: Color(0xff9AA2B6),
-                                              ),
-                                            ),
-                                          ],
+                                  if (message.imageBase64 != null) ...[
+                                    if (message.content.isNotEmpty)
+                                      const SizedBox(height: 8),
+                                    GestureDetector(
+                                      onTap: () {
+                                        _showImage(message.imageBase64!);
+                                      },
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Image.memory(
+                                          base64Decode(message.imageBase64!),
+                                          width: 280,
+                                          height: 210,
+                                          fit: BoxFit.cover,
                                         ),
+                                      ),
+                                    ),
+                                  ],
 
-                                        if (message.content.isNotEmpty) ...[
-                                          const SizedBox(height: 3),
-                                          Text(
-                                            message.content,
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              height: 1.45,
-                                              color: Color(0xff35415F),
-                                            ),
-                                          ),
-                                        ],
+                                  const SizedBox(height: 4),
 
-                                        if (message.imageBase64 != null) ...[
-                                          const SizedBox(height: 8),
-                                          GestureDetector(
-                                            onTap: () {
-                                              _showImage(
-                                                message.imageBase64!,
-                                              );
-                                            },
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              child: Image.memory(
-                                                base64Decode(
-                                                  message.imageBase64!,
-                                                ),
-                                                width: 280,
-                                                height: 210,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ],
+                                  Text(
+                                    _formatTime(message.createdAt),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xff9AA2B6),
                                     ),
                                   ),
                                 ],
