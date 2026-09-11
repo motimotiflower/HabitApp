@@ -2,6 +2,7 @@
 //背景や各ページ、ナビゲーションバーをもっている
 import 'package:flutter/material.dart';
 import 'package:habitapp/z_habit/sheets/add_habit_sheet.dart';
+import 'package:habitapp/z_task/sheets/add_task_sheet.dart';
 import 'package:habitapp/z_home/home_page.dart';
 import 'package:habitapp/z_habit/habit_page.dart';
 import 'package:habitapp/z_task/task_page.dart';
@@ -26,6 +27,9 @@ class _MainPageState extends State<MainPage> {
 
   //HabitPageを指定するためのKey
   final GlobalKey<HabitPageState> _habitPageKey = GlobalKey<HabitPageState>();
+
+  //TaskPageを指定するためのKey
+  final GlobalKey<TaskPageState> _taskPageKey = GlobalKey<TaskPageState>();
 
   //日付関係------------------------
   //カレンダーで選択中の曜日
@@ -53,7 +57,10 @@ class _MainPageState extends State<MainPage> {
         page: HabitPage(key: _habitPageKey),
         showCalendar: true,
       ),
-      PageInfo(title: "Task", page: TaskPage()),
+      PageInfo(
+        title: "Task",
+        page: TaskPage(key: _taskPageKey),
+      ),
       PageInfo(title: "Memo", page: MemoPage()),
     ];
   }
@@ -81,8 +88,27 @@ class _MainPageState extends State<MainPage> {
         },
       );
 
-      //Taskの追加画面はあとで作る
+      //Taskの追加画面
     } else if (_currentIndex == 2) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+
+        builder: (context) {
+          return SizedBox(
+            height: MediaQuery.of(context).size.height * 0.80,
+            child: AddTaskSheet(
+              onAddTask: (task) {
+                _taskPageKey.currentState?.addTask(task);
+              },
+            ),
+          );
+        },
+      );
+
       //Memoの追加画面はあとで作る
     } else if (_currentIndex == 3) {}
   }
@@ -162,7 +188,7 @@ class _MainPageState extends State<MainPage> {
             },
           ),
 
-          // currentIndexに応じたページを表示============
+          //currentIndexに応じたページを表示============
           _pages[_currentIndex].page,
         ],
       ),
@@ -177,7 +203,7 @@ class _MainPageState extends State<MainPage> {
             )
           : null,
 
-      // 共通のナビゲーションバー=======================
+      //共通のナビゲーションバー=======================
       bottomNavigationBar: AppNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
