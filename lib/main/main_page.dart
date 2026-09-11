@@ -239,12 +239,14 @@ class _MainPageState extends State<MainPage> {
             _currentIndex = index; //インデックスの更新
           });
 
-          //Homeを開いた時に最新のタスクを読み直す
-          if (index == 0) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
+          //画面を開いた時に保存データと同期する
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (index == 0) {
               _homePageKey.currentState?.reload();
-            });
-          }
+            } else if (index == 1) {
+              _habitPageKey.currentState?.reloadHabits();
+            }
+          });
         },
       ),
     );
