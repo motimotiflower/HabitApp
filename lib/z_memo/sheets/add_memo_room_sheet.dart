@@ -17,16 +17,6 @@ class AddMemoRoomSheet extends StatefulWidget {
 class _AddMemoRoomSheetState extends State<AddMemoRoomSheet> {
   final TextEditingController _titleController = TextEditingController();
 
-  String _selectedType = 'メモ';
-
-  static const _types = [
-    'メモ',
-    'アイデア',
-    '大学',
-    '制作',
-    'その他',
-  ];
-
   void _save() {
     final title = _titleController.text.trim();
     if (title.isEmpty) return;
@@ -34,7 +24,6 @@ class _AddMemoRoomSheetState extends State<AddMemoRoomSheet> {
     widget.onAdd(
       Memo(
         title: title,
-        type: _selectedType,
         updatedAt: DateTime.now(),
       ),
     );
@@ -71,45 +60,7 @@ class _AddMemoRoomSheetState extends State<AddMemoRoomSheet> {
 
               const SizedBox(height: 20),
 
-              const Text(
-                '種類',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xff35415F),
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _types.map((type) {
-                  final selected = _selectedType == type;
-
-                  return ChoiceChip(
-                    label: Text(type),
-                    selected: selected,
-                    showCheckmark: false,
-                    selectedColor: const Color(0xff526FC5),
-                    backgroundColor: const Color(0xffE8EDFC),
-                    labelStyle: TextStyle(
-                      color: selected
-                          ? Colors.white
-                          : const Color(0xff4763B4),
-                    ),
-                    onSelected: (_) {
-                      setState(() {
-                        _selectedType = type;
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 20),
-
+              //部屋名だけを決める
               TextField(
                 controller: _titleController,
                 autofocus: true,
