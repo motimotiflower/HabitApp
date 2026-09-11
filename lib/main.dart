@@ -20,7 +20,8 @@ class MyApp extends StatelessWidget {
       title: 'Habit App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 134, 116, 116),
+          //アプリ全体の基準色を青に統一
+          seedColor: const Color(0xff526FC5),
         ),
       ),
 
