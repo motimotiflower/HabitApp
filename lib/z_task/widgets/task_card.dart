@@ -134,24 +134,26 @@ class TaskCard extends StatelessWidget {
                           ),
                         ),
 
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            size: 13,
-                            color: deadlineColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _getDeadlineText(),
-                            style: TextStyle(
-                              fontSize: 11,
+                      //締切を設定しているタスクだけ表示
+                      if (task.deadline != null)
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.calendar_today_outlined,
+                              size: 13,
                               color: deadlineColor,
                             ),
-                          ),
-                        ],
-                      ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _getDeadlineText(),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: deadlineColor,
+                              ),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 ],
