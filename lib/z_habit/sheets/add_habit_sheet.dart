@@ -1,57 +1,130 @@
 import 'package:flutter/material.dart';
 import 'package:habitapp/models/habit.dart';
+import 'package:habitapp/z_habit/habit_category_storage.dart';
 
 class AddHabitSheet extends StatefulWidget {
-  //コンストラクタ ==========================
   const AddHabitSheet({super.key, required this.onAddHabit});
 
   final void Function(Habit) onAddHabit;
 
   @override
-  State<AddHabitSheet> createState() {
-    return _AddHabitSheetState();
-  }
+  State<AddHabitSheet> createState() => _AddHabitSheetState();
 }
 
 class _AddHabitSheetState extends State<AddHabitSheet> {
-  //変数-------------------------------------
   static const days = ["月", "火", "水", "木", "金", "土", "日"];
+
   final selectedDays = <String>[];
   final titleController = TextEditingController();
 
+  List<String> _categories = [];
+  String _selectedCategory = '未設定';
+  IconData _selectedIcon = Icons.check;
+
+  final List<IconData> _icons = const [
+    Icons.menu_book,
+    Icons.water_drop,
+    Icons.fitness_center,
+    Icons.self_improvement,
+    Icons.favorite,
+    Icons.star,
+    Icons.music_note,
+    Icons.nightlight_round,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  //保存されているジャンルを読み込む
+  Future<void> _loadCategories() async {
+    final categories = await HabitCategoryStorage.loadCategories();
+
+    if (!mounted) return;
+
+    setState(() {
+      _categories = categories;
+    });
+  }
+
+  //ジャンルを追加
+  Future<void> _addCategory() async {
+    final controller = TextEditingController();
+
+    final name = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('ジャンルを追加'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'ジャンル名',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('キャンセル'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xff526FC5),
+              ),
+              onPressed: () {
+                final value = controller.text.trim();
+                if (value.isEmpty) return;
+                Navigator.pop(dialogContext, value);
+              },
+              child: const Text('追加'),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+
+    if (name == null || _categories.contains(name)) return;
+
+    setState(() {
+      _categories.add(name);
+      _categories.sort();
+      _selectedCategory = name;
+    });
+
+    await HabitCategoryStorage.saveCategories(_categories);
+  }
+
   @override
   Widget build(BuildContext context) {
-    //変数
     final screenWidth = MediaQuery.of(context).size.width;
     final dayButtonSize = (screenWidth - 32 - 48) / 7;
 
     return Container(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-
-      //シートの見た目
       decoration: const BoxDecoration(
         color: Color(0xffF4F7FF),
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
-
       child: Padding(
         padding: EdgeInsets.only(
           left: 16,
           right: 16,
           top: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16, //キーボードの高さ取得
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
         ),
-
         child: Column(
           children: [
-            //スクロールできるようにする
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-
                   children: [
-                    //上のバー-------------------------
                     Center(
                       child: Container(
                         margin: const EdgeInsets.only(top: 12, bottom: 20),
@@ -64,25 +137,22 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                       ),
                     ),
 
-                    //--------------------
                     const Text(
                       "追加",
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
+                        color: Color(0xff263A70),
                       ),
                     ),
                     const SizedBox(height: 16),
 
                     const Text("タイトル", style: TextStyle(fontSize: 20)),
-
                     const SizedBox(height: 8),
 
-                    //文字の入力-----------------------------
                     TextField(
-                      controller: titleController, //ほかの画面に文字を渡すために記憶
+                      controller: titleController,
                       autofocus: true,
-
                       decoration: InputDecoration(
                         hintText: '習慣を入力',
                         border: OutlineInputBorder(
@@ -94,134 +164,134 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
 
-                    //曜日------------------------------------
+                    const SizedBox(height: 18),
+
                     const Text("曜日", style: TextStyle(fontSize: 20)),
                     const SizedBox(height: 12),
 
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-
-                      children: [
-                        //毎日---------------------------------
-                        SizedBox(
-                          width: 80,
-                          height: 40,
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              //枠の色
-                              side: const BorderSide(color: Color(0xffC8D0E8)),
-
-                              //背景
-                              backgroundColor:
-                                  selectedDays.length == days.length
+                    SizedBox(
+                      width: 80,
+                      height: 40,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xffC8D0E8)),
+                          backgroundColor:
+                              selectedDays.length == days.length
                                   ? const Color(0xff526FC5)
-                                  : const Color.fromARGB(255, 255, 255, 255),
-
-                              //文字
-                              foregroundColor:
-                                  selectedDays.length == days.length
+                                  : Colors.white,
+                          foregroundColor:
+                              selectedDays.length == days.length
                                   ? Colors.white
-                                  : const Color.fromARGB(255, 54, 73, 140),
-
-                              //形
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-
-                            onPressed: () {
-                              setState(() {
-                                if (selectedDays.length == days.length) {
-                                  selectedDays.clear();
-                                } else {
-                                  selectedDays.clear();
-                                  selectedDays.addAll(days);
-                                }
-                              });
-                            },
-                            child: const Text("毎日"),
+                                  : const Color(0xff36498C),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
+                        onPressed: () {
+                          setState(() {
+                            if (selectedDays.length == days.length) {
+                              selectedDays.clear();
+                            } else {
+                              selectedDays
+                                ..clear()
+                                ..addAll(days);
+                            }
+                          });
+                        },
+                        child: const Text("毎日"),
+                      ),
+                    ),
 
-                        const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            //曜日ごとのボタン----------------------
-                            for (final day in days)
-                              SizedBox(
-                                width: dayButtonSize,
-                                height: dayButtonSize,
-                                child: OutlinedButton(
-                                  style: OutlinedButton.styleFrom(
-                                    //枠の色
-                                    side: const BorderSide(
-                                      color: Color(0xffC8D0E8),
-                                    ),
-
-                                    //背景
-                                    backgroundColor: selectedDays.contains(day)
-                                        ? const Color(0xff526FC5)
-                                        : Colors.white,
-
-                                    //文字の色
-                                    foregroundColor: selectedDays.contains(day)
-                                        ? Colors.white
-                                        : const Color(0xff36498C),
-
-                                    //丸
-                                    shape: const CircleBorder(),
-
-                                    //ズレ防止
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: Size.zero,
-                                  ),
-
-                                  onPressed: () {
-                                    setState(() {
-                                      if (selectedDays.contains(day)) {
-                                        selectedDays.remove(day);
-                                      } else {
-                                        selectedDays.add(day);
-                                      }
-                                    });
-                                  },
-
-                                  child: Align(
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      day,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final day in days)
+                          SizedBox(
+                            width: dayButtonSize,
+                            height: dayButtonSize,
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                  color: Color(0xffC8D0E8),
                                 ),
+                                backgroundColor: selectedDays.contains(day)
+                                    ? const Color(0xff526FC5)
+                                    : Colors.white,
+                                foregroundColor: selectedDays.contains(day)
+                                    ? Colors.white
+                                    : const Color(0xff36498C),
+                                shape: const CircleBorder(),
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
                               ),
-                          ],
+                              onPressed: () {
+                                setState(() {
+                                  if (selectedDays.contains(day)) {
+                                    selectedDays.remove(day);
+                                  } else {
+                                    selectedDays.add(day);
+                                  }
+                                });
+                              },
+                              child: Text(day),
+                            ),
+                          ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    const Text("ジャンル", style: TextStyle(fontSize: 20)),
+                    const SizedBox(height: 8),
+
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _categoryChip('未設定'),
+                        ..._categories.map(_categoryChip),
+                        ActionChip(
+                          avatar: const Icon(Icons.add, size: 18),
+                          label: const Text('追加'),
+                          onPressed: _addCategory,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    //アイコン--------------------------------
+
+                    const SizedBox(height: 18),
+
                     const Text("アイコン", style: TextStyle(fontSize: 20)),
                     const SizedBox(height: 8),
 
-                    //仮のアイコン
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
-                      children: const [
-                        CircleAvatar(child: Icon(Icons.menu_book)),
-                        CircleAvatar(child: Icon(Icons.water_drop)),
-                        CircleAvatar(child: Icon(Icons.fitness_center)),
-                        CircleAvatar(child: Icon(Icons.self_improvement)),
-                        CircleAvatar(child: Icon(Icons.favorite)),
-                        CircleAvatar(child: Icon(Icons.star)),
-                        CircleAvatar(child: Icon(Icons.music_note)),
-                        CircleAvatar(child: Icon(Icons.nightlight_round)),
-                      ],
+                      children: _icons.map((icon) {
+                        final selected = _selectedIcon == icon;
+
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(24),
+                          onTap: () {
+                            setState(() {
+                              _selectedIcon = icon;
+                            });
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: selected
+                                ? const Color(0xff526FC5)
+                                : const Color(0xffE8EDFC),
+                            child: Icon(
+                              icon,
+                              color: selected
+                                  ? Colors.white
+                                  : const Color(0xff526FC5),
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
 
                     const SizedBox(height: 20),
@@ -230,20 +300,22 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
               ),
             ),
 
-            //保存ボタン
             SizedBox(
               width: double.infinity,
               height: 64,
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff526FC5),
+                  foregroundColor: Colors.white,
+                ),
                 onPressed: () {
-                  //入力判定
                   if (titleController.text.trim().isEmpty) return;
 
-                  //渡す値
                   final habit = Habit(
                     title: titleController.text.trim(),
-                    icon: Icons.check,
+                    icon: _selectedIcon,
                     days: List.from(selectedDays),
+                    category: _selectedCategory,
                   );
 
                   widget.onAddHabit(habit);
@@ -256,5 +328,32 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
         ),
       ),
     );
+  }
+
+  //ジャンル選択ボタン
+  Widget _categoryChip(String category) {
+    final selected = _selectedCategory == category;
+
+    return ChoiceChip(
+      label: Text(category),
+      selected: selected,
+      showCheckmark: false,
+      selectedColor: const Color(0xff526FC5),
+      backgroundColor: const Color(0xffE8EDFC),
+      labelStyle: TextStyle(
+        color: selected ? Colors.white : const Color(0xff4763B4),
+      ),
+      onSelected: (_) {
+        setState(() {
+          _selectedCategory = category;
+        });
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    super.dispose();
   }
 }
