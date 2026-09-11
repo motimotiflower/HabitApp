@@ -44,7 +44,7 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
     setState(() {
       _categories = categories;
 
-      //古いデータのジャンルも選択肢から消さない
+      //古いデータのジャンルも選べるように残す
       if (_selectedCategory != '未設定' &&
           !_categories.contains(_selectedCategory)) {
         _categories.add(_selectedCategory);
@@ -158,36 +158,24 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
 
                       const SizedBox(height: 16),
 
-                      //作成済みジャンルから選択
-                      DropdownButtonFormField<String>(
-                        initialValue: _selectedCategory,
-                        decoration: const InputDecoration(
-                          labelText: 'ジャンル',
-                          prefixIcon: Icon(
-                            Icons.folder_outlined,
-                            color: Color(0xff526FC5),
-                          ),
-                          border: OutlineInputBorder(),
+                      const Text(
+                        'ジャンル',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xff35415F),
                         ),
-                        items: [
-                          const DropdownMenuItem(
-                            value: '未設定',
-                            child: Text('未設定'),
-                          ),
-                          ..._categories.map(
-                            (category) => DropdownMenuItem(
-                              value: category,
-                              child: Text(category),
-                            ),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value == null) return;
+                      ),
 
-                          setState(() {
-                            _selectedCategory = value;
-                          });
-                        },
+                      const SizedBox(height: 8),
+
+                      //作成済みジャンルから丸いボタンで選ぶ
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _buildCategoryChip('未設定'),
+                          ..._categories.map(_buildCategoryChip),
+                        ],
                       ),
                     ],
                   ),
@@ -211,6 +199,29 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
           ),
         ),
       ),
+    );
+  }
+
+  //ジャンル選択ボタン
+  Widget _buildCategoryChip(String category) {
+    final selected = _selectedCategory == category;
+
+    return ChoiceChip(
+      label: Text(category),
+      selected: selected,
+      showCheckmark: false,
+      selectedColor: const Color(0xff526FC5),
+      backgroundColor: const Color(0xffE8EDFC),
+      side: const BorderSide(color: Color(0xffCDD5F0)),
+      labelStyle: TextStyle(
+        color: selected ? Colors.white : const Color(0xff4763B4),
+        fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+      ),
+      onSelected: (_) {
+        setState(() {
+          _selectedCategory = category;
+        });
+      },
     );
   }
 
