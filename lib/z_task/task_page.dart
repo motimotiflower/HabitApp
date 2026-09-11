@@ -4,7 +4,9 @@ import 'package:habitapp/models/task.dart';
 import 'package:habitapp/z_task/widgets/task_card.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
 import 'package:habitapp/z_task/task_storage.dart';
+import 'package:habitapp/z_task/category_storage.dart';
 import 'package:habitapp/z_task/sheets/edit_task_sheet.dart';
+import 'package:habitapp/z_task/sheets/category_manage_sheet.dart';
 
 class TaskPage extends StatefulWidget {
   const TaskPage({super.key});
@@ -15,6 +17,7 @@ class TaskPage extends StatefulWidget {
 
 class TaskPageState extends State<TaskPage> {
   List<Task> tasks = [];
+  List<String> _categories = [];
 
   //表示条件
   String _selectedStatus = 'すべて';
@@ -25,6 +28,7 @@ class TaskPageState extends State<TaskPage> {
     setState(() {
       tasks.add(task);
     });
+
     TaskStorage.saveTasks(tasks);
   }
 
@@ -35,13 +39,6 @@ class TaskPageState extends State<TaskPage> {
 
     setState(() {
       tasks[index] = newTask;
-
-      //編集でジャンルがなくなった場合は絞り込みを戻す
-      final categories = _getCategories();
-      if (_selectedCategory != 'すべて' &&
-          !categories.contains(_selectedCategory)) {
-        _selectedCategory = 'すべて';
-      }
     });
 
     TaskStorage.saveTasks(tasks);
@@ -51,15 +48,77 @@ class TaskPageState extends State<TaskPage> {
   void deleteTask(Task task) {
     setState(() {
       tasks.remove(task);
+    });
 
-      final categories = _getCategories();
-      if (_selectedCategory != 'すべて' &&
-          !categories.contains(_selectedCategory)) {
+    TaskStorage.saveTasks(tasks);
+  }
+
+  //ジャンル追加
+  Future<void> _addCategory(String category) async {
+    if (_categories.contains(category)) return;
+
+    setState(() {
+      _categories.add(category);
+      _categories.sort();
+    });
+
+    await CategoryStorage.saveCategories(_categories);
+  }
+
+  //ジャンル名変更
+  Future<void> _renameCategory(String oldName, String newName) async {
+    setState(() {
+      final categoryIndex = _categories.indexOf(oldName);
+      if (categoryIndex != -1) {
+        _categories[categoryIndex] = newName;
+        _categories.sort();
+      }
+
+      //既存タスクのジャンル名も変更
+      tasks = tasks.map((task) {
+        if (task.category != oldName) return task;
+
+        return Task(
+          title: task.title,
+          deadline: task.deadline,
+          category: newName,
+          isDone: task.isDone,
+        );
+      }).toList();
+
+      if (_selectedCategory == oldName) {
+        _selectedCategory = newName;
+      }
+    });
+
+    await CategoryStorage.saveCategories(_categories);
+    await TaskStorage.saveTasks(tasks);
+  }
+
+  //ジャンル削除
+  Future<void> _deleteCategory(String category) async {
+    setState(() {
+      _categories.remove(category);
+
+      //削除したジャンルのタスクは未設定に戻す
+      tasks = tasks.map((task) {
+        if (task.category != category) return task;
+
+        return Task(
+          title: task.title,
+          deadline: task.deadline,
+          category: '未設定',
+          isDone: task.isDone,
+        );
+      }).toList();
+
+      if (_selectedCategory == category) {
         _selectedCategory = 'すべて';
       }
     });
 
-    TaskStorage.saveTasks(tasks);
+    await CategoryStorage.saveCategories(_categories);
+    await TaskStorage.saveTasks(tasks);
   }
 
   //編集画面
@@ -67,9 +126,7 @@ class TaskPageState extends State<TaskPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) {
         return SizedBox(
           height: MediaQuery.of(context).size.height * 0.80,
@@ -78,6 +135,26 @@ class TaskPageState extends State<TaskPage> {
             onSave: (editedTask) {
               editTask(task, editedTask);
             },
+          ),
+        );
+      },
+    );
+  }
+
+  //ジャンル管理画面
+  Future<void> _showCategoryManageSheet() async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.78,
+          child: CategoryManageSheet(
+            categories: _categories,
+            onAdd: _addCategory,
+            onRename: _renameCategory,
+            onDelete: _deleteCategory,
           ),
         );
       },
@@ -135,30 +212,35 @@ class TaskPageState extends State<TaskPage> {
   @override
   void initState() {
     super.initState();
-    _loadTasks();
+    _loadData();
   }
 
-  Future<void> _loadTasks() async {
+  //タスクとジャンルを読み込む
+  Future<void> _loadData() async {
     final loadedTasks = await TaskStorage.loadTasks();
+    final loadedCategories = await CategoryStorage.loadCategories();
+
+    //以前作ったタスクのジャンルを初回だけジャンル一覧へ移す
+    final taskCategories = loadedTasks
+        .map((task) => task.category.trim())
+        .where((category) => category.isNotEmpty && category != '未設定');
+
+    final mergedCategories = {
+      ...loadedCategories,
+      ...taskCategories,
+    }.toList()
+      ..sort();
+
+    if (mergedCategories.length != loadedCategories.length) {
+      await CategoryStorage.saveCategories(mergedCategories);
+    }
 
     if (!mounted) return;
 
     setState(() {
       tasks = loadedTasks;
+      _categories = mergedCategories;
     });
-  }
-
-  //現在使われているジャンル一覧
-  List<String> _getCategories() {
-    final categories = tasks
-        .map((task) => task.category.trim())
-        .where((category) => category.isNotEmpty && category != '未設定')
-        .toSet()
-        .toList();
-
-    categories.sort();
-
-    return categories;
   }
 
   //絞り込みと並び替え
@@ -198,7 +280,6 @@ class TaskPageState extends State<TaskPage> {
   //青いヘッダー上の絞り込みUI
   Widget _buildHeaderFilters(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final categories = _getCategories();
 
     return Positioned(
       top: screenHeight * 0.15,
@@ -250,48 +331,73 @@ class TaskPageState extends State<TaskPage> {
 
           const SizedBox(height: 9),
 
-          //ジャンル
-          Container(
-            height: 36,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.28),
-              ),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedCategory,
-                isExpanded: true,
-                dropdownColor: const Color(0xff36559F),
-                iconEnabledColor: Colors.white,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
-                items: [
-                  const DropdownMenuItem(
-                    value: 'すべて',
-                    child: Text('すべてのジャンル'),
-                  ),
-                  ...categories.map(
-                    (category) => DropdownMenuItem(
-                      value: category,
-                      child: Text(category),
+          //ジャンル絞り込み・管理
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 36,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.28),
                     ),
                   ),
-                ],
-                onChanged: (value) {
-                  if (value == null) return;
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedCategory,
+                      isExpanded: true,
+                      dropdownColor: const Color(0xff36559F),
+                      iconEnabledColor: Colors.white,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                      items: [
+                        const DropdownMenuItem(
+                          value: 'すべて',
+                          child: Text('すべてのジャンル'),
+                        ),
+                        ..._categories.map(
+                          (category) => DropdownMenuItem(
+                            value: category,
+                            child: Text(category),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value == null) return;
 
-                  setState(() {
-                    _selectedCategory = value;
-                  });
-                },
+                        setState(() {
+                          _selectedCategory = value;
+                        });
+                      },
+                    ),
+                  ),
+                ),
               ),
-            ),
+
+              const SizedBox(width: 8),
+
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white70),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+                onPressed: _showCategoryManageSheet,
+                icon: const Icon(Icons.folder_outlined, size: 17),
+                label: const Text(
+                  'ジャンル管理',
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
+            ],
           ),
         ],
       ),
