@@ -30,7 +30,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
       //シートの見た目
       decoration: const BoxDecoration(
-        color: Color(0xffFBFAFF),
+        color: Color(0xffF4F7FF),
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
 
@@ -116,7 +116,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                               //背景
                               backgroundColor:
                                   selectedDays.length == days.length
-                                  ? const Color(0xff7C8FD9)
+                                  ? const Color(0xff526FC5)
                                   : const Color.fromARGB(255, 255, 255, 255),
 
                               //文字
@@ -164,7 +164,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
                                     //背景
                                     backgroundColor: selectedDays.contains(day)
-                                        ? const Color(0xff7C8FD9)
+                                        ? const Color(0xff526FC5)
                                         : Colors.white,
 
                                     //文字の色
