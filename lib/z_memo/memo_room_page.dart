@@ -197,6 +197,16 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                 ) !=
                                 _formatDate(message.createdAt);
 
+                        //前の投稿から5分以内なら同じ投稿のまとまりとして扱う
+                        final isContinuous = index > 0 &&
+                            !showDate &&
+                            message.createdAt
+                                    .difference(
+                                      _memo.messages[index - 1].createdAt,
+                                    )
+                                    .inMinutes <
+                                5;
+
                         return Column(
                           children: [
                             if (showDate)
@@ -271,15 +281,17 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                     ),
                                   ],
 
-                                  const SizedBox(height: 4),
-
-                                  Text(
-                                    _formatTime(message.createdAt),
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xff9AA2B6),
+                                  //連続投稿では最初の1件だけ時刻を表示
+                                  if (!isContinuous) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _formatTime(message.createdAt),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Color(0xff9AA2B6),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ],
                               ),
                             ),
