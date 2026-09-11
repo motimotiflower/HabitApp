@@ -7,6 +7,7 @@ import 'package:habitapp/z_home/home_page.dart';
 import 'package:habitapp/z_habit/habit_page.dart';
 import 'package:habitapp/z_task/task_page.dart';
 import 'package:habitapp/z_memo/memo_page.dart';
+import 'package:habitapp/z_memo/sheets/memo_sheet.dart';
 
 import 'package:habitapp/main/widgets/main_navigation_bar.dart';
 import 'package:habitapp/main/widgets/main_background.dart';
@@ -25,11 +26,17 @@ class _MainPageState extends State<MainPage> {
   //ページ関係----------------------
   int _currentIndex = 0; // 現在選択中のページ
 
+  //HomePageを指定するためのKey
+  final GlobalKey<HomePageState> _homePageKey = GlobalKey<HomePageState>();
+
   //HabitPageを指定するためのKey
   final GlobalKey<HabitPageState> _habitPageKey = GlobalKey<HabitPageState>();
 
   //TaskPageを指定するためのKey
   final GlobalKey<TaskPageState> _taskPageKey = GlobalKey<TaskPageState>();
+
+  //MemoPageを指定するためのKey
+  final GlobalKey<MemoPageState> _memoPageKey = GlobalKey<MemoPageState>();
 
   //日付関係------------------------
   //カレンダーで選択中の曜日
@@ -51,7 +58,7 @@ class _MainPageState extends State<MainPage> {
     super.initState();
 
     _pages = [
-      PageInfo(title: "Home", page: HomePage()),
+      PageInfo(title: "Home", page: HomePage(key: _homePageKey)),
       PageInfo(
         title: "Habit",
         page: HabitPage(key: _habitPageKey),
@@ -61,7 +68,7 @@ class _MainPageState extends State<MainPage> {
         title: "Task",
         page: TaskPage(key: _taskPageKey),
       ),
-      PageInfo(title: "Memo", page: MemoPage()),
+      PageInfo(title: "Memo", page: MemoPage(key: _memoPageKey)),
     ];
   }
 
@@ -101,14 +108,34 @@ class _MainPageState extends State<MainPage> {
             child: AddTaskSheet(
               onAddTask: (task) {
                 _taskPageKey.currentState?.addTask(task);
+
+                //Homeの「今日のタスク」にも反映
+                _homePageKey.currentState?.reload();
               },
             ),
           );
         },
       );
 
-      //Memoの追加画面はあとで作る
-    } else if (_currentIndex == 3) {}
+      //Memoの追加画面
+    } else if (_currentIndex == 3) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+
+        builder: (context) {
+          return SizedBox(
+            height: MediaQuery.of(context).size.height * 0.82,
+            child: MemoSheet(
+              onSave: (memo) {
+                _memoPageKey.currentState?.addMemo(memo);
+              },
+            ),
+          );
+        },
+      );
+    }
   }
 
   //前の週へ=================================
@@ -211,6 +238,13 @@ class _MainPageState extends State<MainPage> {
           setState(() {
             _currentIndex = index; //インデックスの更新
           });
+
+          //Homeを開いた時に最新のタスクを読み直す
+          if (index == 0) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _homePageKey.currentState?.reload();
+            });
+          }
         },
       ),
     );
