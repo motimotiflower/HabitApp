@@ -15,6 +15,10 @@ class AppNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NavigationBar(
+      //全ページ共通のナビゲーションを青系に統一
+      backgroundColor: const Color(0xffEEF3FF),
+      indicatorColor: const Color(0xffD7E3FF),
+      surfaceTintColor: Colors.transparent,
       selectedIndex: currentIndex,
       onDestinationSelected: onTap, //ボタンを押された時の処理(外で処理)
       //ボタンを追加========================================
