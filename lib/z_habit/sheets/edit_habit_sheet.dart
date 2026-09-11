@@ -131,6 +131,33 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                       const Text('曜日', style: TextStyle(fontSize: 18)),
                       const SizedBox(height: 8),
 
+                      //毎日をまとめて選択・解除
+                      ChoiceChip(
+                        label: const Text('毎日'),
+                        selected: _selectedDays.length == days.length,
+                        showCheckmark: false,
+                        selectedColor: const Color(0xff526FC5),
+                        backgroundColor: Colors.white,
+                        labelStyle: TextStyle(
+                          color: _selectedDays.length == days.length
+                              ? Colors.white
+                              : const Color(0xff36498C),
+                        ),
+                        onSelected: (_) {
+                          setState(() {
+                            if (_selectedDays.length == days.length) {
+                              _selectedDays.clear();
+                            } else {
+                              _selectedDays
+                                ..clear()
+                                ..addAll(days);
+                            }
+                          });
+                        },
+                      ),
+
+                      const SizedBox(height: 8),
+
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
