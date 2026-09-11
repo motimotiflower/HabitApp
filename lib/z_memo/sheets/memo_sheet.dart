@@ -38,7 +38,6 @@ class _MemoSheetState extends State<MemoSheet> {
     final title = _titleController.text.trim();
     final content = _contentController.text.trim();
 
-    //タイトルも本文も空なら保存しない
     if (title.isEmpty && content.isEmpty) return;
 
     widget.onSave(
@@ -59,41 +58,71 @@ class _MemoSheetState extends State<MemoSheet> {
 
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xffF4F7FF),
+        color: Color(0xffF7F9FF),
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       child: SafeArea(
         child: Padding(
           padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 24,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            left: 20,
+            right: 20,
+            top: 18,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 18,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                isEditing ? 'メモを編集' : 'メモを追加',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xff263A70),
-                ),
+              //上部はGoogle Keepのようにシンプルにする
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      isEditing ? 'メモを編集' : 'メモを追加',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xff263A70),
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _saveMemo,
+                    child: const Text(
+                      '保存',
+                      style: TextStyle(
+                        color: Color(0xff526FC5),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
 
-              //タイトル
+              const SizedBox(height: 8),
+
+              //タイトルは枠なし
               TextField(
                 controller: _titleController,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xff35415F),
+                ),
                 decoration: const InputDecoration(
-                  labelText: 'タイトル',
-                  border: OutlineInputBorder(),
+                  hintText: 'タイトル',
+                  hintStyle: TextStyle(
+                    color: Color(0xff9AA2B6),
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
                 ),
               ),
-              const SizedBox(height: 16),
 
-              //本文
+              const SizedBox(height: 4),
+
+              //本文も枠なしでタイトルと自然につながる
               Expanded(
                 child: TextField(
                   controller: _contentController,
@@ -101,25 +130,21 @@ class _MemoSheetState extends State<MemoSheet> {
                   maxLines: null,
                   minLines: null,
                   textAlignVertical: TextAlignVertical.top,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    height: 1.5,
+                    color: Color(0xff4B5368),
+                  ),
                   decoration: const InputDecoration(
-                    labelText: '本文',
-                    alignLabelWithHint: true,
-                    border: OutlineInputBorder(),
+                    hintText: 'メモを入力...',
+                    hintStyle: TextStyle(
+                      color: Color(0xff9AA2B6),
+                    ),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
                   ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff526FC5),
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: _saveMemo,
-                  child: Text(isEditing ? '保存' : '追加'),
                 ),
               ),
             ],
