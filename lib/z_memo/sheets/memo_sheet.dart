@@ -46,6 +46,7 @@ class _MemoSheetState extends State<MemoSheet> {
         title: title.isEmpty ? '無題のメモ' : title,
         content: content,
         updatedAt: DateTime.now(),
+        isPinned: widget.memo?.isPinned ?? false,
       ),
     );
 
