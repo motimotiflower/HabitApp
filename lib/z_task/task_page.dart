@@ -40,6 +40,59 @@ class TaskPageState extends State<TaskPage> {
     TaskStorage.saveTasks(tasks);
   }
 
+  //削除確認ダイアログ=========================
+  void showDeleteDialog(Task task) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('タスクを削除'),
+          content: Text('「${task.title}」を削除しますか？'),
+
+          actions: [
+            //ボタンを縦に並べる
+            SizedBox(
+              width: double.infinity,
+              child: Column(
+                children: [
+                  //削除
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () {
+                        //ダイアログを閉じる
+                        Navigator.pop(context);
+
+                        //タスクを削除
+                        deleteTask(task);
+                      },
+                      child: const Text(
+                        '削除',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ),
+
+                  //キャンセル
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () {
+                        //ダイアログだけ閉じる
+                        Navigator.pop(context);
+                      },
+                      child: const Text('キャンセル'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   //保存データの読み込み===========================
   @override
   void initState() {
@@ -122,7 +175,7 @@ class TaskPageState extends State<TaskPage> {
 
             //削除ボタンが押された時
             onDelete: () {
-              deleteTask(task);
+              showDeleteDialog(task);
             },
           );
         },
