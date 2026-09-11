@@ -81,7 +81,6 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
   void _addMessage(MemoMessage message) {
     final updated = Memo(
       title: _memo.title,
-      type: _memo.type,
       updatedAt: DateTime.now(),
       isPinned: _memo.isPinned,
       messages: [..._memo.messages, message],
@@ -162,25 +161,13 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
         backgroundColor: const Color(0xffF7F9FF),
         surfaceTintColor: Colors.transparent,
         titleSpacing: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              _memo.title,
-              style: const TextStyle(
-                color: Color(0xff35415F),
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Text(
-              _memo.type,
-              style: const TextStyle(
-                color: Color(0xff81889B),
-                fontSize: 11,
-              ),
-            ),
-          ],
+        title: Text(
+          _memo.title,
+          style: const TextStyle(
+            color: Color(0xff35415F),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       body: SafeArea(
@@ -245,69 +232,92 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                 ),
                               ),
 
-                            //Discord風に1投稿を縦に積む
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Container(
-                                width: double.infinity,
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(
-                                    color: const Color(0xffE0E6F5),
-                                  ),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (message.content.isNotEmpty)
-                                      Text(
-                                        message.content,
-                                        style: const TextStyle(
-                                          fontSize: 15,
-                                          height: 1.45,
-                                          color: Color(0xff35415F),
-                                        ),
-                                      ),
-
-                                    if (message.imageBase64 != null) ...[
-                                      if (message.content.isNotEmpty)
-                                        const SizedBox(height: 10),
-                                      GestureDetector(
-                                        onTap: () {
-                                          _showImage(message.imageBase64!);
-                                        },
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          child: Image.memory(
-                                            base64Decode(
-                                              message.imageBase64!,
-                                            ),
-                                            width: double.infinity,
-                                            height: 220,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-
-                                    const SizedBox(height: 6),
-
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                        _formatTime(message.createdAt),
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: Color(0xff9AA2B6),
-                                        ),
-                                      ),
+                            //Discordのように背景へ直接投稿を並べる
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: 4,
+                                right: 4,
+                                bottom: 16,
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const CircleAvatar(
+                                    radius: 17,
+                                    backgroundColor: Color(0xffE8EDFC),
+                                    child: Icon(
+                                      Icons.person_outline,
+                                      size: 18,
+                                      color: Color(0xff526FC5),
                                     ),
-                                  ],
-                                ),
+                                  ),
+
+                                  const SizedBox(width: 10),
+
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Text(
+                                              '自分',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(0xff35415F),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              _formatTime(message.createdAt),
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                color: Color(0xff9AA2B6),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        if (message.content.isNotEmpty) ...[
+                                          const SizedBox(height: 3),
+                                          Text(
+                                            message.content,
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              height: 1.45,
+                                              color: Color(0xff35415F),
+                                            ),
+                                          ),
+                                        ],
+
+                                        if (message.imageBase64 != null) ...[
+                                          const SizedBox(height: 8),
+                                          GestureDetector(
+                                            onTap: () {
+                                              _showImage(
+                                                message.imageBase64!,
+                                              );
+                                            },
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: Image.memory(
+                                                base64Decode(
+                                                  message.imageBase64!,
+                                                ),
+                                                width: 280,
+                                                height: 210,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
