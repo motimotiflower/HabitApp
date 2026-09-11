@@ -220,7 +220,7 @@ class TaskPageState extends State<TaskPage> {
     final loadedTasks = await TaskStorage.loadTasks();
     final loadedCategories = await CategoryStorage.loadCategories();
 
-    //以前作ったタスクのジャンルを初回だけジャンル一覧へ移す
+    //以前作ったタスクのジャンルもジャンル一覧へ引き継ぐ
     final taskCategories = loadedTasks
         .map((task) => task.category.trim())
         .where((category) => category.isNotEmpty && category != '未設定');
@@ -246,7 +246,6 @@ class TaskPageState extends State<TaskPage> {
   //絞り込みと並び替え
   List<Task> _getVisibleTasks() {
     final visibleTasks = tasks.where((task) {
-      //タブごとの表示条件
       final statusMatches =
           (_selectedStatus == 'すべて' && !task.isDone) ||
           (_selectedStatus == '期限あり' &&
@@ -261,12 +260,8 @@ class TaskPageState extends State<TaskPage> {
       return statusMatches && categoryMatches;
     }).toList();
 
-    //未完了を先にして、締切が近い順
+    //締切があるものは近い順、締切なしは後ろ
     visibleTasks.sort((a, b) {
-      if (a.isDone != b.isDone) {
-        return a.isDone ? 1 : -1;
-      }
-
       if (a.deadline != null && b.deadline != null) {
         return a.deadline!.compareTo(b.deadline!);
       }
@@ -290,9 +285,9 @@ class TaskPageState extends State<TaskPage> {
       right: 20,
       child: Column(
         children: [
-          //表示タブ：期限あり・すべて・完了
+          //表示タブ
           Row(
-            children: ['期限あり', 'すべて', '完了'].map((status) {
+            children: ['すべて', '期限あり', '完了'].map((status) {
               final selected = _selectedStatus == status;
 
               return Expanded(
@@ -334,75 +329,78 @@ class TaskPageState extends State<TaskPage> {
 
           const SizedBox(height: 9),
 
-          //ジャンル絞り込み・管理
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 36,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.28),
-                    ),
+          //ジャンルは丸いボタンで横スクロール
+          SizedBox(
+            height: 38,
+            child: Row(
+              children: [
+                Expanded(
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      _buildCategoryChip('すべて'),
+                      ..._categories.map(_buildCategoryChip),
+                    ],
                   ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedCategory,
-                      isExpanded: true,
-                      dropdownColor: const Color(0xff36559F),
-                      iconEnabledColor: Colors.white,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
+                ),
+
+                const SizedBox(width: 8),
+
+                //ジャンル管理
+                InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: _showCategoryManageSheet,
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.45),
                       ),
-                      items: [
-                        const DropdownMenuItem(
-                          value: 'すべて',
-                          child: Text('すべてのジャンル'),
-                        ),
-                        ..._categories.map(
-                          (category) => DropdownMenuItem(
-                            value: category,
-                            child: Text(category),
-                          ),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        if (value == null) return;
-
-                        setState(() {
-                          _selectedCategory = value;
-                        });
-                      },
+                    ),
+                    child: const Icon(
+                      Icons.add,
+                      size: 20,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-              ),
-
-              const SizedBox(width: 8),
-
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white70),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                ),
-                onPressed: _showCategoryManageSheet,
-                icon: const Icon(Icons.folder_outlined, size: 17),
-                label: const Text(
-                  'ジャンル管理',
-                  style: TextStyle(fontSize: 12),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  //ジャンル1つ分の丸いボタン
+  Widget _buildCategoryChip(String category) {
+    final selected = _selectedCategory == category;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 7),
+      child: ChoiceChip(
+        label: Text(category),
+        selected: selected,
+        showCheckmark: false,
+        selectedColor: Colors.white,
+        backgroundColor: Colors.white.withValues(alpha: 0.16),
+        side: BorderSide(
+          color: Colors.white.withValues(alpha: selected ? 0 : 0.28),
+        ),
+        labelStyle: TextStyle(
+          color: selected ? const Color(0xff36559F) : Colors.white,
+          fontSize: 12,
+          fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+        ),
+        onSelected: (_) {
+          setState(() {
+            _selectedCategory = category;
+          });
+        },
       ),
     );
   }
