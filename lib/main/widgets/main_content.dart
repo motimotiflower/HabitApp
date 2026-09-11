@@ -23,7 +23,7 @@ class MainContent extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
 
         decoration: const BoxDecoration(
-          color: Color(0xfffbfaff),
+          color: Color(0xffF7F9FF),
           //borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         ),
 
