@@ -73,7 +73,6 @@ class MemoPageState extends State<MemoPage> {
   void _togglePin(Memo memo) {
     final updated = Memo(
       title: memo.title,
-      type: memo.type,
       updatedAt: memo.updatedAt,
       isPinned: !memo.isPinned,
       messages: memo.messages,
@@ -172,28 +171,12 @@ class MemoPageState extends State<MemoPage> {
           .toLowerCase();
 
       return memo.title.toLowerCase().contains(keyword) ||
-          memo.type.toLowerCase().contains(keyword) ||
           messageText.contains(keyword);
     }).toList();
   }
 
   String _formatDate(DateTime date) {
     return '${date.month}/${date.day}';
-  }
-
-  IconData _iconForType(String type) {
-    switch (type) {
-      case 'アイデア':
-        return Icons.lightbulb_outline;
-      case '大学':
-        return Icons.school_outlined;
-      case '制作':
-        return Icons.code_outlined;
-      case 'その他':
-        return Icons.folder_outlined;
-      default:
-        return Icons.chat_bubble_outline;
-    }
   }
 
   //青いヘッダーに置く検索欄
@@ -276,12 +259,12 @@ class MemoPageState extends State<MemoPage> {
                       onTap: () {
                         _openRoom(memo);
                       },
-                      leading: CircleAvatar(
+                      leading: const CircleAvatar(
                         radius: 24,
-                        backgroundColor: const Color(0xffE8EDFC),
+                        backgroundColor: Color(0xffE8EDFC),
                         child: Icon(
-                          _iconForType(memo.type),
-                          color: const Color(0xff526FC5),
+                          Icons.chat_bubble_outline,
+                          color: Color(0xff526FC5),
                         ),
                       ),
                       title: Row(
