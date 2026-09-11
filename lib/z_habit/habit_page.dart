@@ -5,6 +5,7 @@ import 'package:habitapp/z_habit/widgets/habit_card.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
 import 'package:habitapp/z_habit/sheets/edit_habit_sheet.dart';
+import 'package:habitapp/z_habit/sheets/habit_record_sheet.dart';
 
 class HabitPage extends StatefulWidget {
   const HabitPage({super.key});
@@ -72,6 +73,23 @@ class HabitPageState extends State<HabitPage> {
             onSave: (editedHabit) {
               _editHabit(habit, editedHabit);
             },
+          ),
+        );
+      },
+    );
+  }
+
+  //記録画面
+  void _showRecordSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.86,
+          child: HabitRecordSheet(
+            habits: habits,
           ),
         );
       },
@@ -181,47 +199,85 @@ class HabitPageState extends State<HabitPage> {
 
     return MainContent(
       overlap: 10,
-      child: selectedDayHabits.isEmpty
-          ? const Center(
-              child: Text(
-                'この日の習慣はありません',
+      child: Column(
+        children: [
+          //記録画面への入口
+          Row(
+            children: [
+              const Text(
+                '習慣',
                 style: TextStyle(
-                  color: Color(0xff81889B),
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xff35415F),
                 ),
               ),
-            )
-          : ListView.builder(
-              padding: EdgeInsets.zero,
-              itemCount: selectedDayHabits.length,
-              itemBuilder: (context, index) {
-                final habit = selectedDayHabits[index];
+              const Spacer(),
+              TextButton.icon(
+                onPressed: _showRecordSheet,
+                icon: const Icon(
+                  Icons.auto_graph,
+                  size: 18,
+                  color: Color(0xff526FC5),
+                ),
+                label: const Text(
+                  '記録',
+                  style: TextStyle(
+                    color: Color(0xff526FC5),
+                  ),
+                ),
+              ),
+            ],
+          ),
 
-                return HabitCard(
-                  habit: habit,
-                  isDone: habit.completionHistory[dateKey] ?? false,
+          const SizedBox(height: 8),
 
-                  //達成状態の変更
-                  onChanged: () {
-                    setState(() {
-                      habit.completionHistory[dateKey] =
-                          !(habit.completionHistory[dateKey] ?? false);
-                    });
+          //習慣が増えても一覧だけスクロールできる
+          Expanded(
+            child: selectedDayHabits.isEmpty
+                ? const Center(
+                    child: Text(
+                      'この日の習慣はありません',
+                      style: TextStyle(
+                        color: Color(0xff81889B),
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: selectedDayHabits.length,
+                    itemBuilder: (context, index) {
+                      final habit = selectedDayHabits[index];
 
-                    HabitStorage.saveHabits(habits);
-                  },
+                      return HabitCard(
+                        habit: habit,
+                        isDone: habit.completionHistory[dateKey] ?? false,
 
-                  //編集
-                  onEdit: () {
-                    _showEditSheet(habit);
-                  },
+                        //達成状態の変更
+                        onChanged: () {
+                          setState(() {
+                            habit.completionHistory[dateKey] =
+                                !(habit.completionHistory[dateKey] ?? false);
+                          });
 
-                  //削除
-                  onDelete: () {
-                    _showDeleteDialog(habit);
-                  },
-                );
-              },
-            ),
+                          HabitStorage.saveHabits(habits);
+                        },
+
+                        //編集
+                        onEdit: () {
+                          _showEditSheet(habit);
+                        },
+
+                        //削除
+                        onDelete: () {
+                          _showDeleteDialog(habit);
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
