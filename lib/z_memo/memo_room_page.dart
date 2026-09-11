@@ -97,6 +97,142 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
     });
   }
 
+  //投稿本文を編集する
+  Future<void> _editMessage(int index) async {
+    final message = _memo.messages[index];
+    final controller = TextEditingController(text: message.content);
+
+    final editedText = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('メモを編集'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            minLines: 3,
+            maxLines: 8,
+            decoration: const InputDecoration(
+              hintText: 'メモを入力',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('キャンセル'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xff526FC5),
+              ),
+              onPressed: () {
+                Navigator.pop(
+                  dialogContext,
+                  controller.text.trim(),
+                );
+              },
+              child: const Text('保存'),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+
+    if (editedText == null) return;
+
+    //画像だけの投稿は空文字のままでも残せる
+    if (editedText.isEmpty && message.imageBase64 == null) return;
+
+    final updatedMessages = [..._memo.messages];
+    updatedMessages[index] = MemoMessage(
+      content: editedText,
+      createdAt: message.createdAt,
+      imageBase64: message.imageBase64,
+    );
+
+    final updatedMemo = Memo(
+      title: _memo.title,
+      updatedAt: DateTime.now(),
+      isPinned: _memo.isPinned,
+      messages: updatedMessages,
+    );
+
+    setState(() {
+      _memo = updatedMemo;
+    });
+
+    widget.onChanged(updatedMemo);
+  }
+
+  //投稿を削除する
+  Future<void> _deleteMessage(int index) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('メモを削除'),
+          content: const Text('このメモを削除しますか？'),
+          actions: [
+            SizedBox(
+              width: double.infinity,
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xff526FC5),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(dialogContext, true);
+                      },
+                      child: const Text('削除'),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xff526FC5),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(dialogContext, false);
+                      },
+                      child: const Text('キャンセル'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete != true) return;
+
+    final updatedMessages = [..._memo.messages]..removeAt(index);
+
+    final updatedMemo = Memo(
+      title: _memo.title,
+      updatedAt: DateTime.now(),
+      isPinned: _memo.isPinned,
+      messages: updatedMessages,
+    );
+
+    setState(() {
+      _memo = updatedMemo;
+    });
+
+    widget.onChanged(updatedMemo);
+  }
+
   //長文用の全画面入力
   Future<void> _openComposer() async {
     await Navigator.push(
@@ -242,69 +378,112 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                 ),
                               ),
 
-                            //壁打ちメモは左寄せ。連続投稿の先頭だけ時刻を上に表示
+                            //Discordのように各投稿から編集・削除できる
                             SizedBox(
                               width: double.infinity,
                               child: Padding(
                                 padding: const EdgeInsets.only(
                                   left: 0,
-                                  right: 4,
+                                  right: 0,
                                   bottom: 12,
                                 ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
+                                child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (!isContinuous) ...[
-                                      Text(
-                                        _formatTime(message.createdAt),
-                                        textAlign: TextAlign.left,
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: Color(0xff9AA2B6),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                    ],
-
-                                    if (message.content.isNotEmpty)
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          message.content,
-                                          textAlign: TextAlign.left,
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            height: 1.45,
-                                            color: Color(0xff35415F),
-                                          ),
-                                        ),
-                                      ),
-
-                                    if (message.imageBase64 != null) ...[
-                                      if (message.content.isNotEmpty)
-                                        const SizedBox(height: 8),
-                                      Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            _showImage(message.imageBase64!);
-                                          },
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            child: Image.memory(
-                                              base64Decode(
-                                                message.imageBase64!,
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          if (!isContinuous) ...[
+                                            Text(
+                                              _formatTime(message.createdAt),
+                                              textAlign: TextAlign.left,
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                color: Color(0xff9AA2B6),
                                               ),
-                                              width: 280,
-                                              height: 210,
-                                              fit: BoxFit.cover,
                                             ),
+                                            const SizedBox(height: 4),
+                                          ],
+
+                                          if (message.content.isNotEmpty)
+                                            Text(
+                                              message.content,
+                                              textAlign: TextAlign.left,
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                                height: 1.45,
+                                                color: Color(0xff35415F),
+                                              ),
+                                            ),
+
+                                          if (message.imageBase64 != null) ...[
+                                            if (message.content.isNotEmpty)
+                                              const SizedBox(height: 8),
+                                            GestureDetector(
+                                              onTap: () {
+                                                _showImage(
+                                                  message.imageBase64!,
+                                                );
+                                              },
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                child: Image.memory(
+                                                  base64Decode(
+                                                    message.imageBase64!,
+                                                  ),
+                                                  width: 280,
+                                                  height: 210,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+
+                                    PopupMenuButton<String>(
+                                      tooltip: 'メニュー',
+                                      padding: EdgeInsets.zero,
+                                      icon: const Icon(
+                                        Icons.more_horiz,
+                                        size: 20,
+                                        color: Color(0xff9AA2B6),
+                                      ),
+                                      onSelected: (value) {
+                                        if (value == 'edit') {
+                                          _editMessage(index);
+                                        } else if (value == 'delete') {
+                                          _deleteMessage(index);
+                                        }
+                                      },
+                                      itemBuilder: (context) => const [
+                                        PopupMenuItem(
+                                          value: 'edit',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.edit_outlined),
+                                              SizedBox(width: 8),
+                                              Text('編集'),
+                                            ],
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                        PopupMenuItem(
+                                          value: 'delete',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.delete_outline),
+                                              SizedBox(width: 8),
+                                              Text('削除'),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ],
                                 ),
                               ),
