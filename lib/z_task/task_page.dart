@@ -16,12 +16,14 @@ class TaskPage extends StatefulWidget {
 class TaskPageState extends State<TaskPage> {
   List<Task> tasks = [];
 
+  //表示フィルター
+  String _selectedFilter = 'すべて';
+
   //データの追加
   void addTask(Task task) {
     setState(() {
       tasks.add(task);
     });
-
     TaskStorage.saveTasks(tasks);
   }
 
@@ -33,7 +35,6 @@ class TaskPageState extends State<TaskPage> {
     setState(() {
       tasks[index] = newTask;
     });
-
     TaskStorage.saveTasks(tasks);
   }
 
@@ -42,7 +43,6 @@ class TaskPageState extends State<TaskPage> {
     setState(() {
       tasks.remove(task);
     });
-
     TaskStorage.saveTasks(tasks);
   }
 
@@ -129,13 +129,22 @@ class TaskPageState extends State<TaskPage> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    //表示専用のコピー
-    final sortedTasks = [...tasks];
+  //フィルターを反映した一覧を作る
+  List<Task> _getVisibleTasks() {
+    final visibleTasks = tasks.where((task) {
+      if (_selectedFilter == '未完了') {
+        return !task.isDone;
+      }
+
+      if (_selectedFilter == '完了') {
+        return task.isDone;
+      }
+
+      return true;
+    }).toList();
 
     //未完了 → 締切が近い順 → 重要度が高い順
-    sortedTasks.sort((a, b) {
+    visibleTasks.sort((a, b) {
       if (a.isDone != b.isDone) {
         return a.isDone ? 1 : -1;
       }
@@ -151,42 +160,109 @@ class TaskPageState extends State<TaskPage> {
       return b.priority.compareTo(a.priority);
     });
 
+    return visibleTasks;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final visibleTasks = _getVisibleTasks();
+
+    final incompleteCount = tasks.where((task) => !task.isDone).length;
+    final completedCount = tasks.where((task) => task.isDone).length;
+
     return MainContent(
       overlap: 10,
-      child: tasks.isEmpty
-          ? const Center(
-              child: Text(
-                'タスクはまだありません',
-                style: TextStyle(color: Colors.grey),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          //件数表示
+          Row(
+            children: [
+              const Text(
+                'タスク',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            )
-          : ListView.builder(
-              padding: EdgeInsets.zero,
-              itemCount: sortedTasks.length,
-              itemBuilder: (context, index) {
-                final task = sortedTasks[index];
+              const Spacer(),
+              Text(
+                '未完了 $incompleteCount  /  完了 $completedCount',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xff7C7690),
+                ),
+              ),
+            ],
+          ),
 
-                return TaskCard(
-                  task: task,
+          const SizedBox(height: 12),
 
-                  onChanged: () {
-                    setState(() {
-                      task.isDone = !task.isDone;
-                    });
+          //表示切り替え
+          Wrap(
+            spacing: 8,
+            children: ['すべて', '未完了', '完了'].map((filter) {
+              return ChoiceChip(
+                label: Text(filter),
+                selected: _selectedFilter == filter,
+                selectedColor: const Color(0xffE8E3FA),
+                labelStyle: TextStyle(
+                  color: _selectedFilter == filter
+                      ? const Color(0xff6658A8)
+                      : const Color(0xff6F6A7C),
+                  fontWeight: _selectedFilter == filter
+                      ? FontWeight.w600
+                      : FontWeight.normal,
+                ),
+                onSelected: (_) {
+                  setState(() {
+                    _selectedFilter = filter;
+                  });
+                },
+              );
+            }).toList(),
+          ),
 
-                    TaskStorage.saveTasks(tasks);
-                  },
+          const SizedBox(height: 12),
 
-                  onEdit: () {
-                    showEditSheet(task);
-                  },
+          Expanded(
+            child: visibleTasks.isEmpty
+                ? Center(
+                    child: Text(
+                      tasks.isEmpty
+                          ? 'タスクはまだありません'
+                          : 'この条件のタスクはありません',
+                      style: const TextStyle(
+                        color: Color(0xff8D8799),
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: visibleTasks.length,
+                    itemBuilder: (context, index) {
+                      final task = visibleTasks[index];
 
-                  onDelete: () {
-                    showDeleteDialog(task);
-                  },
-                );
-              },
-            ),
+                      return TaskCard(
+                        task: task,
+                        onChanged: () {
+                          setState(() {
+                            task.isDone = !task.isDone;
+                          });
+                          TaskStorage.saveTasks(tasks);
+                        },
+                        onEdit: () {
+                          showEditSheet(task);
+                        },
+                        onDelete: () {
+                          showDeleteDialog(task);
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
