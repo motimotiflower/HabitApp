@@ -18,7 +18,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   List<Habit> _todayHabits = [];
   List<Task> _todayTasks = [];
-  List<Memo> _recentMemos = [];
+  List<Memo> _pinnedMemos = [];
 
   @override
   void initState() {
@@ -53,21 +53,18 @@ class HomePageState extends State<HomePage> {
           deadline.day == now.day;
     }).toList();
 
-    //ピン留めを優先して最近のメモを表示
-    memos.sort((a, b) {
-      if (a.isPinned != b.isPinned) {
-        return a.isPinned ? -1 : 1;
-      }
-
-      return b.updatedAt.compareTo(a.updatedAt);
-    });
+    //Homeにはピン留めしたメモだけ表示
+    final pinnedMemos = memos
+        .where((memo) => memo.isPinned)
+        .toList()
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
 
     if (!mounted) return;
 
     setState(() {
       _todayHabits = todayHabits;
       _todayTasks = todayTasks;
-      _recentMemos = memos.take(3).toList();
+      _pinnedMemos = pinnedMemos;
     });
   }
 
@@ -226,10 +223,10 @@ class HomePageState extends State<HomePage> {
           _HomeSectionCard(
             title: 'メモ',
             icon: Icons.edit_note_outlined,
-            child: _recentMemos.isEmpty
-                ? const _EmptyText('メモはまだありません')
+            child: _pinnedMemos.isEmpty
+                ? const _EmptyText('ピン留めしたメモはありません')
                 : Column(
-                    children: _recentMemos.map((memo) {
+                    children: _pinnedMemos.map((memo) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: Row(
