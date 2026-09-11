@@ -254,10 +254,10 @@ class HomePageState extends State<HomePage> {
                                       color: Color(0xff35415F),
                                     ),
                                   ),
-                                  if (memo.content.isNotEmpty) ...[
+                                  if (memo.preview.isNotEmpty) ...[
                                     const SizedBox(height: 3),
                                     Text(
-                                      memo.content,
+                                      memo.preview,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
