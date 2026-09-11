@@ -14,6 +14,7 @@ class MemoPage extends StatefulWidget {
 
 class MemoPageState extends State<MemoPage> {
   List<Memo> memos = [];
+  String _searchText = '';
 
   @override
   void initState() {
@@ -33,9 +34,15 @@ class MemoPageState extends State<MemoPage> {
     });
   }
 
-  //新しい順に並べる
+  //ピン留めを先頭、その中では新しい順
   void _sortMemos() {
-    memos.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    memos.sort((a, b) {
+      if (a.isPinned != b.isPinned) {
+        return a.isPinned ? -1 : 1;
+      }
+
+      return b.updatedAt.compareTo(a.updatedAt);
+    });
   }
 
   //メモを追加
@@ -55,6 +62,26 @@ class MemoPageState extends State<MemoPage> {
 
     setState(() {
       memos[index] = newMemo;
+      _sortMemos();
+    });
+
+    MemoStorage.saveMemos(memos);
+  }
+
+  //ピン留め切り替え
+  void _togglePin(Memo memo) {
+    final index = memos.indexOf(memo);
+    if (index == -1) return;
+
+    final updatedMemo = Memo(
+      title: memo.title,
+      content: memo.content,
+      updatedAt: memo.updatedAt,
+      isPinned: !memo.isPinned,
+    );
+
+    setState(() {
+      memos[index] = updatedMemo;
       _sortMemos();
     });
 
@@ -138,106 +165,205 @@ class MemoPageState extends State<MemoPage> {
     );
   }
 
+  //検索条件を反映
+  List<Memo> _getVisibleMemos() {
+    final keyword = _searchText.trim().toLowerCase();
+
+    if (keyword.isEmpty) {
+      return [...memos];
+    }
+
+    return memos.where((memo) {
+      return memo.title.toLowerCase().contains(keyword) ||
+          memo.content.toLowerCase().contains(keyword);
+    }).toList();
+  }
+
   String _formatDate(DateTime date) {
     return '${date.month}/${date.day}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final visibleMemos = _getVisibleMemos();
+
     return MainContent(
       overlap: 10,
-      child: memos.isEmpty
-          ? const Center(
-              child: Text(
-                'メモはまだありません',
-                style: TextStyle(color: Color(0xff81889B)),
+      child: Column(
+        children: [
+          //Google Keepのように上に検索欄を置く
+          TextField(
+            onChanged: (value) {
+              setState(() {
+                _searchText = value;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'メモを検索',
+              prefixIcon: const Icon(
+                Icons.search,
+                color: Color(0xff526FC5),
               ),
-            )
-          : ListView.builder(
-              padding: EdgeInsets.zero,
-              itemCount: memos.length,
-              itemBuilder: (context, index) {
-                final memo = memos[index];
+              filled: true,
+              fillColor: const Color(0xffF2F4FC),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(22),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
 
-                return InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () {
-                    _showEditSheet(memo);
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xffF2F4FC),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xffCDD5F0),
+          const SizedBox(height: 14),
+
+          Expanded(
+            child: visibleMemos.isEmpty
+                ? Center(
+                    child: Text(
+                      memos.isEmpty
+                          ? 'メモはまだありません'
+                          : '一致するメモはありません',
+                      style: const TextStyle(
+                        color: Color(0xff81889B),
                       ),
                     ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(
-                          Icons.edit_note_outlined,
-                          color: Color(0xff526FC5),
-                        ),
-                        const SizedBox(width: 12),
+                  )
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      //スマホは2列、広い画面では3列
+                      final crossAxisCount =
+                          constraints.maxWidth > 900 ? 3 : 2;
 
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      memo.title,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xff35415F),
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    _formatDate(memo.updatedAt),
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xff81889B),
-                                    ),
+                      return GridView.builder(
+                        padding: EdgeInsets.zero,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: 1.12,
+                        ),
+                        itemCount: visibleMemos.length,
+                        itemBuilder: (context, index) {
+                          final memo = visibleMemos[index];
+
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () {
+                              _showEditSheet(memo);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(13),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: const Color(0xffCDD5F0),
+                                ),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x12000000),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 3),
                                   ),
                                 ],
                               ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          memo.title,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xff35415F),
+                                          ),
+                                        ),
+                                      ),
 
-                              if (memo.content.isNotEmpty) ...[
-                                const SizedBox(height: 5),
-                                Text(
-                                  memo.content,
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: Color(0xff616A80),
+                                      IconButton(
+                                        tooltip: memo.isPinned
+                                            ? 'ピン留めを外す'
+                                            : 'ピン留め',
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        color: const Color(0xff526FC5),
+                                        icon: Icon(
+                                          memo.isPinned
+                                              ? Icons.push_pin
+                                              : Icons.push_pin_outlined,
+                                          size: 18,
+                                        ),
+                                        onPressed: () {
+                                          _togglePin(memo);
+                                        },
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
 
-                        IconButton(
-                          tooltip: '削除',
-                          color: const Color(0xff526FC5),
-                          icon: const Icon(Icons.delete_outline, size: 19),
-                          onPressed: () {
-                            _showDeleteDialog(memo);
-                          },
-                        ),
-                      ],
-                    ),
+                                  if (memo.content.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Expanded(
+                                      child: Text(
+                                        memo.content,
+                                        maxLines: 6,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          height: 1.35,
+                                          color: Color(0xff616A80),
+                                        ),
+                                      ),
+                                    ),
+                                  ] else
+                                    const Spacer(),
+
+                                  const SizedBox(height: 8),
+
+                                  Row(
+                                    children: [
+                                      Text(
+                                        _formatDate(memo.updatedAt),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: Color(0xff81889B),
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      PopupMenuButton<String>(
+                                        tooltip: 'メニュー',
+                                        icon: const Icon(
+                                          Icons.more_vert,
+                                          size: 18,
+                                          color: Color(0xff81889B),
+                                        ),
+                                        onSelected: (value) {
+                                          if (value == 'delete') {
+                                            _showDeleteDialog(memo);
+                                          }
+                                        },
+                                        itemBuilder: (context) => const [
+                                          PopupMenuItem(
+                                            value: 'delete',
+                                            child: Text('削除'),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
-                );
-              },
-            ),
+          ),
+        ],
+      ),
     );
   }
 }
