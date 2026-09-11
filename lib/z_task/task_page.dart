@@ -16,8 +16,9 @@ class TaskPage extends StatefulWidget {
 class TaskPageState extends State<TaskPage> {
   List<Task> tasks = [];
 
-  //表示フィルター
-  String _selectedFilter = 'すべて';
+  //表示条件
+  String _selectedStatus = 'すべて';
+  String _selectedCategory = 'すべて';
 
   //データの追加
   void addTask(Task task) {
@@ -34,7 +35,15 @@ class TaskPageState extends State<TaskPage> {
 
     setState(() {
       tasks[index] = newTask;
+
+      //編集でジャンルがなくなった場合は絞り込みを戻す
+      final categories = _getCategories();
+      if (_selectedCategory != 'すべて' &&
+          !categories.contains(_selectedCategory)) {
+        _selectedCategory = 'すべて';
+      }
     });
+
     TaskStorage.saveTasks(tasks);
   }
 
@@ -42,7 +51,14 @@ class TaskPageState extends State<TaskPage> {
   void deleteTask(Task task) {
     setState(() {
       tasks.remove(task);
+
+      final categories = _getCategories();
+      if (_selectedCategory != 'すべて' &&
+          !categories.contains(_selectedCategory)) {
+        _selectedCategory = 'すべて';
+      }
     });
+
     TaskStorage.saveTasks(tasks);
   }
 
@@ -85,7 +101,7 @@ class TaskPageState extends State<TaskPage> {
                     width: double.infinity,
                     child: FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xffE88796),
+                        backgroundColor: const Color(0xff526FC5),
                       ),
                       onPressed: () {
                         Navigator.pop(context);
@@ -98,6 +114,9 @@ class TaskPageState extends State<TaskPage> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xff526FC5),
+                      ),
                       onPressed: () {
                         Navigator.pop(context);
                       },
@@ -129,140 +148,205 @@ class TaskPageState extends State<TaskPage> {
     });
   }
 
-  //フィルターを反映した一覧を作る
+  //現在使われているジャンル一覧
+  List<String> _getCategories() {
+    final categories = tasks
+        .map((task) => task.category.trim())
+        .where((category) => category.isNotEmpty && category != '未設定')
+        .toSet()
+        .toList();
+
+    categories.sort();
+
+    return categories;
+  }
+
+  //絞り込みと並び替え
   List<Task> _getVisibleTasks() {
     final visibleTasks = tasks.where((task) {
-      if (_selectedFilter == '未完了') {
-        return !task.isDone;
-      }
+      final statusMatches =
+          _selectedStatus == 'すべて' ||
+          (_selectedStatus == '未完了' && !task.isDone) ||
+          (_selectedStatus == '完了' && task.isDone);
 
-      if (_selectedFilter == '完了') {
-        return task.isDone;
-      }
+      final categoryMatches =
+          _selectedCategory == 'すべて' ||
+          task.category == _selectedCategory;
 
-      return true;
+      return statusMatches && categoryMatches;
     }).toList();
 
-    //未完了 → 締切が近い順 → 重要度が高い順
+    //未完了を先にして、締切が近い順
     visibleTasks.sort((a, b) {
       if (a.isDone != b.isDone) {
         return a.isDone ? 1 : -1;
       }
 
       if (a.deadline != null && b.deadline != null) {
-        final deadlineCompare = a.deadline!.compareTo(b.deadline!);
-        if (deadlineCompare != 0) return deadlineCompare;
+        return a.deadline!.compareTo(b.deadline!);
       }
 
       if (a.deadline == null && b.deadline != null) return 1;
       if (a.deadline != null && b.deadline == null) return -1;
 
-      return b.priority.compareTo(a.priority);
+      return 0;
     });
 
     return visibleTasks;
+  }
+
+  //青いヘッダー上の絞り込みUI
+  Widget _buildHeaderFilters(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final categories = _getCategories();
+
+    return Positioned(
+      top: screenHeight * 0.15,
+      left: 20,
+      right: 20,
+      child: Column(
+        children: [
+          //完了状態
+          Row(
+            children: ['すべて', '未完了', '完了'].map((status) {
+              final selected = _selectedStatus == status;
+
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedStatus = status;
+                      });
+                    },
+                    child: Container(
+                      height: 34,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? Colors.white
+                            : Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Text(
+                        status,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: selected
+                              ? const Color(0xff36559F)
+                              : Colors.white,
+                          fontWeight: selected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 9),
+
+          //ジャンル
+          Container(
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.28),
+              ),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedCategory,
+                isExpanded: true,
+                dropdownColor: const Color(0xff36559F),
+                iconEnabledColor: Colors.white,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                ),
+                items: [
+                  const DropdownMenuItem(
+                    value: 'すべて',
+                    child: Text('すべてのジャンル'),
+                  ),
+                  ...categories.map(
+                    (category) => DropdownMenuItem(
+                      value: category,
+                      child: Text(category),
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value == null) return;
+
+                  setState(() {
+                    _selectedCategory = value;
+                  });
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final visibleTasks = _getVisibleTasks();
 
-    final incompleteCount = tasks.where((task) => !task.isDone).length;
-    final completedCount = tasks.where((task) => task.isDone).length;
+    return Stack(
+      children: [
+        //青い背景部分に表示
+        _buildHeaderFilters(context),
 
-    return MainContent(
-      overlap: 10,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          //件数表示
-          Row(
-            children: [
-              const Text(
-                'タスク',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                '未完了 $incompleteCount  /  完了 $completedCount',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xff7C7690),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          //表示切り替え
-          Wrap(
-            spacing: 8,
-            children: ['すべて', '未完了', '完了'].map((filter) {
-              return ChoiceChip(
-                label: Text(filter),
-                selected: _selectedFilter == filter,
-                selectedColor: const Color(0xffE8E3FA),
-                labelStyle: TextStyle(
-                  color: _selectedFilter == filter
-                      ? const Color(0xff6658A8)
-                      : const Color(0xff6F6A7C),
-                  fontWeight: _selectedFilter == filter
-                      ? FontWeight.w600
-                      : FontWeight.normal,
-                ),
-                onSelected: (_) {
-                  setState(() {
-                    _selectedFilter = filter;
-                  });
-                },
-              );
-            }).toList(),
-          ),
-
-          const SizedBox(height: 12),
-
-          Expanded(
-            child: visibleTasks.isEmpty
-                ? Center(
-                    child: Text(
-                      tasks.isEmpty
-                          ? 'タスクはまだありません'
-                          : 'この条件のタスクはありません',
-                      style: const TextStyle(
-                        color: Color(0xff8D8799),
-                      ),
+        //白いカード部分
+        MainContent(
+          overlap: 10,
+          child: visibleTasks.isEmpty
+              ? Center(
+                  child: Text(
+                    tasks.isEmpty
+                        ? 'タスクはまだありません'
+                        : 'この条件のタスクはありません',
+                    style: const TextStyle(
+                      color: Color(0xff81889B),
                     ),
-                  )
-                : ListView.builder(
-                    padding: EdgeInsets.zero,
-                    itemCount: visibleTasks.length,
-                    itemBuilder: (context, index) {
-                      final task = visibleTasks[index];
-
-                      return TaskCard(
-                        task: task,
-                        onChanged: () {
-                          setState(() {
-                            task.isDone = !task.isDone;
-                          });
-                          TaskStorage.saveTasks(tasks);
-                        },
-                        onEdit: () {
-                          showEditSheet(task);
-                        },
-                        onDelete: () {
-                          showDeleteDialog(task);
-                        },
-                      );
-                    },
                   ),
-          ),
-        ],
-      ),
+                )
+              : ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: visibleTasks.length,
+                  itemBuilder: (context, index) {
+                    final task = visibleTasks[index];
+
+                    return TaskCard(
+                      task: task,
+                      onChanged: () {
+                        setState(() {
+                          task.isDone = !task.isDone;
+                        });
+
+                        TaskStorage.saveTasks(tasks);
+                      },
+                      onEdit: () {
+                        showEditSheet(task);
+                      },
+                      onDelete: () {
+                        showDeleteDialog(task);
+                      },
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 }
