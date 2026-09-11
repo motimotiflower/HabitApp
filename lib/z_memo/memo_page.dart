@@ -1,5 +1,6 @@
 //メモを表示するページ
 import 'package:flutter/material.dart';
+import 'package:habitapp/main/widgets/main_background.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
 import 'package:habitapp/models/memo.dart';
 import 'package:habitapp/z_memo/memo_storage.dart';
@@ -183,187 +184,204 @@ class MemoPageState extends State<MemoPage> {
     return '${date.month}/${date.day}';
   }
 
+  //青いヘッダーに置く検索欄
+  Widget _buildHeaderSearch(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Positioned(
+      top: screenHeight * MainBackground.headerRatio * 0.50,
+      left: 20,
+      right: 20,
+      child: TextField(
+        onChanged: (value) {
+          setState(() {
+            _searchText = value;
+          });
+        },
+        style: const TextStyle(
+          color: Color(0xff35415F),
+        ),
+        decoration: InputDecoration(
+          hintText: 'メモを検索',
+          hintStyle: const TextStyle(
+            color: Color(0xff81889B),
+          ),
+          prefixIcon: const Icon(
+            Icons.search,
+            color: Color(0xff526FC5),
+          ),
+          filled: true,
+          fillColor: Colors.white.withValues(alpha: 0.96),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final visibleMemos = _getVisibleMemos();
 
-    return MainContent(
-      overlap: 10,
-      child: Column(
-        children: [
-          //Google Keepのように上に検索欄を置く
-          TextField(
-            onChanged: (value) {
-              setState(() {
-                _searchText = value;
-              });
-            },
-            decoration: InputDecoration(
-              hintText: 'メモを検索',
-              prefixIcon: const Icon(
-                Icons.search,
-                color: Color(0xff526FC5),
-              ),
-              filled: true,
-              fillColor: const Color(0xffF2F4FC),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(22),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
+    return Stack(
+      children: [
+        _buildHeaderSearch(context),
 
-          const SizedBox(height: 14),
-
-          Expanded(
-            child: visibleMemos.isEmpty
-                ? Center(
-                    child: Text(
-                      memos.isEmpty
-                          ? 'メモはまだありません'
-                          : '一致するメモはありません',
-                      style: const TextStyle(
-                        color: Color(0xff81889B),
-                      ),
+        MainContent(
+          overlap: 10,
+          child: visibleMemos.isEmpty
+              ? Center(
+                  child: Text(
+                    memos.isEmpty
+                        ? 'メモはまだありません'
+                        : '一致するメモはありません',
+                    style: const TextStyle(
+                      color: Color(0xff81889B),
                     ),
-                  )
-                : LayoutBuilder(
-                    builder: (context, constraints) {
-                      //スマホは2列、広い画面では3列
-                      final crossAxisCount =
-                          constraints.maxWidth > 900 ? 3 : 2;
+                  ),
+                )
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    //スマホは2列、広い画面では3列
+                    final crossAxisCount =
+                        constraints.maxWidth > 900 ? 3 : 2;
 
-                      return GridView.builder(
-                        padding: EdgeInsets.zero,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          childAspectRatio: 1.12,
-                        ),
-                        itemCount: visibleMemos.length,
-                        itemBuilder: (context, index) {
-                          final memo = visibleMemos[index];
+                    return GridView.builder(
+                      padding: EdgeInsets.zero,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: 1.12,
+                      ),
+                      itemCount: visibleMemos.length,
+                      itemBuilder: (context, index) {
+                        final memo = visibleMemos[index];
 
-                          return InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: () {
-                              _showEditSheet(memo);
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(13),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: const Color(0xffCDD5F0),
-                                ),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Color(0x12000000),
-                                    blurRadius: 8,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () {
+                            _showEditSheet(memo);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(13),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xffCDD5F0),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          memo.title,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            color: Color(0xff35415F),
-                                          ),
-                                        ),
-                                      ),
-
-                                      IconButton(
-                                        tooltip: memo.isPinned
-                                            ? 'ピン留めを外す'
-                                            : 'ピン留め',
-                                        padding: EdgeInsets.zero,
-                                        constraints: const BoxConstraints(),
-                                        color: const Color(0xff526FC5),
-                                        icon: Icon(
-                                          memo.isPinned
-                                              ? Icons.push_pin
-                                              : Icons.push_pin_outlined,
-                                          size: 18,
-                                        ),
-                                        onPressed: () {
-                                          _togglePin(memo);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-
-                                  if (memo.content.isNotEmpty) ...[
-                                    const SizedBox(height: 8),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x12000000),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
                                     Expanded(
                                       child: Text(
-                                        memo.content,
-                                        maxLines: 6,
+                                        memo.title,
+                                        maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
-                                          fontSize: 13,
-                                          height: 1.35,
-                                          color: Color(0xff616A80),
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xff35415F),
                                         ),
                                       ),
                                     ),
-                                  ] else
-                                    const Spacer(),
 
+                                    IconButton(
+                                      tooltip: memo.isPinned
+                                          ? 'ピン留めを外す'
+                                          : 'ピン留め',
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                      color: const Color(0xff526FC5),
+                                      icon: Icon(
+                                        memo.isPinned
+                                            ? Icons.push_pin
+                                            : Icons.push_pin_outlined,
+                                        size: 18,
+                                      ),
+                                      onPressed: () {
+                                        _togglePin(memo);
+                                      },
+                                    ),
+                                  ],
+                                ),
+
+                                if (memo.content.isNotEmpty) ...[
                                   const SizedBox(height: 8),
-
-                                  Row(
-                                    children: [
-                                      Text(
-                                        _formatDate(memo.updatedAt),
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: Color(0xff81889B),
-                                        ),
+                                  Expanded(
+                                    child: Text(
+                                      memo.content,
+                                      maxLines: 6,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        height: 1.35,
+                                        color: Color(0xff616A80),
                                       ),
-                                      const Spacer(),
-                                      PopupMenuButton<String>(
-                                        tooltip: 'メニュー',
-                                        icon: const Icon(
-                                          Icons.more_vert,
-                                          size: 18,
-                                          color: Color(0xff81889B),
-                                        ),
-                                        onSelected: (value) {
-                                          if (value == 'delete') {
-                                            _showDeleteDialog(memo);
-                                          }
-                                        },
-                                        itemBuilder: (context) => const [
-                                          PopupMenuItem(
-                                            value: 'delete',
-                                            child: Text('削除'),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ],
-                              ),
+                                ] else
+                                  const Spacer(),
+
+                                const SizedBox(height: 8),
+
+                                Row(
+                                  children: [
+                                    Text(
+                                      _formatDate(memo.updatedAt),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Color(0xff81889B),
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    PopupMenuButton<String>(
+                                      tooltip: 'メニュー',
+                                      icon: const Icon(
+                                        Icons.more_vert,
+                                        size: 18,
+                                        color: Color(0xff81889B),
+                                      ),
+                                      onSelected: (value) {
+                                        if (value == 'delete') {
+                                          _showDeleteDialog(memo);
+                                        }
+                                      },
+                                      itemBuilder: (context) => const [
+                                        PopupMenuItem(
+                                          value: 'delete',
+                                          child: Text('削除'),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 }
