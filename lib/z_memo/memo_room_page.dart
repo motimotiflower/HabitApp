@@ -242,57 +242,71 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                 ),
                               ),
 
-                            //壁打ちメモなので本文と時刻だけをシンプルに表示
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                left: 4,
-                                right: 4,
-                                bottom: 16,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (message.content.isNotEmpty)
-                                    Text(
-                                      message.content,
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        height: 1.45,
-                                        color: Color(0xff35415F),
-                                      ),
-                                    ),
-
-                                  if (message.imageBase64 != null) ...[
-                                    if (message.content.isNotEmpty)
-                                      const SizedBox(height: 8),
-                                    GestureDetector(
-                                      onTap: () {
-                                        _showImage(message.imageBase64!);
-                                      },
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Image.memory(
-                                          base64Decode(message.imageBase64!),
-                                          width: 280,
-                                          height: 210,
-                                          fit: BoxFit.cover,
+                            //壁打ちメモは左寄せ。連続投稿の先頭だけ時刻を上に表示
+                            SizedBox(
+                              width: double.infinity,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 0,
+                                  right: 4,
+                                  bottom: 12,
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (!isContinuous) ...[
+                                      Text(
+                                        _formatTime(message.createdAt),
+                                        textAlign: TextAlign.left,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: Color(0xff9AA2B6),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(height: 4),
+                                    ],
 
-                                  //連続投稿では最初の1件だけ時刻を表示
-                                  if (!isContinuous) ...[
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _formatTime(message.createdAt),
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        color: Color(0xff9AA2B6),
+                                    if (message.content.isNotEmpty)
+                                      Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          message.content,
+                                          textAlign: TextAlign.left,
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            height: 1.45,
+                                            color: Color(0xff35415F),
+                                          ),
+                                        ),
                                       ),
-                                    ),
+
+                                    if (message.imageBase64 != null) ...[
+                                      if (message.content.isNotEmpty)
+                                        const SizedBox(height: 8),
+                                      Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            _showImage(message.imageBase64!);
+                                          },
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: Image.memory(
+                                              base64Decode(
+                                                message.imageBase64!,
+                                              ),
+                                              width: 280,
+                                              height: 210,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ],
-                                ],
+                                ),
                               ),
                             ),
                           ],
