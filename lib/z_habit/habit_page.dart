@@ -66,10 +66,10 @@ class HabitPageState extends State<HabitPage> {
     super.initState();
 
     //HabitPageが最初に作られた時に保存データを読み込む
-    _loadHabits();
+    reloadHabits();
   }
 
-  Future<void> _loadHabits() async {
+  Future<void> reloadHabits() async {
     //保存されている習慣一覧を取得
     final loadedHabits = await HabitStorage.loadHabits();
 
