@@ -13,20 +13,9 @@ class AddTaskSheet extends StatefulWidget {
 
 class _AddTaskSheetState extends State<AddTaskSheet> {
   final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _categoryController = TextEditingController();
 
   DateTime? _deadline;
-  String _category = '未設定';
-  int _priority = 0;
-
-  static const List<String> _categories = [
-    '未設定',
-    '勉強',
-    '仕事',
-    '生活',
-    '健康',
-    'サークル',
-    'その他',
-  ];
 
   //締切日を選ぶ
   Future<void> _selectDeadline() async {
@@ -47,14 +36,15 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
   //タスクを追加する
   void _addTask() {
     final title = _titleController.text.trim();
+    final category = _categoryController.text.trim();
+
     if (title.isEmpty) return;
 
     widget.onAddTask(
       Task(
         title: title,
         deadline: _deadline,
-        category: _category,
-        priority: _priority,
+        category: category.isEmpty ? '未設定' : category,
       ),
     );
 
@@ -78,6 +68,7 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
               'タスクを追加',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
+
             const SizedBox(height: 20),
 
             Expanded(
@@ -85,6 +76,7 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    //タスク名
                     TextField(
                       controller: _titleController,
                       decoration: const InputDecoration(
@@ -92,11 +84,16 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
                         border: OutlineInputBorder(),
                       ),
                     ),
+
                     const SizedBox(height: 20),
 
+                    //締切日
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.calendar_today),
+                      leading: const Icon(
+                        Icons.calendar_today,
+                        color: Color(0xff526FC5),
+                      ),
                       title: Text(
                         _deadline == null
                             ? '締切日を選択'
@@ -114,46 +111,21 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
                             ),
                       onTap: _selectDeadline,
                     ),
+
                     const SizedBox(height: 12),
 
-                    const Text(
-                      'ジャンル',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _categories.map((category) {
-                        return ChoiceChip(
-                          label: Text(category),
-                          selected: _category == category,
-                          onSelected: (_) {
-                            setState(() {
-                              _category = category;
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 20),
-
-                    const Text(
-                      '重要度',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _priorityChip('なし', 0),
-                        _priorityChip('低', 1),
-                        _priorityChip('中', 2),
-                        _priorityChip('高', 3),
-                      ],
+                    //ジャンルは自由に作成できる
+                    TextField(
+                      controller: _categoryController,
+                      decoration: const InputDecoration(
+                        labelText: 'ジャンル',
+                        hintText: '例：勉強、買い物、サークル',
+                        prefixIcon: Icon(
+                          Icons.folder_outlined,
+                          color: Color(0xff526FC5),
+                        ),
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ],
                 ),
@@ -165,6 +137,10 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff526FC5),
+                  foregroundColor: Colors.white,
+                ),
                 onPressed: _addTask,
                 child: const Text('追加'),
               ),
@@ -175,22 +151,10 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
     );
   }
 
-  //重要度選択を共通化
-  Widget _priorityChip(String label, int value) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: _priority == value,
-      onSelected: (_) {
-        setState(() {
-          _priority = value;
-        });
-      },
-    );
-  }
-
   @override
   void dispose() {
     _titleController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 }
