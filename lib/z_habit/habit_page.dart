@@ -4,20 +4,16 @@ import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/z_habit/widgets/habit_card.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
+import 'package:habitapp/z_habit/sheets/edit_habit_sheet.dart';
 
-//習慣画面を表すWidget======================================
 class HabitPage extends StatefulWidget {
   const HabitPage({super.key});
 
-  // HabitPageとHabitPageStateを結び付ける
   @override
   State<HabitPage> createState() => HabitPageState();
 }
 
-//HabitPageの値や見た目の管理(ここ限定）=======================
 class HabitPageState extends State<HabitPage> {
-  //変数=====================================
-
   //選択中の曜日
   int selectedDayIndex = DateTime.now().weekday - 1;
 
@@ -30,50 +26,130 @@ class HabitPageState extends State<HabitPage> {
   DateTime displayedMonday = _getMonday(DateTime.now());
 
   //習慣一覧
-  List<Habit> habits = [
-    Habit(title: "読書", icon: Icons.sunny),
-    Habit(title: "タスク", icon: Icons.abc),
-  ];
+  List<Habit> habits = [];
 
-  //データの追加=================================
+  //データの追加
   void addHabit(Habit habit) {
     setState(() {
       habits.add(habit);
     });
 
-    //追加後の習慣一覧を保存
     HabitStorage.saveHabits(habits);
   }
 
-  //表示する曜日を変更=============================
+  //データの編集
+  void _editHabit(Habit oldHabit, Habit newHabit) {
+    final index = habits.indexOf(oldHabit);
+    if (index == -1) return;
+
+    setState(() {
+      habits[index] = newHabit;
+    });
+
+    HabitStorage.saveHabits(habits);
+  }
+
+  //データの削除
+  void _deleteHabit(Habit habit) {
+    setState(() {
+      habits.remove(habit);
+    });
+
+    HabitStorage.saveHabits(habits);
+  }
+
+  //編集画面
+  void _showEditSheet(Habit habit) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.82,
+          child: EditHabitSheet(
+            habit: habit,
+            onSave: (editedHabit) {
+              _editHabit(habit, editedHabit);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  //削除確認
+  void _showDeleteDialog(Habit habit) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('習慣を削除'),
+          content: Text('「${habit.title}」を削除しますか？\n達成記録も削除されます。'),
+          actions: [
+            SizedBox(
+              width: double.infinity,
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xff526FC5),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _deleteHabit(habit);
+                      },
+                      child: const Text('削除'),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xff526FC5),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('キャンセル'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  //表示する曜日を変更
   void selectDay(int index) {
     setState(() {
       selectedDayIndex = index;
     });
   }
 
-  //表示する週を変更===============================
-  //MainPageの週移動ボタンから呼ばれる
+  //表示する週を変更
   void changeDisplayedWeek(DateTime monday) {
     setState(() {
       displayedMonday = monday;
     });
   }
 
-  //保存データの読み込み===========================
   @override
   void initState() {
     super.initState();
-
-    //HabitPageが最初に作られた時に保存データを読み込む
     reloadHabits();
   }
 
+  //保存データの読み込み
   Future<void> reloadHabits() async {
-    //保存されている習慣一覧を取得
     final loadedHabits = await HabitStorage.loadHabits();
 
-    //読み込み中にWidgetが破棄されていたら終了
     if (!mounted) return;
 
     setState(() {
@@ -81,15 +157,10 @@ class HabitPageState extends State<HabitPage> {
     });
   }
 
-  //画面を作る処理=================================
   @override
   Widget build(BuildContext context) {
-    //変数----------------------------------------
-
-    //曜日一覧
     const days = ["月", "火", "水", "木", "金", "土", "日"];
 
-    //現在選択している曜日
     final selectedDay = days[selectedDayIndex];
 
     //選択した曜日に実行する習慣だけ取得
@@ -98,55 +169,59 @@ class HabitPageState extends State<HabitPage> {
     }).toList();
 
     //表示中の週から、選択した曜日の日付を取得
-    //例：表示週が9/7(月)で火曜日を選択 → 9/8
-    final selectedDate = displayedMonday.add(Duration(days: selectedDayIndex));
+    final selectedDate = displayedMonday.add(
+      Duration(days: selectedDayIndex),
+    );
 
-    //達成履歴で使用する日付キーを作成
-    //例：2026-09-07
+    //達成履歴で使用する日付キー
     final dateKey =
         '${selectedDate.year}-'
         '${selectedDate.month.toString().padLeft(2, '0')}-'
         '${selectedDate.day.toString().padLeft(2, '0')}';
 
-    //画面========================================
     return MainContent(
       overlap: 10,
+      child: selectedDayHabits.isEmpty
+          ? const Center(
+              child: Text(
+                'この日の習慣はありません',
+                style: TextStyle(
+                  color: Color(0xff81889B),
+                ),
+              ),
+            )
+          : ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: selectedDayHabits.length,
+              itemBuilder: (context, index) {
+                final habit = selectedDayHabits[index];
 
-      //習慣一覧
-      child: ListView.builder(
-        //ListView自身の余白はいらない
-        padding: EdgeInsets.zero,
+                return HabitCard(
+                  habit: habit,
+                  isDone: habit.completionHistory[dateKey] ?? false,
 
-        //表示する習慣の数
-        itemCount: selectedDayHabits.length,
+                  //達成状態の変更
+                  onChanged: () {
+                    setState(() {
+                      habit.completionHistory[dateKey] =
+                          !(habit.completionHistory[dateKey] ?? false);
+                    });
 
-        //習慣1件分のカードを作成
-        itemBuilder: (context, index) {
-          //現在表示しているHabit
-          final habit = selectedDayHabits[index];
+                    HabitStorage.saveHabits(habits);
+                  },
 
-          return HabitCard(
-            //HabitCardに習慣データを渡す
-            habit: habit,
+                  //編集
+                  onEdit: () {
+                    _showEditSheet(habit);
+                  },
 
-            //選択した日の達成状態
-            //記録がまだなければ未達成(false)
-            isDone: habit.completionHistory[dateKey] ?? false,
-
-            //チェックボタンが押された時
-            onChanged: () {
-              setState(() {
-                //選択した日の達成状態を反転
-                habit.completionHistory[dateKey] =
-                    !(habit.completionHistory[dateKey] ?? false);
-              });
-
-              //変更後の達成状態を保存
-              HabitStorage.saveHabits(habits);
-            },
-          );
-        },
-      ),
+                  //削除
+                  onDelete: () {
+                    _showDeleteDialog(habit);
+                  },
+                );
+              },
+            ),
     );
   }
 }
