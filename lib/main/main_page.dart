@@ -7,7 +7,7 @@ import 'package:habitapp/z_home/home_page.dart';
 import 'package:habitapp/z_habit/habit_page.dart';
 import 'package:habitapp/z_task/task_page.dart';
 import 'package:habitapp/z_memo/memo_page.dart';
-import 'package:habitapp/z_memo/sheets/memo_sheet.dart';
+import 'package:habitapp/z_memo/sheets/add_memo_room_sheet.dart';
 
 import 'package:habitapp/main/widgets/main_navigation_bar.dart';
 import 'package:habitapp/main/widgets/main_background.dart';
@@ -117,7 +117,7 @@ class _MainPageState extends State<MainPage> {
         },
       );
 
-      //Memoの追加画面
+      //Memo部屋の追加画面
     } else if (_currentIndex == 3) {
       showModalBottomSheet(
         context: context,
@@ -126,10 +126,13 @@ class _MainPageState extends State<MainPage> {
 
         builder: (context) {
           return SizedBox(
-            height: MediaQuery.of(context).size.height * 0.82,
-            child: MemoSheet(
-              onSave: (memo) {
+            height: MediaQuery.of(context).size.height * 0.68,
+            child: AddMemoRoomSheet(
+              onAdd: (memo) {
                 _memoPageKey.currentState?.addMemo(memo);
+
+                //Homeのピン留めメモ表示も最新化
+                _homePageKey.currentState?.reload();
               },
             ),
           );
@@ -245,6 +248,8 @@ class _MainPageState extends State<MainPage> {
               _homePageKey.currentState?.reload();
             } else if (index == 1) {
               _habitPageKey.currentState?.reloadHabits();
+            } else if (index == 3) {
+              _memoPageKey.currentState?.reloadMemos();
             }
           });
         },
