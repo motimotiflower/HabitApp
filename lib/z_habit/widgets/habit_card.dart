@@ -25,9 +25,9 @@ class HabitCard extends StatelessWidget {
 
       //見た目の設定--------------------------
       decoration: BoxDecoration(
-        color: const Color.fromARGB(228, 233, 233, 244),
+        color: const Color(0xffF2F4FC),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xffD0CAE8), width: 0.4),
+        border: Border.all(color: const Color(0xffCDD5F0), width: 0.4),
       ),
 
       /*表示--------------------------------
@@ -37,7 +37,7 @@ class HabitCard extends StatelessWidget {
       child: Row(
         //行
         children: [
-          Icon(habit.icon, color: const Color(0xffEBD3E3)),
+          Icon(habit.icon, color: const Color(0xff526FC5)),
           const SizedBox(width: 16), //空白
           Text(habit.title), //タイトル
           const Spacer(), //空白
