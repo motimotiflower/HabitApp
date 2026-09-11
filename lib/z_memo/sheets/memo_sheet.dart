@@ -54,8 +54,6 @@ class _MemoSheetState extends State<MemoSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.memo != null;
-
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xffF7F9FF),
@@ -66,40 +64,12 @@ class _MemoSheetState extends State<MemoSheet> {
           padding: EdgeInsets.only(
             left: 20,
             right: 20,
-            top: 18,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 18,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //上部はGoogle Keepのようにシンプルにする
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      isEditing ? 'メモを編集' : 'メモを追加',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff263A70),
-                      ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _saveMemo,
-                    child: const Text(
-                      '保存',
-                      style: TextStyle(
-                        color: Color(0xff526FC5),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 8),
-
               //タイトルは枠なし
               TextField(
                 controller: _titleController,
@@ -144,6 +114,25 @@ class _MemoSheetState extends State<MemoSheet> {
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
                     contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              //保存ボタンは下に戻す
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xff526FC5),
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: _saveMemo,
+                  child: const Text(
+                    '保存',
+                    style: TextStyle(fontSize: 16),
                   ),
                 ),
               ),
