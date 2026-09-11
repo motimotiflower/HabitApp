@@ -5,7 +5,6 @@ import 'package:habitapp/models/task.dart';
 class AddTaskSheet extends StatefulWidget {
   const AddTaskSheet({super.key, required this.onAddTask});
 
-  //追加したタスクをMainPage側へ渡す
   final void Function(Task task) onAddTask;
 
   @override
@@ -13,30 +12,31 @@ class AddTaskSheet extends StatefulWidget {
 }
 
 class _AddTaskSheetState extends State<AddTaskSheet> {
-  //変数=====================================
-
-  //タスク名入力用
   final TextEditingController _titleController = TextEditingController();
 
-  //選択した締切日
   DateTime? _deadline;
+  String _category = '未設定';
+  int _priority = 0;
 
-  //日付選択=================================
+  static const List<String> _categories = [
+    '未設定',
+    '勉強',
+    '仕事',
+    '生活',
+    '健康',
+    'サークル',
+    'その他',
+  ];
+
+  //締切日を選ぶ
   Future<void> _selectDeadline() async {
     final selectedDate = await showDatePicker(
       context: context,
-
-      //最初に表示する日
-      initialDate: DateTime.now(),
-
-      //選択できる最初の日
+      initialDate: _deadline ?? DateTime.now(),
       firstDate: DateTime.now(),
-
-      //選択できる最後の日
       lastDate: DateTime(2030),
     );
 
-    //キャンセルされた場合は何もしない
     if (selectedDate == null) return;
 
     setState(() {
@@ -44,82 +44,150 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
     });
   }
 
-  //タスク追加===============================
+  //タスクを追加する
   void _addTask() {
     final title = _titleController.text.trim();
-
-    //タスク名が空なら追加しない
     if (title.isEmpty) return;
 
-    final newTask = Task(title: title, deadline: _deadline);
+    widget.onAddTask(
+      Task(
+        title: title,
+        deadline: _deadline,
+        category: _category,
+        priority: _priority,
+      ),
+    );
 
-    //MainPage側へタスクを渡す
-    widget.onAddTask(newTask);
-
-    //追加画面を閉じる
     Navigator.pop(context);
   }
 
-  //========================================
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-
-        //キーボード分だけ下に余白を追加
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          //タイトル
-          const Text(
-            'タスクを追加',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 24),
-
-          //タスク名
-          TextField(
-            controller: _titleController,
-            decoration: const InputDecoration(
-              labelText: 'タスク名',
-              border: OutlineInputBorder(),
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 24,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'タスクを追加',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-          ),
+            const SizedBox(height: 20),
 
-          const SizedBox(height: 20),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: _titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'タスク名',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
 
-          //締切日
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.calendar_today),
-            title: Text(
-              _deadline == null
-                  ? '締切日を選択'
-                  : '${_deadline!.year}年${_deadline!.month}月${_deadline!.day}日',
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.calendar_today),
+                      title: Text(
+                        _deadline == null
+                            ? '締切日を選択'
+                            : '${_deadline!.year}年${_deadline!.month}月${_deadline!.day}日',
+                      ),
+                      trailing: _deadline == null
+                          ? null
+                          : IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                setState(() {
+                                  _deadline = null;
+                                });
+                              },
+                            ),
+                      onTap: _selectDeadline,
+                    ),
+                    const SizedBox(height: 12),
+
+                    const Text(
+                      'ジャンル',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _categories.map((category) {
+                        return ChoiceChip(
+                          label: Text(category),
+                          selected: _category == category,
+                          onSelected: (_) {
+                            setState(() {
+                              _category = category;
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+
+                    const Text(
+                      '重要度',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _priorityChip('なし', 0),
+                        _priorityChip('低', 1),
+                        _priorityChip('中', 2),
+                        _priorityChip('高', 3),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
-            onTap: _selectDeadline,
-          ),
 
-          const Spacer(),
+            const SizedBox(height: 16),
 
-          //追加ボタン
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(onPressed: _addTask, child: const Text('追加')),
-          ),
-        ],
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _addTask,
+                child: const Text('追加'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  //Controllerの後片付け=====================
+  //重要度選択を共通化
+  Widget _priorityChip(String label, int value) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: _priority == value,
+      onSelected: (_) {
+        setState(() {
+          _priority = value;
+        });
+      },
+    );
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
