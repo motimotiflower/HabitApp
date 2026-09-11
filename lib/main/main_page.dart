@@ -196,6 +196,9 @@ class _MainPageState extends State<MainPage> {
           _currentIndex !=
               0 //Home画面以外に表示
           ? FloatingActionButton(
+              //共通の追加ボタンを青系に統一
+              backgroundColor: const Color(0xff526FC5),
+              foregroundColor: Colors.white,
               onPressed: _openAddSheet,
               child: const Icon(Icons.add),
             )
