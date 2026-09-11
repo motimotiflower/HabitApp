@@ -4,8 +4,8 @@ import 'package:habitapp/models/task.dart';
 import 'package:habitapp/z_task/widgets/task_card.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
 import 'package:habitapp/z_task/task_storage.dart';
+import 'package:habitapp/z_task/sheets/edit_task_sheet.dart';
 
-//タスク画面を表すWidget======================================
 class TaskPage extends StatefulWidget {
   const TaskPage({super.key});
 
@@ -13,34 +13,62 @@ class TaskPage extends StatefulWidget {
   State<TaskPage> createState() => TaskPageState();
 }
 
-//TaskPageの値や見た目の管理=================================
 class TaskPageState extends State<TaskPage> {
-  //変数=====================================
-
-  //タスク一覧
   List<Task> tasks = [];
 
-  //データの追加=================================
+  //データの追加
   void addTask(Task task) {
     setState(() {
       tasks.add(task);
     });
 
-    //追加後のタスク一覧を保存
     TaskStorage.saveTasks(tasks);
   }
 
-  //データの削除=================================
+  //データの編集
+  void editTask(Task oldTask, Task newTask) {
+    final index = tasks.indexOf(oldTask);
+    if (index == -1) return;
+
+    setState(() {
+      tasks[index] = newTask;
+    });
+
+    TaskStorage.saveTasks(tasks);
+  }
+
+  //データの削除
   void deleteTask(Task task) {
     setState(() {
       tasks.remove(task);
     });
 
-    //削除後のタスク一覧を保存
     TaskStorage.saveTasks(tasks);
   }
 
-  //削除確認ダイアログ=========================
+  //編集画面
+  void showEditSheet(Task task) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      builder: (context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.80,
+          child: EditTaskSheet(
+            task: task,
+            onSave: (editedTask) {
+              editTask(task, editedTask);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  //削除確認ダイアログ
   void showDeleteDialog(Task task) {
     showDialog(
       context: context,
@@ -48,37 +76,29 @@ class TaskPageState extends State<TaskPage> {
         return AlertDialog(
           title: const Text('タスクを削除'),
           content: Text('「${task.title}」を削除しますか？'),
-
           actions: [
-            //ボタンを縦に並べる
             SizedBox(
               width: double.infinity,
               child: Column(
                 children: [
-                  //削除
                   SizedBox(
                     width: double.infinity,
-                    child: TextButton(
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xffE88796),
+                      ),
                       onPressed: () {
-                        //ダイアログを閉じる
                         Navigator.pop(context);
-
-                        //タスクを削除
                         deleteTask(task);
                       },
-                      child: const Text(
-                        '削除',
-                        style: TextStyle(color: Colors.red),
-                      ),
+                      child: const Text('削除'),
                     ),
                   ),
-
-                  //キャンセル
+                  const SizedBox(height: 6),
                   SizedBox(
                     width: double.infinity,
-                    child: TextButton(
+                    child: OutlinedButton(
                       onPressed: () {
-                        //ダイアログだけ閉じる
                         Navigator.pop(context);
                       },
                       child: const Text('キャンセル'),
@@ -93,20 +113,15 @@ class TaskPageState extends State<TaskPage> {
     );
   }
 
-  //保存データの読み込み===========================
   @override
   void initState() {
     super.initState();
-
-    //TaskPageが最初に作られた時に保存データを読み込む
     _loadTasks();
   }
 
   Future<void> _loadTasks() async {
-    //保存されているタスク一覧を取得
     final loadedTasks = await TaskStorage.loadTasks();
 
-    //読み込み中にWidgetが破棄されていたら終了
     if (!mounted) return;
 
     setState(() {
@@ -114,72 +129,64 @@ class TaskPageState extends State<TaskPage> {
     });
   }
 
-  //画面を作る処理===========================
   @override
   Widget build(BuildContext context) {
-    //表示用のコピーしたタスク一覧
+    //表示専用のコピー
     final sortedTasks = [...tasks];
 
-    //未完了を先にして、締切が近い順に並べる
+    //未完了 → 締切が近い順 → 重要度が高い順
     sortedTasks.sort((a, b) {
-      //完了状態が違う場合は未完了を先にする
       if (a.isDone != b.isDone) {
         return a.isDone ? 1 : -1;
       }
 
-      //両方とも締切なし
-      if (a.deadline == null && b.deadline == null) {
-        return 0;
+      if (a.deadline != null && b.deadline != null) {
+        final deadlineCompare = a.deadline!.compareTo(b.deadline!);
+        if (deadlineCompare != 0) return deadlineCompare;
       }
 
-      //aだけ締切なし
-      if (a.deadline == null) {
-        return 1;
-      }
+      if (a.deadline == null && b.deadline != null) return 1;
+      if (a.deadline != null && b.deadline == null) return -1;
 
-      //bだけ締切なし
-      if (b.deadline == null) {
-        return -1;
-      }
-
-      //締切が近い方を先にする
-      return a.deadline!.compareTo(b.deadline!);
+      return b.priority.compareTo(a.priority);
     });
 
     return MainContent(
       overlap: 10,
+      child: tasks.isEmpty
+          ? const Center(
+              child: Text(
+                'タスクはまだありません',
+                style: TextStyle(color: Colors.grey),
+              ),
+            )
+          : ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: sortedTasks.length,
+              itemBuilder: (context, index) {
+                final task = sortedTasks[index];
 
-      //タスク一覧
-      child: ListView.builder(
-        padding: EdgeInsets.zero,
+                return TaskCard(
+                  task: task,
 
-        //表示するタスクの数
-        itemCount: tasks.length,
+                  onChanged: () {
+                    setState(() {
+                      task.isDone = !task.isDone;
+                    });
 
-        //タスク1件分を表示
-        itemBuilder: (context, index) {
-          final task = tasks[index];
+                    TaskStorage.saveTasks(tasks);
+                  },
 
-          return TaskCard(
-            task: task,
+                  onEdit: () {
+                    showEditSheet(task);
+                  },
 
-            //チェックボタンが押された時
-            onChanged: () {
-              setState(() {
-                task.isDone = !task.isDone;
-              });
-
-              //変更後の完了状態を保存
-              TaskStorage.saveTasks(tasks);
-            },
-
-            //削除ボタンが押された時
-            onDelete: () {
-              showDeleteDialog(task);
-            },
-          );
-        },
-      ),
+                  onDelete: () {
+                    showDeleteDialog(task);
+                  },
+                );
+              },
+            ),
     );
   }
 }
