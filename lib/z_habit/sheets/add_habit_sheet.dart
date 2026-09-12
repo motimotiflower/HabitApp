@@ -24,12 +24,13 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
   //青系UIになじむジャンルカラー
   static const List<Color> _categoryPalette = [
-    Color(0xff526FC5),
-    Color(0xff6F86D6),
-    Color(0xff7D78C9),
-    Color(0xff5D8FBF),
-    Color(0xff5E9AA0),
-    Color(0xff7B88A8),
+    Color(0xff32448C),
+    Color(0xff6880D0),
+    Color(0xff8B8DD3),
+    Color(0xffB4BFE9),
+    Color(0xffBEBDE4),
+    Color(0xffEBD3E4),
+    Color(0xffF3E4DC),
   ];
 
   final List<IconData> _icons = const [
