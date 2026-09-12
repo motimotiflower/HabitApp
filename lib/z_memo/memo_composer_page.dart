@@ -61,6 +61,10 @@ class _MemoComposerPageState extends State<MemoComposerPage> {
     return Scaffold(
       backgroundColor: const Color(0xffF7F9FF),
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back),
+        ),
         backgroundColor: const Color(0xffF7F9FF),
         elevation: 0,
         leading: TextButton(
