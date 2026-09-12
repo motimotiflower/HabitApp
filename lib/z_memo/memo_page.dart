@@ -158,20 +158,35 @@ class MemoPageState extends State<MemoPage> {
     );
   }
 
-  //検索条件を反映
+  //検索用にカタカナをひらがなへ寄せる
+  String _normalizeSearchText(String text) {
+    final buffer = StringBuffer();
+
+    for (final rune in text.toLowerCase().runes) {
+      //ァ〜ヶをぁ〜ゖへ変換して、ひらがな・カタカナを同一視する
+      if (rune >= 0x30A1 && rune <= 0x30F6) {
+        buffer.writeCharCode(rune - 0x60);
+      } else {
+        buffer.writeCharCode(rune);
+      }
+    }
+
+    return buffer.toString();
+  }
+
+  //部屋名だけでなく、部屋の中の全テキストも検索する
   List<Memo> _getVisibleMemos() {
-    final keyword = _searchText.trim().toLowerCase();
+    final keyword = _normalizeSearchText(_searchText.trim());
 
     if (keyword.isEmpty) return [...memos];
 
     return memos.where((memo) {
-      final messageText = memo.messages
-          .map((message) => message.content)
-          .join(' ')
-          .toLowerCase();
+      final title = _normalizeSearchText(memo.title);
+      final messageText = _normalizeSearchText(
+        memo.messages.map((message) => message.content).join(' '),
+      );
 
-      return memo.title.toLowerCase().contains(keyword) ||
-          messageText.contains(keyword);
+      return title.contains(keyword) || messageText.contains(keyword);
     }).toList();
   }
 
