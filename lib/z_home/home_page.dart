@@ -329,13 +329,16 @@ class HomePageState extends State<HomePage> {
 
         if (isWide) {
           //スマホ以外は、ほかのページと同じ白い土台を使う
-          final headerHeight = screenHeight * 0.32;
+          //Homeはタイトル下の青い余白をしっかり残す
+          final headerHeight = screenHeight * 0.30;
+          final contentHeight =
+              (constraints.maxHeight - headerHeight).clamp(0.0, double.infinity);
 
           return Padding(
             padding: EdgeInsets.only(top: headerHeight),
             child: Container(
               width: double.infinity,
-              height: constraints.maxHeight - headerHeight,
+              height: contentHeight,
               color: const Color(0xffF7F9FF),
               child: SingleChildScrollView(
                 child: Column(
@@ -375,6 +378,7 @@ class HomePageState extends State<HomePage> {
                             showRightBorder: true,
                             child: _HomeHabitGrid(
                               marks: habitMarks,
+                              isWide: true,
                             ),
                           ),
                         ),
@@ -538,9 +542,11 @@ class _HomeSectionCard extends StatelessWidget {
 class _HomeHabitGrid extends StatelessWidget {
   const _HomeHabitGrid({
     required this.marks,
+    this.isWide = false,
   });
 
   final List<_HabitMark> marks;
+  final bool isWide;
 
   static const int _minimumCells = 60;
 
@@ -548,12 +554,25 @@ class _HomeHabitGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        const cellSize = 14.0;
-        const spacing = 4.0;
+        //Webでは少し大きめ、スマホでは今までのサイズ
+        final cellSize = isWide ? 20.0 : 14.0;
+        final spacing = isWide ? 5.0 : 4.0;
+
+        //Webでは横幅いっぱい×最低6行になる数のマスを用意
+        final columns = constraints.maxWidth.isFinite
+            ? ((constraints.maxWidth + spacing) / (cellSize + spacing))
+                .floor()
+                .clamp(1, 1000)
+            : 1;
+        final wideMinimumCells = columns * 6;
+        final minimumCells =
+            isWide && wideMinimumCells > _minimumCells
+                ? wideMinimumCells
+                : _minimumCells;
 
         //記録が増えるほどマスも増え、区画自体も縦に伸びる
         final cellCount =
-            marks.length > _minimumCells ? marks.length : _minimumCells;
+            marks.length > minimumCells ? marks.length : minimumCells;
 
         return Wrap(
           spacing: spacing,
