@@ -227,6 +227,10 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     TextField(
                       controller: titleController,
                       autofocus: true,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                      ),
                       decoration: InputDecoration(
                         hintText: '習慣を入力',
                         border: OutlineInputBorder(
@@ -234,7 +238,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
-                          vertical: 16,
+                          vertical: 20,
                         ),
                       ),
                     ),
