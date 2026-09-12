@@ -992,7 +992,17 @@ class _HomeRecordPreview extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(child: starSide),
-        const SizedBox(width: 12),
+
+        //瓶側と記録マス側をほんのり区切る
+        Container(
+          width: 1,
+          margin: const EdgeInsets.symmetric(
+            horizontal: 6,
+            vertical: 8,
+          ),
+          color: const Color(0xffE7EAF3),
+        ),
+
         Expanded(
           child: _HomeHabitGrid(
             marks: marks,
