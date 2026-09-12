@@ -122,11 +122,39 @@ class DebugSeedService {
       await MemoStorage.saveMemos(memos);
     }
 
-    await HabitCategoryStorage.saveCategories(['勉強', '健康']);
-    await HabitCategoryStorage.saveCategoryColors({
-      '勉強': const Color(0xff6880D0).toARGB32(),
-      '健康': const Color(0xff8B8DD3).toARGB32(),
-    });
-    await CategoryStorage.saveCategories(['大学', '制作']);
+    final habitCategories =
+        await HabitCategoryStorage.loadCategories();
+    final mergedHabitCategories = {
+      ...habitCategories,
+      '勉強',
+      '健康',
+    }.toList()
+      ..sort();
+
+    final habitColors =
+        await HabitCategoryStorage.loadCategoryColors();
+    habitColors.putIfAbsent(
+      '勉強',
+      () => const Color(0xff6880D0).toARGB32(),
+    );
+    habitColors.putIfAbsent(
+      '健康',
+      () => const Color(0xff8B8DD3).toARGB32(),
+    );
+
+    await HabitCategoryStorage.saveCategories(
+      mergedHabitCategories,
+    );
+    await HabitCategoryStorage.saveCategoryColors(habitColors);
+
+    final taskCategories = await CategoryStorage.loadCategories();
+    final mergedTaskCategories = {
+      ...taskCategories,
+      '大学',
+      '制作',
+    }.toList()
+      ..sort();
+
+    await CategoryStorage.saveCategories(mergedTaskCategories);
   }
 }
