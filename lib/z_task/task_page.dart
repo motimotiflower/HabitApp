@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:habitapp/models/task.dart';
 import 'package:habitapp/z_task/widgets/task_card.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
+import 'package:habitapp/main/widgets/main_background.dart';
 import 'package:habitapp/z_task/task_storage.dart';
 import 'package:habitapp/z_task/category_storage.dart';
 import 'package:habitapp/z_task/sheets/edit_task_sheet.dart';
