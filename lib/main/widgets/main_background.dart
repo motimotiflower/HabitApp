@@ -122,8 +122,17 @@ class MainBackground extends StatelessWidget {
                   ),
                 ),
 
-              //設定アイコン
-              const Icon(Icons.settings_outlined, color: Colors.white),
+              //どのページでも同じ位置になるよう高さを固定
+              const SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(
+                  child: Icon(
+                    Icons.settings_outlined,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
