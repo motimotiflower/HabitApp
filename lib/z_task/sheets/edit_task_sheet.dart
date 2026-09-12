@@ -19,6 +19,7 @@ class EditTaskSheet extends StatefulWidget {
 
 class _EditTaskSheetState extends State<EditTaskSheet> {
   late final TextEditingController _titleController;
+  late final TextEditingController _descriptionController;
 
   DateTime? _deadline;
   late bool _isFlagged;
@@ -32,6 +33,8 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
     super.initState();
 
     _titleController = TextEditingController(text: widget.task.title);
+    _descriptionController =
+        TextEditingController(text: widget.task.description);
     _deadline = widget.task.deadline;
     _selectedCategory = widget.task.category;
     _isFlagged = widget.task.isFlagged;
@@ -100,6 +103,7 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
       Task(
         id: widget.task.id,
         title: title,
+        description: _descriptionController.text.trim(),
         deadline: _deadline,
         category: _selectedCategory,
         isFlagged: _isFlagged,
@@ -151,9 +155,43 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
                       //タスク名
                       TextField(
                         controller: _titleController,
-                        decoration: const InputDecoration(
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        decoration: InputDecoration(
                           labelText: 'タスク名',
-                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 20,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      TextField(
+                        controller: _descriptionController,
+                        minLines: 6,
+                        maxLines: 12,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          height: 1.5,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: '詳細',
+                          alignLabelWithHint: true,
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.all(18),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
                       ),
 
@@ -314,6 +352,7 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
   @override
   void dispose() {
     _titleController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 }
