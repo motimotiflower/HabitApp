@@ -1,7 +1,9 @@
 //Discordのチャンネルのようにメモを壁打ちする画面
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:habitapp/models/memo.dart';
 import 'package:habitapp/z_memo/memo_composer_page.dart';
 import 'package:habitapp/user/user_profile_storage.dart';
@@ -28,12 +30,18 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
   late Memo _memo;
   String? _imageBase64;
   String _userName = 'ユーザー';
+  int? _selectedMessageIndex;
 
   @override
   void initState() {
     super.initState();
     _memo = widget.memo;
     _loadUserName();
+
+    //Webではブラウザ標準の右クリックメニューを出さない
+    if (kIsWeb) {
+      BrowserContextMenu.disableContextMenu();
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
@@ -252,6 +260,10 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
     final overlay =
         Overlay.of(context).context.findRenderObject() as RenderBox;
 
+    setState(() {
+      _selectedMessageIndex = index;
+    });
+
     final value = await showMenu<String>(
       context: context,
       position: RelativeRect.fromRect(
@@ -281,6 +293,12 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
         ),
       ],
     );
+
+    if (mounted) {
+      setState(() {
+        _selectedMessageIndex = null;
+      });
+    }
 
     if (value == 'edit') {
       _editMessage(index);
@@ -404,6 +422,18 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                     .inMinutes <
                                 5;
 
+                        //次も連投なら、この投稿の下余白も詰める
+                        final nextIsContinuous =
+                            index < _memo.messages.length - 1 &&
+                            _formatDate(
+                                  _memo.messages[index + 1].createdAt,
+                                ) ==
+                                _formatDate(message.createdAt) &&
+                            _memo.messages[index + 1].createdAt
+                                    .difference(message.createdAt)
+                                    .inMinutes <
+                                5;
+
                         return Column(
                           children: [
                             if (showDate)
@@ -445,7 +475,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                               child: Padding(
                                 padding: EdgeInsets.only(
                                   //連続投稿なら間隔を小さくする
-                                  bottom: isContinuous ? 2 : 16,
+                                  bottom: nextIsContinuous ? 2 : 16,
                                 ),
                                 child: GestureDetector(
                                   behavior: HitTestBehavior.translucent,
@@ -462,9 +492,19 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                       details.globalPosition,
                                     );
                                   },
-                                  child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _selectedMessageIndex == index
+                                          ? const Color(0xffE8EDFC)
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
                                     //連続投稿ではアイコンを表示しない
                                     SizedBox(
                                       width: 42,
@@ -561,6 +601,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
 
 
                                   ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -676,6 +717,10 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
 
   @override
   void dispose() {
+    if (kIsWeb) {
+      BrowserContextMenu.enableContextMenu();
+    }
+
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
