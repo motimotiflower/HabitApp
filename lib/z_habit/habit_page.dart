@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/z_habit/widgets/habit_card.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
+import 'package:habitapp/main/widgets/adaptive_editor_panel.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/z_habit/sheets/edit_habit_sheet.dart';
