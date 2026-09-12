@@ -12,8 +12,7 @@ class MainContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //変数
-    final screenHeight = MediaQuery.of(context).size.height;
-    final headerHeight = screenHeight * MainBackground.headerRatio;
+    final headerHeight = MainBackground.headerHeight(context);
 
     return Padding(
       padding: EdgeInsets.only(top: headerHeight - overlap),
