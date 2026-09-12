@@ -15,6 +15,10 @@ class StarSkyPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xff102D72),
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back),
+        ),
         backgroundColor: const Color(0xff102D72),
         foregroundColor: Colors.white,
         title: const Text('わたしの星空'),
