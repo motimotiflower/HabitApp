@@ -26,6 +26,9 @@ class TaskPageState extends State<TaskPage> {
   String _selectedStatus = 'すべて';
   String _selectedCategory = 'すべて';
 
+  //チェック後も画面を移動するまでは、そのタスクを現在の一覧に残す
+  final Set<String> _stickyTaskIds = {};
+
   //データの追加
   void addTask(Task task) {
     setState(() {
@@ -262,6 +265,7 @@ class TaskPageState extends State<TaskPage> {
     setState(() {
       tasks = loadedTasks;
       _categories = mergedCategories;
+      _stickyTaskIds.clear();
     });
   }
 
@@ -279,7 +283,11 @@ class TaskPageState extends State<TaskPage> {
           _selectedCategory == 'すべて' ||
           task.category == _selectedCategory;
 
-      return statusMatches && categoryMatches;
+      final sticky = _stickyTaskIds.contains(task.id);
+
+      //今いる画面でチェックを切り替えた直後は、
+      //状態が変わっても画面移動までは表示を維持する
+      return categoryMatches && (statusMatches || sticky);
     }).toList();
 
     //締切があるものは近い順、締切なしは後ろ
@@ -319,6 +327,7 @@ class TaskPageState extends State<TaskPage> {
                     onTap: () {
                       setState(() {
                         _selectedStatus = status;
+                        _stickyTaskIds.clear();
                       });
                     },
                     child: Container(
@@ -392,6 +401,7 @@ class TaskPageState extends State<TaskPage> {
 
                         setState(() {
                           _selectedCategory = value;
+                          _stickyTaskIds.clear();
                         });
                       },
                     ),
@@ -461,6 +471,7 @@ class TaskPageState extends State<TaskPage> {
 
                         setState(() {
                           task.isDone = !wasDone;
+                          _stickyTaskIds.add(task.id);
                         });
 
                         await TaskStorage.saveTasks(tasks);
