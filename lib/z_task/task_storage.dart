@@ -33,7 +33,19 @@ class TaskStorage {
     //JSON文字列をListに戻す
     final List<dynamic> jsonList = jsonDecode(jsonString);
 
-    //MapからTaskに戻す
-    return jsonList.map((json) => Task.fromJson(json)).toList();
+    //以前のデータにIDが無ければ読み込み時に付与して保存し直す
+    final hadMissingIds = jsonList.any(
+      (json) => json is Map && json['id'] == null,
+    );
+
+    final tasks = jsonList
+        .map((json) => Task.fromJson(Map<String, dynamic>.from(json)))
+        .toList();
+
+    if (hadMissingIds) {
+      await saveTasks(tasks);
+    }
+
+    return tasks;
   }
 }
