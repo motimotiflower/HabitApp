@@ -193,8 +193,8 @@ class _HomeHabitRecordPageState
     final screenWidth = MediaQuery.of(context).size.width;
 
     //記録ページは文字＋余白だけのコンパクトなヘッダー
-    final headerHeight = screenWidth >= 700 ? 82.0 : 74.0;
-    const titlePosition = 10.0;
+    final headerHeight = screenWidth >= 700 ? 66.0 : 62.0;
+    const titlePosition = 2.0;
     const titlePadding = 8.0;
     const titleFontSize = 25.0;
 
@@ -249,7 +249,7 @@ class _HomeHabitRecordPageState
 
           Padding(
             //ヘッダー直下だけ少し詰める
-            padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
+            padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -625,18 +625,18 @@ class _RecordGrid extends StatelessWidget {
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w600,
-              color: color,
+              color: const Color(0xff35415F),
             ),
           ),
           const SizedBox(height: 10),
           LayoutBuilder(
             builder: (context, constraints) {
               final spacing = compact ? 4.0 : 5.0;
-              final cellSize = compact
-                  ? 18.0
-                  : (constraints.maxWidth -
-                          spacing * (_columnCount - 1)) /
-                      _columnCount;
+
+              //カード幅いっぱいに11列のマスを敷き詰める
+              final cellSize = (constraints.maxWidth -
+                      spacing * (_columnCount - 1)) /
+                  _columnCount;
 
               return Wrap(
                 spacing: spacing,
