@@ -10,6 +10,7 @@ class HabitCard extends StatelessWidget {
     required this.onChanged,
     required this.onEdit,
     required this.onDelete,
+    this.categoryColor,
   });
 
   final Habit habit;
@@ -17,12 +18,20 @@ class HabitCard extends StatelessWidget {
   final VoidCallback onChanged;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final Color? categoryColor;
 
   @override
   Widget build(BuildContext context) {
+    final accentColor = habit.category == '未設定'
+        ? const Color(0xff526FC5)
+        : (categoryColor ?? const Color(0xff526FC5));
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 14,
+      ),
       decoration: BoxDecoration(
         color: const Color(0xffF2F4FC),
         borderRadius: BorderRadius.circular(16),
@@ -35,7 +44,8 @@ class HabitCard extends StatelessWidget {
         children: [
           Icon(
             habit.icon,
-            color: const Color(0xff526FC5),
+            size: 24,
+            color: accentColor,
           ),
 
           const SizedBox(width: 14),
@@ -47,6 +57,7 @@ class HabitCard extends StatelessWidget {
                 Text(
                   habit.title,
                   style: TextStyle(
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xff35415F),
                     decoration:
@@ -55,21 +66,22 @@ class HabitCard extends StatelessWidget {
                 ),
 
                 if (habit.category != '未設定') ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                      horizontal: 9,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xffE8EDFC),
+                      color: accentColor.withValues(alpha: 0.13),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       habit.category,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xff526FC5),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: accentColor,
                       ),
                     ),
                   ),
@@ -81,20 +93,20 @@ class HabitCard extends StatelessWidget {
           IconButton(
             tooltip: '編集',
             color: const Color(0xff526FC5),
-            icon: const Icon(Icons.edit_outlined, size: 19),
+            icon: const Icon(Icons.edit_outlined, size: 20),
             onPressed: onEdit,
           ),
 
           IconButton(
             tooltip: '削除',
             color: const Color(0xff526FC5),
-            icon: const Icon(Icons.delete_outline, size: 19),
+            icon: const Icon(Icons.delete_outline, size: 20),
             onPressed: onDelete,
           ),
 
           Checkbox(
             value: isDone,
-            activeColor: const Color(0xff526FC5),
+            activeColor: accentColor,
             onChanged: (_) {
               onChanged();
             },
