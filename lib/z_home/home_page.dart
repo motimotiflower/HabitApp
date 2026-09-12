@@ -1024,8 +1024,8 @@ class _HomeHabitGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        //Web・スマホとも少し大きめのマスにする
-        final cellSize = isWide ? 22.0 : 16.0;
+        //瓶との高さをそろえやすいよう、Homeのマスは少し大きめ
+        final cellSize = isWide ? 30.0 : 26.0;
         final spacing = isWide ? 5.0 : 4.0;
 
         final columns = constraints.maxWidth.isFinite
@@ -1034,14 +1034,13 @@ class _HomeHabitGrid extends StatelessWidget {
                 .clamp(1, 1000)
             : 1;
 
-        //カード表示では横幅いっぱい×最低5行までマスを敷き詰める
-        final fillMinimumCells = columns * (isWide ? 6 : 5);
-        final minimumCells =
-            (isWide || fillCard) && fillMinimumCells > _minimumCells
-                ? fillMinimumCells
-                : _minimumCells;
+        //Homeの記録カードは5行で統一。
+        //以前60マス固定で増えていた一番下の余分な行をなくす
+        final minimumCells = fillCard
+            ? columns * 5
+            : _minimumCells;
 
-        //記録が増えるほどマスも増え、区画自体も縦に伸びる
+        //記録が増えた場合だけ必要な分だけ伸ばす
         final cellCount =
             marks.length > minimumCells ? marks.length : minimumCells;
 
