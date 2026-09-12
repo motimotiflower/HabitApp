@@ -61,17 +61,13 @@ class _MemoComposerPageState extends State<MemoComposerPage> {
     return Scaffold(
       backgroundColor: const Color(0xffF7F9FF),
       appBar: AppBar(
+        backgroundColor: const Color(0xffF7F9FF),
+        elevation: 0,
         leading: IconButton(
+          tooltip: '戻る',
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
-        backgroundColor: const Color(0xffF7F9FF),
-        elevation: 0,
-        leading: TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('閉じる'),
-        ),
-        leadingWidth: 72,
         title: const Text(
           '新しいメモ',
           style: TextStyle(
