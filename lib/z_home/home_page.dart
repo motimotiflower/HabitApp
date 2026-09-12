@@ -728,7 +728,7 @@ class HomePageState extends State<HomePage> {
 
                 //タイトルのすぐ下からカードを開始する
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 88, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(16, 76, 16, 16),
                   child: Column(
                     children: [
                       todayHabitCard,
