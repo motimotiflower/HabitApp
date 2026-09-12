@@ -6,9 +6,11 @@ class HabitRecordSheet extends StatelessWidget {
   const HabitRecordSheet({
     super.key,
     required this.habits,
+    required this.categoryColors,
   });
 
   final List<Habit> habits;
+  final Map<String, int> categoryColors;
 
   //ジャンル未設定なら習慣単体、それ以外はジャンルごとにまとめる
   Map<String, List<Habit>> _groupHabits() {
@@ -40,6 +42,19 @@ class HabitRecordSheet extends StatelessWidget {
 
     records.sort();
     return records;
+  }
+
+  //グループに使う色
+  Color _groupColor(List<Habit> groupHabits) {
+    final firstHabit = groupHabits.first;
+
+    if (firstHabit.category == '未設定') {
+      return const Color(0xff526FC5);
+    }
+
+    return Color(
+      categoryColors[firstHabit.category] ?? 0xff526FC5,
+    );
   }
 
   @override
@@ -99,6 +114,7 @@ class HabitRecordSheet extends StatelessWidget {
                           return _HabitRecordGrid(
                             title: entry.key,
                             completedCount: records.length,
+                            color: _groupColor(entry.value),
                           );
                         },
                       ),
@@ -115,10 +131,12 @@ class _HabitRecordGrid extends StatelessWidget {
   const _HabitRecordGrid({
     required this.title,
     required this.completedCount,
+    required this.color,
   });
 
   final String title;
   final int completedCount;
+  final Color color;
 
   static const int _columnCount = 11;
   static const int _minimumRows = 3;
@@ -137,10 +155,10 @@ class _HabitRecordGrid extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 16,
+          style: TextStyle(
+            fontSize: 17,
             fontWeight: FontWeight.w600,
-            color: Color(0xff35415F),
+            color: color,
           ),
         ),
 
@@ -164,13 +182,11 @@ class _HabitRecordGrid extends StatelessWidget {
                   width: cellSize,
                   height: cellSize,
                   decoration: BoxDecoration(
-                    color: completed
-                        ? const Color(0xff526FC5)
-                        : Colors.white,
+                    color: completed ? color : Colors.white,
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: completed
-                          ? const Color(0xff526FC5)
+                          ? color
                           : const Color(0xffDCE3F5),
                     ),
                   ),
