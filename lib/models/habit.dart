@@ -14,6 +14,8 @@ class Habit {
   final List<String> days; //習慣を行う曜日
   final String category; //ジャンル
   final bool notificationEnabled; //通知を使うか
+  final List<String> notificationDays; //曜日指定
+  final DateTime? notificationDate; //日にち指定
   final int? notificationHour; //通知時刻
   final int? notificationMinute;
   final Map<String, bool> completionHistory; //日付ごとの達成記録
@@ -25,6 +27,8 @@ class Habit {
     this.days = const [],
     this.category = '未設定',
     this.notificationEnabled = false,
+    this.notificationDays = const [],
+    this.notificationDate,
     this.notificationHour,
     this.notificationMinute,
     Map<String, bool>? completionHistory,
@@ -40,6 +44,8 @@ class Habit {
       'days': days,
       'category': category,
       'notificationEnabled': notificationEnabled,
+      'notificationDays': notificationDays,
+      'notificationDate': notificationDate?.toIso8601String(),
       'notificationHour': notificationHour,
       'notificationMinute': notificationMinute,
       'completionHistory': completionHistory,
@@ -57,6 +63,10 @@ class Habit {
       //以前の保存データにはジャンルが無いので未設定にする
       category: json['category'] ?? '未設定',
       notificationEnabled: json['notificationEnabled'] ?? false,
+      notificationDays: List<String>.from(json['notificationDays'] ?? []),
+      notificationDate: json['notificationDate'] != null
+          ? DateTime.tryParse(json['notificationDate'])
+          : null,
       notificationHour: json['notificationHour'],
       notificationMinute: json['notificationMinute'],
 
