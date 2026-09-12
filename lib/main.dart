@@ -7,10 +7,14 @@ import 'package:habitapp/user/user_setup_page.dart';
 import 'package:habitapp/notifications/notification_service.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
 import 'package:habitapp/z_task/task_storage.dart';
+import 'package:habitapp/debug/debug_seed_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService.initialize();
+
+  //デバッグ中でデータが空なら確認用データを用意
+  await DebugSeedService.seedIfNeeded();
 
   //保存済みの設定から通知予定を作り直す
   await NotificationService.syncHabits(
