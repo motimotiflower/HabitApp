@@ -232,7 +232,6 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                         fontWeight: FontWeight.w600,
                       ),
                       decoration: InputDecoration(
-                        hintText: '習慣を入力',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
