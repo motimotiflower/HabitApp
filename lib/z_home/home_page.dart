@@ -4,6 +4,7 @@ import 'package:habitapp/main/widgets/main_background.dart';
 import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/models/memo.dart';
 import 'package:habitapp/models/task.dart';
+import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
 import 'package:habitapp/z_memo/memo_storage.dart';
 import 'package:habitapp/z_task/task_storage.dart';
@@ -16,9 +17,11 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  List<Habit> _allHabits = [];
   List<Habit> _todayHabits = [];
   List<Task> _todayTasks = [];
   List<Memo> _pinnedMemos = [];
+  Map<String, int> _categoryColors = {};
 
   @override
   void initState() {
@@ -31,6 +34,8 @@ class HomePageState extends State<HomePage> {
     final habits = await HabitStorage.loadHabits();
     final tasks = await TaskStorage.loadTasks();
     final memos = await MemoStorage.loadMemos();
+    final categoryColors =
+        await HabitCategoryStorage.loadCategoryColors();
 
     final now = DateTime.now();
 
@@ -62,9 +67,11 @@ class HomePageState extends State<HomePage> {
     if (!mounted) return;
 
     setState(() {
+      _allHabits = habits;
       _todayHabits = todayHabits;
       _todayTasks = todayTasks;
       _pinnedMemos = pinnedMemos;
+      _categoryColors = categoryColors;
     });
   }
 
@@ -112,55 +119,105 @@ class HomePageState extends State<HomePage> {
     await reload();
   }
 
+  //全習慣の達成記録を1つのマス列にまとめる
+  List<_HabitMark> _habitMarks() {
+    final marks = <_HabitMark>[];
+
+    for (final habit in _allHabits) {
+      final color = habit.category == '未設定'
+          ? const Color(0xff526FC5)
+          : Color(
+              _categoryColors[habit.category] ?? 0xff526FC5,
+            );
+
+      for (final entry in habit.completionHistory.entries) {
+        if (entry.value) {
+          marks.add(
+            _HabitMark(
+              dateKey: entry.key,
+              color: color,
+            ),
+          );
+        }
+      }
+    }
+
+    marks.sort((a, b) => a.dateKey.compareTo(b.dateKey));
+    return marks;
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final topSpace = screenHeight * MainBackground.headerRatio * 0.48;
     final dateKey = _todayKey();
+    final habitMarks = _habitMarks();
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16, topSpace, 16, 16),
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
+          //ジャンルを分けず、全習慣の積み重ねを表示
+          _HomeSectionCard(
+            title: '習慣の積み重ね',
+            icon: Icons.grid_view_rounded,
+            minHeight: 166,
+            child: _HomeHabitGrid(marks: habitMarks),
+          ),
+
+          const SizedBox(height: 12),
+
           //今日の習慣
           _HomeSectionCard(
             title: '今日の習慣',
             icon: Icons.auto_awesome,
+            minHeight: 128,
             child: _todayHabits.isEmpty
                 ? const _EmptyText('今日の習慣はありません')
                 : Column(
                     children: _todayHabits.map((habit) {
                       final isDone =
                           habit.completionHistory[dateKey] ?? false;
+                      final habitColor = habit.category == '未設定'
+                          ? const Color(0xff526FC5)
+                          : Color(
+                              _categoryColors[habit.category] ??
+                                  0xff526FC5,
+                            );
 
-                      return Row(
-                        children: [
-                          Icon(
-                            habit.icon,
-                            size: 20,
-                            color: const Color(0xff526FC5),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              habit.title,
-                              style: TextStyle(
-                                color: const Color(0xff35415F),
-                                decoration: isDone
-                                    ? TextDecoration.lineThrough
-                                    : null,
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Row(
+                          children: [
+                            Icon(
+                              habit.icon,
+                              size: 22,
+                              color: habitColor,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                habit.title,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xff35415F),
+                                  decoration: isDone
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                ),
                               ),
                             ),
-                          ),
-                          Checkbox(
-                            value: isDone,
-                            activeColor: const Color(0xff526FC5),
-                            onChanged: (_) {
-                              _toggleHabit(habit);
-                            },
-                          ),
-                        ],
+                            Checkbox(
+                              value: isDone,
+                              activeColor: habitColor,
+                              onChanged: (_) {
+                                _toggleHabit(habit);
+                              },
+                            ),
+                          ],
+                        ),
                       );
                     }).toList(),
                   ),
@@ -172,6 +229,7 @@ class HomePageState extends State<HomePage> {
           _HomeSectionCard(
             title: '今日のタスク',
             icon: Icons.check_circle_outline,
+            minHeight: 128,
             child: _todayTasks.isEmpty
                 ? const _EmptyText('今日締切のタスクはありません')
                 : Column(
@@ -189,6 +247,7 @@ class HomePageState extends State<HomePage> {
                             child: Text(
                               task.title,
                               style: const TextStyle(
+                                fontSize: 15,
                                 color: Color(0xff35415F),
                               ),
                             ),
@@ -206,7 +265,7 @@ class HomePageState extends State<HomePage> {
                               child: Text(
                                 task.category,
                                 style: const TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   color: Color(0xff526FC5),
                                 ),
                               ),
@@ -223,6 +282,7 @@ class HomePageState extends State<HomePage> {
           _HomeSectionCard(
             title: 'メモ',
             icon: Icons.edit_note_outlined,
+            minHeight: 128,
             child: _pinnedMemos.isEmpty
                 ? const _EmptyText('ピン留めしたメモはありません')
                 : Column(
@@ -250,6 +310,7 @@ class HomePageState extends State<HomePage> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
+                                      fontSize: 15,
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xff35415F),
                                     ),
@@ -261,7 +322,7 @@ class HomePageState extends State<HomePage> {
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
-                                        fontSize: 12,
+                                        fontSize: 13,
                                         color: Color(0xff697188),
                                       ),
                                     ),
@@ -287,15 +348,18 @@ class _HomeSectionCard extends StatelessWidget {
     required this.title,
     required this.icon,
     required this.child,
+    required this.minHeight,
   });
 
   final String title;
   final IconData icon;
   final Widget child;
+  final double minHeight;
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: BoxConstraints(minHeight: minHeight),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.96),
@@ -315,14 +379,14 @@ class _HomeSectionCard extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                size: 19,
+                size: 20,
                 color: const Color(0xff526FC5),
               ),
               const SizedBox(width: 8),
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 17,
                   fontWeight: FontWeight.bold,
                   color: Color(0xff35415F),
                 ),
@@ -337,6 +401,70 @@ class _HomeSectionCard extends StatelessWidget {
   }
 }
 
+//Home用の全習慣マス
+class _HomeHabitGrid extends StatelessWidget {
+  const _HomeHabitGrid({
+    required this.marks,
+  });
+
+  final List<_HabitMark> marks;
+
+  static const int _columnCount = 11;
+  static const int _minimumRows = 3;
+
+  @override
+  Widget build(BuildContext context) {
+    final minimumCells = _columnCount * _minimumRows;
+    final neededCells =
+        ((marks.length + _columnCount - 1) ~/ _columnCount) * _columnCount;
+    final cellCount =
+        neededCells > minimumCells ? neededCells : minimumCells;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 5.0;
+        final cellSize =
+            (constraints.maxWidth - spacing * (_columnCount - 1)) /
+                _columnCount;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: List.generate(cellCount, (index) {
+            final hasRecord = index < marks.length;
+
+            return Container(
+              width: cellSize,
+              height: cellSize,
+              decoration: BoxDecoration(
+                color: hasRecord
+                    ? marks[index].color
+                    : const Color(0xffF7F9FF),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: hasRecord
+                      ? marks[index].color
+                      : const Color(0xffDCE3F5),
+                ),
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
+}
+
+class _HabitMark {
+  const _HabitMark({
+    required this.dateKey,
+    required this.color,
+  });
+
+  final String dateKey;
+  final Color color;
+}
+
 class _EmptyText extends StatelessWidget {
   const _EmptyText(this.text);
 
@@ -344,13 +472,14 @@ class _EmptyText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+    return SizedBox(
+      height: 48,
       child: Center(
         child: Text(
           text,
           style: const TextStyle(
-            color: Color(0xff81889B),
+            fontSize: 13,
+            color: Color(0xff9AA2B6),
           ),
         ),
       ),
