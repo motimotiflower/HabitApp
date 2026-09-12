@@ -26,10 +26,13 @@ class MainBackground extends StatelessWidget {
   final VoidCallback? onSettings;
 
   //各メインページが共通で参照するヘッダー高さ
-  static const double headerRatio = 0.30;
+  static const double headerRatio = 0.245;
 
   static double headerHeight(BuildContext context) {
-    return MediaQuery.of(context).size.height * headerRatio;
+    //Habitページの内容量を基準に、上下の余白が近くなる高さへ統一
+    return (MediaQuery.of(context).size.height * headerRatio)
+        .clamp(218.0, 250.0)
+        .toDouble();
   }
 
   //詳細ページのAppBarもここを参照する
@@ -80,7 +83,7 @@ class MainBackground extends StatelessWidget {
                 children: [
                   //タイトルは少し下げ、下の部品はタイトル寄りにまとめる
                   Padding(
-                    padding: const EdgeInsets.only(top: 6),
+                    padding: const EdgeInsets.only(top: 10),
                     child: Row(
                       children: [
                         Text(
@@ -115,7 +118,7 @@ class MainBackground extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -149,7 +152,7 @@ class MainBackground extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -200,7 +203,7 @@ class MainBackground extends StatelessWidget {
             : Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 6),
+                  padding: const EdgeInsets.only(top: 10),
                   child: Row(
                     children: [
                       Text(
