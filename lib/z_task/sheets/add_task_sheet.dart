@@ -16,6 +16,9 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
   final TextEditingController _titleController = TextEditingController();
 
   DateTime? _deadline;
+  bool _isFlagged = false;
+  bool _notificationEnabled = false;
+  TimeOfDay _notificationTime = const TimeOfDay(hour: 9, minute: 0);
   List<String> _categories = [];
   String _selectedCategory = '未設定';
 
@@ -52,6 +55,20 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
     });
   }
 
+  //通知時刻を選ぶ
+  Future<void> _selectNotificationTime() async {
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: _notificationTime,
+    );
+
+    if (selected == null) return;
+
+    setState(() {
+      _notificationTime = selected;
+    });
+  }
+
   //タスクを追加する
   void _addTask() {
     final title = _titleController.text.trim();
@@ -63,6 +80,11 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
         title: title,
         deadline: _deadline,
         category: _selectedCategory,
+        isFlagged: _isFlagged,
+        notificationEnabled:
+            _notificationEnabled && _deadline != null,
+        notificationHour: _notificationTime.hour,
+        notificationMinute: _notificationTime.minute,
       ),
     );
 
@@ -138,6 +160,64 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
                               ),
                         onTap: _selectDeadline,
                       ),
+
+                      const SizedBox(height: 8),
+
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        secondary: const Icon(
+                          Icons.flag_outlined,
+                          color: Color(0xff526FC5),
+                        ),
+                        title: const Text('フラグ'),
+                        subtitle: const Text('Homeに優先表示します'),
+                        value: _isFlagged,
+                        onChanged: (value) {
+                          setState(() {
+                            _isFlagged = value;
+                          });
+                        },
+                      ),
+
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        secondary: const Icon(
+                          Icons.notifications_outlined,
+                          color: Color(0xff526FC5),
+                        ),
+                        title: const Text('通知'),
+                        subtitle: Text(
+                          _deadline == null
+                              ? '締切日を設定すると通知できます'
+                              : '締切日の指定時刻に通知します',
+                        ),
+                        value: _notificationEnabled,
+                        onChanged: _deadline == null
+                            ? null
+                            : (value) {
+                                setState(() {
+                                  _notificationEnabled = value;
+                                });
+                              },
+                      ),
+
+                      if (_notificationEnabled && _deadline != null)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.schedule,
+                            color: Color(0xff526FC5),
+                          ),
+                          title: const Text('通知時刻'),
+                          trailing: Text(
+                            _notificationTime.format(context),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onTap: _selectNotificationTime,
+                        ),
 
                       const SizedBox(height: 16),
 
