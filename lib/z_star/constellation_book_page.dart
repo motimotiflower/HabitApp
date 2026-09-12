@@ -1,4 +1,5 @@
 //獲得した星座を確認する図鑑ページ
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:habitapp/z_star/constellation_data.dart';
 import 'package:habitapp/z_star/star_storage.dart';
@@ -76,10 +77,13 @@ class _MobileBook extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PageView.builder(
-      controller: PageController(viewportFraction: 0.9),
-      itemCount: StarStorage.constellationNames.length,
-      itemBuilder: (context, index) {
+    return ScrollConfiguration(
+      behavior: const _BookScrollBehavior(),
+      child: PageView.builder(
+        controller: PageController(viewportFraction: 0.9),
+        physics: const PageScrollPhysics(),
+        itemCount: StarStorage.constellationNames.length,
+        itemBuilder: (context, index) {
         final name = StarStorage.constellationNames[index];
         ConstellationRecord? record;
 
@@ -90,19 +94,32 @@ class _MobileBook extends StatelessWidget {
           }
         }
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 20,
-          ),
-          child: _BookCard(
-            name: name,
-            record: record,
-          ),
-        );
-      },
+          return Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 20,
+            ),
+            child: _BookCard(
+              name: name,
+              record: record,
+            ),
+          );
+        },
+      ),
     );
   }
+}
+
+class _BookScrollBehavior extends MaterialScrollBehavior {
+  const _BookScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => const {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+      };
 }
 
 class _BookCard extends StatelessWidget {
