@@ -164,20 +164,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
     await HabitCategoryStorage.saveCategoryColors(_categoryColors);
   }
 
-  Future<void> _selectNotificationTime() async {
-    final selected = await showTimePicker(
-      context: context,
-      initialTime: _notificationTime,
-    );
-
-    if (selected == null) return;
-
-    setState(() {
-      _notificationTime = selected;
-    });
-  }
-
-  @override
+    @override
   Widget build(BuildContext context) {
     //Webでも曜日ボタンが大きくなりすぎないよう固定サイズにする
     const dayButtonSize = 42.0;
