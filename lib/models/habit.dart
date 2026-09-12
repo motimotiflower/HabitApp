@@ -2,6 +2,12 @@
 import 'package:flutter/material.dart';
 
 class Habit {
+  static int _idCounter = 0;
+
+  static String _createId() {
+    return '${DateTime.now().microsecondsSinceEpoch}_${_idCounter++}';
+  }
+
   final String id; //同じタイトルでも別の習慣として判定するID
   final String title;
   final IconData icon;
@@ -16,7 +22,7 @@ class Habit {
     this.days = const [],
     this.category = '未設定',
     Map<String, bool>? completionHistory,
-  })  : id = id ?? DateTime.now().microsecondsSinceEpoch.toString(),
+  })  : id = id ?? _createId(),
         completionHistory = completionHistory ?? {};
 
   //Habitを保存しやすい形に変換
