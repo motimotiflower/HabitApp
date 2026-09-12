@@ -91,68 +91,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
     });
   }
 
-  Future<void> _selectNotificationTime() async {
-    final selected = await showTimePicker(
-      context: context,
-      initialTime: _notificationTime,
-    );
-
-    if (selected == null) return;
-
-    setState(() {
-      _notificationTime = selected;
-    });
-  }
-
-  void _saveHabit() {
-    final title = _titleController.text.trim();
-    if (title.isEmpty) return;
-
-    //曜日が1つも選ばれていない場合は保存しない
-    if (_selectedDays.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('曜日を1つ以上選んでください'),
-        ),
-      );
-      return;
-    }
-
-    if (_notificationEnabled &&
-        _notificationDate == null &&
-        _notificationDays.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('通知する曜日か日にちを選んでください'),
-        ),
-      );
-      return;
-    }
-
-    widget.onSave(
-      Habit(
-        id: widget.habit.id,
-        title: title,
-        icon: _selectedIcon,
-        days: _selectedDays,
-        category: _selectedCategory,
-        notificationEnabled: _notificationEnabled,
-        notificationDays: _notificationDays,
-        notificationDate: _notificationDate,
-        notificationHour: _notificationTime.hour,
-        notificationMinute: _notificationTime.minute,
-
-        //編集しても達成履歴は残す
-        completionHistory: Map<String, bool>.from(
-          widget.habit.completionHistory,
-        ),
-      ),
-    );
-
-    Navigator.pop(context);
-  }
-
-  @override
+    @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
