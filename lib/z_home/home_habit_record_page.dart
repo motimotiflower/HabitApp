@@ -202,7 +202,10 @@ class _HomeHabitRecordPageState
 
     return Scaffold(
       backgroundColor: const Color(0xffF7F9FF),
-      body: Column(
+
+      //ヘッダーも含めてページ全体を一緒にスクロールする
+      body: ListView(
+        padding: EdgeInsets.zero,
         children: [
           Container(
             height: headerHeight,
@@ -220,39 +223,36 @@ class _HomeHabitRecordPageState
                 Positioned(
                   top: titlePosition,
                   left: titlePadding,
-                  child: Text(
-                    '習慣の記録',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: titleFontSize,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: titlePosition,
-                  right: screenWidth > 700
-                      ? 60
-                      : screenWidth * 0.06,
-                  child: SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(
-                        Icons.close,
-                        color: Colors.white,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        tooltip: '戻る',
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '習慣の記録',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
 
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(18),
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _StarFragmentCard(
                   fragments: _starState.fragments,
@@ -269,7 +269,7 @@ class _HomeHabitRecordPageState
                 const Text(
                   '習慣の積み重ね',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Color(0xff35415F),
                   ),
@@ -279,11 +279,11 @@ class _HomeHabitRecordPageState
                 if (groups.isEmpty)
                   const Center(
                     child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 40),
+                      padding: EdgeInsets.symmetric(vertical: 40),
                       child: Text(
                         'まだ記録がありません',
                         style: TextStyle(
+                          fontSize: 16,
                           color: Color(0xff81889B),
                         ),
                       ),
