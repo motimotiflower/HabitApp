@@ -15,6 +15,8 @@ class StarSkyPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xff102D72),
       appBar: AppBar(
+        //各詳細ページで上下の余白をそろえる
+        toolbarHeight: 52,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
