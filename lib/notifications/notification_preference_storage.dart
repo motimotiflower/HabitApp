@@ -10,19 +10,22 @@ enum GlobalNotificationMode {
 class GlobalNotificationSettings {
   const GlobalNotificationSettings({
     required this.mode,
-    required this.batchHour,
-    required this.batchMinute,
+    required this.batchTimes,
   });
 
   final GlobalNotificationMode mode;
-  final int batchHour;
-  final int batchMinute;
+
+  //HH:mm形式。まとめ通知は複数時刻を持てる
+  final List<String> batchTimes;
 }
 
 class NotificationPreferenceStorage {
   static const _modeKey = 'notification_global_mode';
-  static const _batchHourKey = 'notification_batch_hour';
-  static const _batchMinuteKey = 'notification_batch_minute';
+  static const _batchTimesKey = 'notification_batch_times';
+
+  //旧バージョンの1時刻設定から移行するため残しておく
+  static const _legacyBatchHourKey = 'notification_batch_hour';
+  static const _legacyBatchMinuteKey = 'notification_batch_minute';
 
   static Future<GlobalNotificationSettings> load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -33,10 +36,21 @@ class NotificationPreferenceStorage {
       orElse: () => GlobalNotificationMode.normal,
     );
 
+    var batchTimes = prefs.getStringList(_batchTimesKey);
+
+    //以前の1時刻設定があれば、その値を新形式へ移行
+    if (batchTimes == null || batchTimes.isEmpty) {
+      final hour = prefs.getInt(_legacyBatchHourKey) ?? 21;
+      final minute = prefs.getInt(_legacyBatchMinuteKey) ?? 0;
+
+      batchTimes = [
+        '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}',
+      ];
+    }
+
     return GlobalNotificationSettings(
       mode: mode,
-      batchHour: prefs.getInt(_batchHourKey) ?? 21,
-      batchMinute: prefs.getInt(_batchMinuteKey) ?? 0,
+      batchTimes: batchTimes,
     );
   }
 
@@ -44,7 +58,10 @@ class NotificationPreferenceStorage {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setString(_modeKey, settings.mode.name);
-    await prefs.setInt(_batchHourKey, settings.batchHour);
-    await prefs.setInt(_batchMinuteKey, settings.batchMinute);
+    await prefs.setStringList(_batchTimesKey, settings.batchTimes);
+
+    //旧形式は不要なので削除
+    await prefs.remove(_legacyBatchHourKey);
+    await prefs.remove(_legacyBatchMinuteKey);
   }
 }
