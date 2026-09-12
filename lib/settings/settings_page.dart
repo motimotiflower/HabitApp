@@ -1,6 +1,7 @@
 //アプリ設定画面
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:habitapp/main/widgets/main_background.dart';
 import 'package:habitapp/debug/debug_seed_service.dart';
 import 'package:habitapp/notifications/notification_preference_storage.dart';
 import 'package:habitapp/notifications/notification_service.dart';
@@ -139,7 +140,7 @@ class _SettingsPageState extends State<SettingsPage> {
       backgroundColor: const Color(0xffF7F9FF),
       appBar: AppBar(
         //各詳細ページで上下の余白をそろえる
-        toolbarHeight: 52,
+        toolbarHeight: MainBackground.detailToolbarHeight,
         backgroundColor: const Color(0xff526FC5),
         foregroundColor: Colors.white,
         leading: IconButton(
