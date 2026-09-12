@@ -196,10 +196,11 @@ class MemoPageState extends State<MemoPage> {
 
   //青いヘッダーに置く検索欄
   Widget _buildHeaderSearch(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    final headerHeight = MainBackground.headerHeight(context);
 
     return Positioned(
-      top: screenHeight * MainBackground.headerRatio * 0.68,
+      //タイトルとの間を少し詰める
+      top: headerHeight * 0.62,
       left: 20,
       right: 20,
       child: TextField(
