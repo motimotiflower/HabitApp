@@ -85,20 +85,7 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
     });
   }
 
-  Future<void> _selectNotificationTime() async {
-    final selected = await showTimePicker(
-      context: context,
-      initialTime: _notificationTime,
-    );
-
-    if (selected == null) return;
-
-    setState(() {
-      _notificationTime = selected;
-    });
-  }
-
-  //編集内容を保存する
+    //編集内容を保存する
   void _saveTask() {
     final title = _titleController.text.trim();
 
