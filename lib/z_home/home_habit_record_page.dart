@@ -190,141 +190,97 @@ class _HomeHabitRecordPageState
   @override
   Widget build(BuildContext context) {
     final groups = _groupHabits();
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    //記録ページは文字＋余白だけのコンパクトなヘッダー
-    final headerHeight = screenWidth >= 700 ? 66.0 : 62.0;
-    const titlePosition = 2.0;
-    const titlePadding = 8.0;
-    const titleFontSize = 25.0;
 
     return Scaffold(
       backgroundColor: const Color(0xffF7F9FF),
-
-      //ヘッダーも含めてページ全体を一緒にスクロールする
+      //メモ部屋と同じ高さ・余白・戻るボタンのヘッダー
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back),
+        ),
+        backgroundColor: const Color(0xff526FC5),
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        titleSpacing: 0,
+        title: const Text(
+          '記録',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 23,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
       body: ListView(
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
         children: [
-          Container(
-            height: headerHeight,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xff102d72),
-                  Color(0xff5e78cf),
-                ],
-              ),
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  top: titlePosition,
-                  left: titlePadding,
-                  child: Row(
-                    children: [
-                      IconButton(
-                        tooltip: '戻る',
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        '記録',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+          _StarFragmentCard(
+            fragments: _starState.fragments,
+            habitFragments: _starState.habitFragments,
+            taskFragments: _starState.taskFragments,
+            ownedCount: _starState.constellations.length,
+            onDraw: _drawConstellation,
+            onSky: _openSky,
+            onBook: _openBook,
+          ),
+          const SizedBox(height: 26),
+          const Text(
+            '記録',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff35415F),
             ),
           ),
-
-          Padding(
-            //ヘッダー直下だけ少し詰める
-            padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _StarFragmentCard(
-                  fragments: _starState.fragments,
-                  habitFragments: _starState.habitFragments,
-                  taskFragments: _starState.taskFragments,
-                  ownedCount: _starState.constellations.length,
-                  onDraw: _drawConstellation,
-                  onSky: _openSky,
-                  onBook: _openBook,
-                ),
-
-                const SizedBox(height: 26),
-
-                const Text(
-                  '記録',
+          const SizedBox(height: 14),
+          if (groups.isEmpty)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: Text(
+                  'まだ記録がありません',
                   style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xff35415F),
+                    fontSize: 16,
+                    color: Color(0xff81889B),
                   ),
                 ),
-                const SizedBox(height: 14),
+              ),
+            )
+          else
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 700;
+                final columnCount = constraints.maxWidth >= 1200
+                    ? 3
+                    : constraints.maxWidth >= 700
+                        ? 2
+                        : 1;
+                const gap = 18.0;
+                final itemWidth = columnCount == 1
+                    ? constraints.maxWidth
+                    : (constraints.maxWidth -
+                            gap * (columnCount - 1)) /
+                        columnCount;
 
-                if (groups.isEmpty)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 40),
-                      child: Text(
-                        'まだ記録がありません',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xff81889B),
-                        ),
+                return Wrap(
+                  spacing: gap,
+                  runSpacing: 22,
+                  children: groups.entries.map((entry) {
+                    return SizedBox(
+                      width: itemWidth,
+                      child: _RecordGrid(
+                        title: entry.key,
+                        completedCount: _completedCount(entry.value),
+                        color: _groupColor(entry.value),
+                        compact: isWide,
                       ),
-                    ),
-                  )
-                else
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isWide = constraints.maxWidth >= 700;
-                      final columnCount = constraints.maxWidth >= 1200
-                          ? 3
-                          : constraints.maxWidth >= 700
-                              ? 2
-                              : 1;
-                      const gap = 18.0;
-                      final itemWidth = columnCount == 1
-                          ? constraints.maxWidth
-                          : (constraints.maxWidth -
-                                  gap * (columnCount - 1)) /
-                              columnCount;
-
-                      return Wrap(
-                        spacing: gap,
-                        runSpacing: 22,
-                        children: groups.entries.map((entry) {
-                          return SizedBox(
-                            width: itemWidth,
-                            child: _RecordGrid(
-                              title: entry.key,
-                              completedCount:
-                                  _completedCount(entry.value),
-                              color: _groupColor(entry.value),
-                              compact: isWide,
-                            ),
-                          );
-                        }).toList(),
-                      );
-                    },
-                  ),
-              ],
+                    );
+                  }).toList(),
+                );
+              },
             ),
-          ),
         ],
       ),
     );
