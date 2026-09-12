@@ -150,6 +150,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
     final topSpace = screenHeight * MainBackground.headerRatio * 0.58;
     final dateKey = _todayKey();
     final habitMarks = _habitMarks();
@@ -341,6 +342,22 @@ class HomePageState extends State<HomePage> {
         //Homeはヘッダーも白い内容部分も1つのスクロールにする
         final headerHeight = screenHeight * 0.30;
 
+        //ほかのページと同じ位置・大きさにそろえる
+        final titlePosition = headerHeight * 0.26;
+        final titlePadding =
+            (screenWidth * 0.07).clamp(0.0, 60.0).toDouble();
+        final titleFontSize =
+            (screenWidth * 0.08).clamp(0.0, 36.0).toDouble();
+        final horizontalPadding =
+            screenWidth > 700 ? 60.0 : screenWidth * 0.06;
+
+        //中身が空でも4分割がしっかり見える最低高さ
+        final sectionMinHeight = isWide
+            ? ((screenHeight - headerHeight - 32) / 2)
+                .clamp(220.0, double.infinity)
+                .toDouble()
+            : 220.0;
+
         return SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
@@ -357,34 +374,35 @@ class HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 36),
-                child: SafeArea(
-                  bottom: false,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(top: 42),
-                        child: Text(
-                          'Home',
-                          style: TextStyle(
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: titlePosition,
+                      left: titlePadding,
+                      child: Text(
+                        'Home',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: titlePosition,
+                      right: horizontalPadding,
+                      child: const SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Center(
+                          child: Icon(
+                            Icons.settings_outlined,
                             color: Colors.white,
-                            fontSize: 36,
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
-                      const Spacer(),
-                      const Padding(
-                        padding: EdgeInsets.only(top: 46),
-                        child: Icon(
-                          Icons.settings_outlined,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -413,13 +431,13 @@ class HomePageState extends State<HomePage> {
                           _HomeWideSection(
                             title: '今日の習慣',
                             icon: Icons.auto_awesome,
-                            minHeight: 220,
+                            minHeight: sectionMinHeight,
                             child: todayHabitCard.child,
                           ),
                           _HomeWideSection(
                             title: 'タスク',
                             icon: Icons.check_circle_outline,
-                            minHeight: 220,
+                            minHeight: sectionMinHeight,
                             child: todayTaskCard.child,
                           ),
                         ],
@@ -430,7 +448,7 @@ class HomePageState extends State<HomePage> {
                           _HomeWideSection(
                             title: '習慣の積み重ね',
                             icon: Icons.grid_view_rounded,
-                            minHeight: 220,
+                            minHeight: sectionMinHeight,
                             child: _HomeHabitGrid(
                               marks: habitMarks,
                               isWide: true,
@@ -439,7 +457,7 @@ class HomePageState extends State<HomePage> {
                           _HomeWideSection(
                             title: 'メモ',
                             icon: Icons.edit_note_outlined,
-                            minHeight: 220,
+                            minHeight: sectionMinHeight,
                             child: memoCard.child,
                           ),
                         ],
