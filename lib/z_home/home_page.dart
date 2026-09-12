@@ -602,42 +602,27 @@ class HomePageState extends State<HomePage> {
                 .toDouble()
             : 220.0;
 
-        return Container(
-          decoration: isWide
-              ? null
-              : const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.topRight,
-                    colors: [
-                      Color(0xff102d72),
-                      Color(0xff5e78cf),
-                    ],
-                  ),
-                ),
-          child: SingleChildScrollView(
+        if (isWide) {
+          //Web版は白い2×2の土台を残す
+          return SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
-            children: [
-              //Homeも他ページと同じ共通ヘッダーを使う
-              SizedBox(
-                height: headerHeight,
-                child: MainBackground(
-                  title: 'Home',
-                  showCalendar: false,
-                  onSettings: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const SettingsPage(),
-                      ),
-                    );
-                  },
+              children: [
+                SizedBox(
+                  height: headerHeight,
+                  child: MainBackground(
+                    title: 'Home',
+                    showCalendar: false,
+                    onSettings: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SettingsPage(),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-
-              if (isWide)
-                //スマホ以外は1つの白い領域を2×2に区切る
                 Container(
                   width: double.infinity,
                   color: const Color(0xffF7F9FF),
@@ -676,7 +661,6 @@ class HomePageState extends State<HomePage> {
                       ),
                       TableRow(
                         children: [
-                          //3番目に習慣の記録を配置
                           _HomeWideSection(
                             title: '記録',
                             icon: Icons.grid_view_rounded,
@@ -699,12 +683,52 @@ class HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
-                )
-              else
-                //スマホは今まで通りカードを縦に並べる
-                Container(
-                  color: Colors.transparent,
-                  padding: const EdgeInsets.all(16),
+                ),
+              ],
+            ),
+          );
+        }
+
+        //スマホ版は青背景のまま、タイトル直下までカードを持ち上げる
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.topRight,
+              colors: [
+                Color(0xff102d72),
+                Color(0xff5e78cf),
+              ],
+            ),
+          ),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: SizedBox(
+                    height: headerHeight,
+                    child: MainBackground(
+                      title: 'Home',
+                      showCalendar: false,
+                      onSettings: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SettingsPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+                //タイトルのすぐ下からカードを開始する
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 88, 16, 16),
                   child: Column(
                     children: [
                       todayHabitCard,
@@ -717,9 +741,9 @@ class HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
-            ],
+              ],
+            ),
           ),
-        ),
         );
       },
     );
