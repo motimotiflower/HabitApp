@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:habitapp/models/task.dart';
+import 'package:habitapp/notifications/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TaskStorage {
@@ -16,6 +17,7 @@ class TaskStorage {
     final jsonString = jsonEncode(tasks.map((task) => task.toJson()).toList());
 
     await prefs.setString(_key, jsonString);
+    await NotificationService.syncTasks(tasks);
   }
 
   //保存されているタスク一覧を読み込む=================
