@@ -208,6 +208,8 @@ class _HomeHabitRecordPageState
       backgroundColor: const Color(0xffF7F9FF),
       //メモ部屋と同じ高さ・余白・戻るボタンのヘッダー
       appBar: AppBar(
+        //各詳細ページで上下の余白をそろえる
+        toolbarHeight: 52,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
