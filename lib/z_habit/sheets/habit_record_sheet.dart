@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:habitapp/models/habit.dart';
 
-class HabitRecordSheet extends StatefulWidget {
+class HabitRecordSheet extends StatelessWidget {
   const HabitRecordSheet({
     super.key,
     required this.habits,
@@ -10,86 +10,41 @@ class HabitRecordSheet extends StatefulWidget {
 
   final List<Habit> habits;
 
-  @override
-  State<HabitRecordSheet> createState() => _HabitRecordSheetState();
-}
+  //ジャンル未設定なら習慣単体、それ以外はジャンルごとにまとめる
+  Map<String, List<Habit>> _groupHabits() {
+    final groups = <String, List<Habit>>{};
 
-class _HabitRecordSheetState extends State<HabitRecordSheet> {
-  String _range = '今日';
+    for (final habit in habits) {
+      final key = habit.category == '未設定'
+          ? habit.title
+          : habit.category;
 
-  static const _days = ['月', '火', '水', '木', '金', '土', '日'];
-
-  //日付を保存キー形式にする
-  String _dateKey(DateTime date) {
-    return '${date.year}-'
-        '${date.month.toString().padLeft(2, '0')}-'
-        '${date.day.toString().padLeft(2, '0')}';
-  }
-
-  //指定日の予定習慣数
-  int _scheduledCount(DateTime date) {
-    final dayName = _days[date.weekday - 1];
-
-    return widget.habits
-        .where((habit) => habit.days.contains(dayName))
-        .length;
-  }
-
-  //指定日の達成数
-  int _completedCount(DateTime date) {
-    final key = _dateKey(date);
-
-    return widget.habits
-        .where((habit) => habit.completionHistory[key] == true)
-        .length;
-  }
-
-  //表示範囲の日付を作る
-  List<DateTime> _datesForRange() {
-    final now = DateTime.now();
-
-    if (_range == '今日') {
-      return [DateTime(now.year, now.month, now.day)];
+      groups.putIfAbsent(key, () => []);
+      groups[key]!.add(habit);
     }
 
-    if (_range == '今週') {
-      final monday = now.subtract(Duration(days: now.weekday - 1));
+    return groups;
+  }
 
-      return List.generate(
-        7,
-        (index) => DateTime(
-          monday.year,
-          monday.month,
-          monday.day + index,
-        ),
-      );
+  //そのグループで記録されている達成日を古い順に取得
+  List<String> _completedRecords(List<Habit> groupHabits) {
+    final records = <String>[];
+
+    for (final habit in groupHabits) {
+      for (final entry in habit.completionHistory.entries) {
+        if (entry.value) {
+          records.add(entry.key);
+        }
+      }
     }
 
-    final first = DateTime(now.year, now.month, 1);
-    final nextMonth = DateTime(now.year, now.month + 1, 1);
-    final daysInMonth = nextMonth.difference(first).inDays;
-
-    return List.generate(
-      daysInMonth,
-      (index) => DateTime(now.year, now.month, index + 1),
-    );
+    records.sort();
+    return records;
   }
 
   @override
   Widget build(BuildContext context) {
-    final dates = _datesForRange();
-
-    final scheduled = dates.fold<int>(
-      0,
-      (sum, date) => sum + _scheduledCount(date),
-    );
-
-    final completed = dates.fold<int>(
-      0,
-      (sum, date) => sum + _completedCount(date),
-    );
-
-    final progress = scheduled == 0 ? 0.0 : completed / scheduled;
+    final groups = _groupHabits();
 
     return Container(
       decoration: const BoxDecoration(
@@ -111,164 +66,120 @@ class _HabitRecordSheetState extends State<HabitRecordSheet> {
                 ),
               ),
 
-              const SizedBox(height: 14),
-
-              //今日・今週・今月の切り替え
-              Row(
-                children: ['今日', '今週', '今月'].map((range) {
-                  final selected = _range == range;
-
-                  return Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: ChoiceChip(
-                        label: Center(child: Text(range)),
-                        selected: selected,
-                        showCheckmark: false,
-                        selectedColor: const Color(0xff526FC5),
-                        backgroundColor: const Color(0xffE8EDFC),
-                        labelStyle: TextStyle(
-                          color: selected
-                              ? Colors.white
-                              : const Color(0xff4763B4),
-                        ),
-                        onSelected: (_) {
-                          setState(() {
-                            _range = range;
-                          });
-                        },
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 16),
-
-              //達成数
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: const Color(0xffCDD5F0),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '達成状況',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xff35415F),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '$completed / $scheduled',
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff263A70),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 8,
-                      borderRadius: BorderRadius.circular(8),
-                      color: const Color(0xff526FC5),
-                      backgroundColor: const Color(0xffE8EDFC),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
+              const SizedBox(height: 6),
 
               const Text(
-                '日ごとの記録',
+                '続けた分だけ、マスが少しずつ増えていきます',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xff35415F),
+                  fontSize: 13,
+                  color: Color(0xff81889B),
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-              //件数が多い時もスクロールできる
               Expanded(
-                child: ListView.builder(
-                  itemCount: dates.length,
-                  itemBuilder: (context, index) {
-                    final date = dates[index];
-                    final scheduledCount = _scheduledCount(date);
-                    final completedCount = _completedCount(date);
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: const Color(0xffDCE3F5),
+                child: groups.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'まだ習慣がありません',
+                          style: TextStyle(
+                            color: Color(0xff81889B),
+                          ),
                         ),
+                      )
+                    : ListView.separated(
+                        itemCount: groups.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: 24),
+                        itemBuilder: (context, index) {
+                          final entry = groups.entries.elementAt(index);
+                          final records = _completedRecords(entry.value);
+
+                          return _HabitRecordGrid(
+                            title: entry.key,
+                            completedCount: records.length,
+                          );
+                        },
                       ),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 70,
-                            child: Text(
-                              '${date.month}/${date.day}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xff35415F),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Wrap(
-                              spacing: 5,
-                              runSpacing: 5,
-                              children: [
-                                for (int i = 0; i < scheduledCount; i++)
-                                  Icon(
-                                    i < completedCount
-                                        ? Icons.star
-                                        : Icons.star_border,
-                                    size: 18,
-                                    color: i < completedCount
-                                        ? const Color(0xff526FC5)
-                                        : const Color(0xffB8C1D9),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            '$completedCount/$scheduledCount',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xff81889B),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _HabitRecordGrid extends StatelessWidget {
+  const _HabitRecordGrid({
+    required this.title,
+    required this.completedCount,
+  });
+
+  final String title;
+  final int completedCount;
+
+  static const int _columnCount = 11;
+  static const int _minimumRows = 3;
+
+  @override
+  Widget build(BuildContext context) {
+    //最低3行を表示し、記録が増えたら必要な分だけ行を増やす
+    final minimumCells = _columnCount * _minimumRows;
+    final neededCells =
+        ((completedCount + _columnCount - 1) ~/ _columnCount) * _columnCount;
+    final cellCount =
+        neededCells > minimumCells ? neededCells : minimumCells;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Color(0xff35415F),
+          ),
+        ),
+
+        const SizedBox(height: 10),
+
+        LayoutBuilder(
+          builder: (context, constraints) {
+            const spacing = 5.0;
+            final cellSize =
+                (constraints.maxWidth - spacing * (_columnCount - 1)) /
+                    _columnCount;
+
+            return Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: List.generate(cellCount, (index) {
+                final completed = index < completedCount;
+
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: cellSize,
+                  height: cellSize,
+                  decoration: BoxDecoration(
+                    color: completed
+                        ? const Color(0xff526FC5)
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: completed
+                          ? const Color(0xff526FC5)
+                          : const Color(0xffDCE3F5),
+                    ),
+                  ),
+                );
+              }),
+            );
+          },
+        ),
+      ],
     );
   }
 }
