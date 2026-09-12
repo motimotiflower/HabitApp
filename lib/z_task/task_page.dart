@@ -413,7 +413,7 @@ class TaskPageState extends State<TaskPage> {
 
         //白いカード部分
         MainContent(
-          overlap: 10,
+          overlap: 0,
           child: visibleTasks.isEmpty
               ? Center(
                   child: Text(
