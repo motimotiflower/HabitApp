@@ -76,40 +76,46 @@ class MainBackground extends StatelessWidget {
         ),
         child: showCalendar
             ? Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: onToday,
-                        child: const Text(
-                          '今日',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: IconButton(
-                          tooltip: '設定',
-                          onPressed: onSettings,
-                          icon: const Icon(
-                            Icons.settings_outlined,
+                  //タイトルは少し下げ、下の部品はタイトル寄りにまとめる
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Row(
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
                             color: Colors.white,
+                            fontSize: titleFontSize,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      ),
-                    ],
+                        const Spacer(),
+                        TextButton(
+                          onPressed: onToday,
+                          child: const Text(
+                            '今日',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: IconButton(
+                            tooltip: '設定',
+                            onPressed: onSettings,
+                            icon: const Icon(
+                              Icons.settings_outlined,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+
+                  const SizedBox(height: 8),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -142,6 +148,8 @@ class MainBackground extends StatelessWidget {
                       ),
                     ],
                   ),
+
+                  const SizedBox(height: 4),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -191,30 +199,33 @@ class MainBackground extends StatelessWidget {
               )
             : Align(
                 alignment: Alignment.topCenter,
-                child: Row(
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: titleFontSize,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Spacer(),
-                    SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: IconButton(
-                        tooltip: '設定',
-                        onPressed: onSettings,
-                        icon: const Icon(
-                          Icons.settings_outlined,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Row(
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
                           color: Colors.white,
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                  ],
+                      const Spacer(),
+                      SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: IconButton(
+                          tooltip: '設定',
+                          onPressed: onSettings,
+                          icon: const Icon(
+                            Icons.settings_outlined,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
       ),
