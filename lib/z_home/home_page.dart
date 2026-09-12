@@ -354,9 +354,9 @@ class HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    _starFragments >= 30
+                    _starFragments >= StarStorage.drawCost
                         ? '星の欠片  $_starFragments個・ガチャできます'
-                        : '星の欠片  $_starFragments / 30',
+                        : '星の欠片  $_starFragments / ${StarStorage.drawCost}',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -748,9 +748,9 @@ class HomePageState extends State<HomePage> {
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
-                                      _starFragments >= 30
+                                      _starFragments >= StarStorage.drawCost
                                           ? '星の欠片  $_starFragments個・ガチャできます'
-                                          : '星の欠片  $_starFragments / 30',
+                                          : '星の欠片  $_starFragments / ${StarStorage.drawCost}',
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
