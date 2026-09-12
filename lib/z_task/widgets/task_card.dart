@@ -116,6 +116,25 @@ class TaskCard extends StatelessWidget {
                     runSpacing: 4,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
+                      if (task.isFlagged)
+                        const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.flag_rounded,
+                              size: 14,
+                              color: Color(0xff526FC5),
+                            ),
+                            SizedBox(width: 3),
+                            Text(
+                              'フラグ',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Color(0xff526FC5),
+                              ),
+                            ),
+                          ],
+                        ),
                       if (task.category != '未設定')
                         Container(
                           padding: const EdgeInsets.symmetric(
