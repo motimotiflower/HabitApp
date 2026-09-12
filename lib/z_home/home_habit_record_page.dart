@@ -290,17 +290,39 @@ class _HomeHabitRecordPageState
                     ),
                   )
                 else
-                  ...groups.entries.map((entry) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 24),
-                      child: _RecordGrid(
-                        title: entry.key,
-                        completedCount:
-                            _completedCount(entry.value),
-                        color: _groupColor(entry.value),
-                      ),
-                    );
-                  }),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide = constraints.maxWidth >= 700;
+                      final columnCount = constraints.maxWidth >= 1200
+                          ? 3
+                          : constraints.maxWidth >= 700
+                              ? 2
+                              : 1;
+                      const gap = 18.0;
+                      final itemWidth = columnCount == 1
+                          ? constraints.maxWidth
+                          : (constraints.maxWidth -
+                                  gap * (columnCount - 1)) /
+                              columnCount;
+
+                      return Wrap(
+                        spacing: gap,
+                        runSpacing: 22,
+                        children: groups.entries.map((entry) {
+                          return SizedBox(
+                            width: itemWidth,
+                            child: _RecordGrid(
+                              title: entry.key,
+                              completedCount:
+                                  _completedCount(entry.value),
+                              color: _groupColor(entry.value),
+                              compact: isWide,
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
               ],
             ),
           ),
@@ -432,18 +454,20 @@ class _StarFragmentCard extends StatelessWidget {
           if (!allCollected)
             SizedBox(
               width: double.infinity,
+              height: 62,
               child: FilledButton.icon(
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xffE7B95A),
                   foregroundColor: const Color(0xff263A70),
                   padding:
-                      const EdgeInsets.symmetric(vertical: 14),
+                      const EdgeInsets.symmetric(vertical: 16),
                 ),
                 onPressed: fragments >= 30 ? onDraw : null,
                 icon: const Icon(Icons.auto_awesome),
                 label: const Text(
                   '星座ガチャを引く',
                   style: TextStyle(
+                    fontSize: 17,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -553,11 +577,13 @@ class _RecordGrid extends StatelessWidget {
     required this.title,
     required this.completedCount,
     required this.color,
+    this.compact = false,
   });
 
   final String title;
   final int completedCount;
   final Color color;
+  final bool compact;
 
   static const int _columnCount = 11;
   static const int _minimumRows = 3;
@@ -585,9 +611,10 @@ class _RecordGrid extends StatelessWidget {
         const SizedBox(height: 10),
         LayoutBuilder(
           builder: (context, constraints) {
-            const spacing = 5.0;
-            final cellSize =
-                (constraints.maxWidth -
+            final spacing = compact ? 4.0 : 5.0;
+            final cellSize = compact
+                ? 18.0
+                : (constraints.maxWidth -
                         spacing * (_columnCount - 1)) /
                     _columnCount;
 
