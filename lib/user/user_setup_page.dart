@@ -77,7 +77,6 @@ class _UserSetupPageState extends State<UserSetupPage> {
                     onSubmitted: (_) => _save(),
                     decoration: InputDecoration(
                       labelText: '名前',
-                      hintText: '例：さやか',
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
