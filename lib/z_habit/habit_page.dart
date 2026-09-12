@@ -8,6 +8,7 @@ import 'package:habitapp/z_habit/habit_storage.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/z_habit/sheets/edit_habit_sheet.dart';
 import 'package:habitapp/z_habit/sheets/habit_record_sheet.dart';
+import 'package:habitapp/z_habit/sheets/habit_category_manage_sheet.dart';
 import 'package:habitapp/z_star/star_storage.dart';
 
 class HabitPage extends StatefulWidget {
@@ -32,7 +33,8 @@ class HabitPageState extends State<HabitPage> {
   //習慣一覧
   List<Habit> habits = [];
 
-  //ジャンルごとの色
+  //ジャンル一覧と色
+  List<String> _categories = [];
   Map<String, int> _categoryColors = {};
 
   //データの追加
@@ -64,6 +66,118 @@ class HabitPageState extends State<HabitPage> {
     });
 
     HabitStorage.saveHabits(habits);
+  }
+
+  Future<void> _addCategory(String name, int color) async {
+    if (_categories.contains(name)) return;
+
+    setState(() {
+      _categories.add(name);
+      _categories.sort();
+      _categoryColors[name] = color;
+    });
+
+    await HabitCategoryStorage.saveCategories(_categories);
+    await HabitCategoryStorage.saveCategoryColors(_categoryColors);
+  }
+
+  Future<void> _renameCategory(String oldName, String newName) async {
+    if (newName.isEmpty || _categories.contains(newName)) return;
+
+    setState(() {
+      final index = _categories.indexOf(oldName);
+      if (index != -1) {
+        _categories[index] = newName;
+        _categories.sort();
+      }
+
+      final oldColor = _categoryColors.remove(oldName);
+      if (oldColor != null) {
+        _categoryColors[newName] = oldColor;
+      }
+
+      habits = habits.map((habit) {
+        if (habit.category != oldName) return habit;
+
+        return Habit(
+          id: habit.id,
+          title: habit.title,
+          icon: habit.icon,
+          days: habit.days,
+          category: newName,
+          notificationEnabled: habit.notificationEnabled,
+          notificationDays: habit.notificationDays,
+          notificationDate: habit.notificationDate,
+          notificationHour: habit.notificationHour,
+          notificationMinute: habit.notificationMinute,
+          completionHistory: Map<String, bool>.from(
+            habit.completionHistory,
+          ),
+        );
+      }).toList();
+    });
+
+    await HabitCategoryStorage.saveCategories(_categories);
+    await HabitCategoryStorage.saveCategoryColors(_categoryColors);
+    await HabitStorage.saveHabits(habits);
+  }
+
+  Future<void> _deleteCategory(String category) async {
+    setState(() {
+      _categories.remove(category);
+      _categoryColors.remove(category);
+
+      habits = habits.map((habit) {
+        if (habit.category != category) return habit;
+
+        return Habit(
+          id: habit.id,
+          title: habit.title,
+          icon: habit.icon,
+          days: habit.days,
+          category: '未設定',
+          notificationEnabled: habit.notificationEnabled,
+          notificationDays: habit.notificationDays,
+          notificationDate: habit.notificationDate,
+          notificationHour: habit.notificationHour,
+          notificationMinute: habit.notificationMinute,
+          completionHistory: Map<String, bool>.from(
+            habit.completionHistory,
+          ),
+        );
+      }).toList();
+    });
+
+    await HabitCategoryStorage.saveCategories(_categories);
+    await HabitCategoryStorage.saveCategoryColors(_categoryColors);
+    await HabitStorage.saveHabits(habits);
+  }
+
+  Future<void> _changeCategoryColor(String category, int color) async {
+    setState(() {
+      _categoryColors[category] = color;
+    });
+
+    await HabitCategoryStorage.saveCategoryColors(_categoryColors);
+  }
+
+  Future<void> _showCategoryManageSheet() async {
+    await showAdaptiveEditor(
+      context: context,
+      mobileHeightFactor: 0.80,
+      builder: (context) {
+        return HabitCategoryManageSheet(
+          categories: _categories,
+          colors: _categoryColors,
+          onAdd: _addCategory,
+          onRename: _renameCategory,
+          onDelete: _deleteCategory,
+          onColorChanged: _changeCategoryColor,
+        );
+      },
+    );
+
+    await reloadHabits();
   }
 
   //編集画面
@@ -173,6 +287,7 @@ class HabitPageState extends State<HabitPage> {
   //保存データの読み込み
   Future<void> reloadHabits() async {
     final loadedHabits = await HabitStorage.loadHabits();
+    final categories = await HabitCategoryStorage.loadCategories();
     final categoryColors =
         await HabitCategoryStorage.loadCategoryColors();
 
@@ -180,6 +295,7 @@ class HabitPageState extends State<HabitPage> {
 
     setState(() {
       habits = loadedHabits;
+      _categories = categories;
       _categoryColors = categoryColors;
     });
   }
@@ -226,6 +342,12 @@ class HabitPageState extends State<HabitPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              OutlinedButton.icon(
+                onPressed: _showCategoryManageSheet,
+                icon: const Icon(Icons.folder_outlined, size: 18),
+                label: const Text('ジャンル管理'),
+              ),
+              const SizedBox(width: 8),
               SizedBox(
                 height: 42,
                 child: FilledButton.icon(
