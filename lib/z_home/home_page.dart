@@ -166,7 +166,7 @@ class HomePageState extends State<HomePage> {
     if (!mounted) return;
 
     setState(() {
-      targetTask.isDone = !wasDone;
+      targetTask.isDone = !wasDone!;
       _starFragments = starState.fragments;
     });
   }
