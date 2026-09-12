@@ -4,8 +4,11 @@ import 'package:flutter/material.dart'; //flutterの基本的なライブラリ
 import 'package:habitapp/main/main_page.dart'; //habit_pageをつかえるように
 import 'package:habitapp/user/user_profile_storage.dart';
 import 'package:habitapp/user/user_setup_page.dart';
+import 'package:habitapp/notifications/notification_service.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.initialize();
   runApp(const MyApp());
 }
 
