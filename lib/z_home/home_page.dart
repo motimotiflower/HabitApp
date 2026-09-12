@@ -328,91 +328,71 @@ class HomePageState extends State<HomePage> {
         );
 
         if (isWide) {
-          //Homeの青背景は残しつつ、白い土台の表示領域を必ず確保する
+          //スマホ以外は、ほかのページと同じ白い土台を使う
           final headerHeight = screenHeight * 0.32;
-          final contentHeight =
-              (constraints.maxHeight - headerHeight).clamp(300.0, double.infinity);
 
           return Padding(
             padding: EdgeInsets.only(top: headerHeight),
-            child: SizedBox(
-              height: contentHeight,
+            child: Container(
               width: double.infinity,
-              child: Container(
-                color: const Color(0xffF7F9FF),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      //習慣・タスクが増えた分だけ上段も自然に伸びる
-                      IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: _HomeWideSection(
-                                title: '今日の習慣',
-                                icon: Icons.auto_awesome,
-                                child: todayHabitCard.child,
-                              ),
-                            ),
-                            const VerticalDivider(
-                              width: 1,
-                              thickness: 1,
-                              color: Color(0xffE6EAF4),
-                            ),
-                            Expanded(
-                              child: _HomeWideSection(
-                                title: '今日のタスク',
-                                icon: Icons.check_circle_outline,
-                                child: todayTaskCard.child,
-                              ),
-                            ),
-                          ],
+              height: constraints.maxHeight - headerHeight,
+              color: const Color(0xffF7F9FF),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    //上段は習慣・タスク。内容が多い方に合わせて行が伸びる
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: _HomeWideSection(
+                            title: '今日の習慣',
+                            icon: Icons.auto_awesome,
+                            showRightBorder: true,
+                            showBottomBorder: true,
+                            child: todayHabitCard.child,
+                          ),
                         ),
-                      ),
-                      const Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: Color(0xffE6EAF4),
-                      ),
-                      IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              //3番目に習慣の記録を配置
-                              child: _HomeWideSection(
-                                title: '習慣の積み重ね',
-                                icon: Icons.grid_view_rounded,
-                                child: _HomeHabitGrid(
-                                  marks: habitMarks,
-                                ),
-                              ),
-                            ),
-                            const VerticalDivider(
-                              width: 1,
-                              thickness: 1,
-                              color: Color(0xffE6EAF4),
-                            ),
-                            Expanded(
-                              child: _HomeWideSection(
-                                title: 'メモ',
-                                icon: Icons.edit_note_outlined,
-                                child: memoCard.child,
-                              ),
-                            ),
-                          ],
+                        Expanded(
+                          child: _HomeWideSection(
+                            title: '今日のタスク',
+                            icon: Icons.check_circle_outline,
+                            showBottomBorder: true,
+                            child: todayTaskCard.child,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+
+                    //下段。3番目に習慣の記録
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: _HomeWideSection(
+                            title: '習慣の積み重ね',
+                            icon: Icons.grid_view_rounded,
+                            showRightBorder: true,
+                            child: _HomeHabitGrid(
+                              marks: habitMarks,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: _HomeWideSection(
+                            title: 'メモ',
+                            icon: Icons.edit_note_outlined,
+                            child: memoCard.child,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
           );
         }
-
         //スマホ版は今まで通りカード表示
         return Padding(
           padding: EdgeInsets.fromLTRB(16, topSpace, 16, 16),
@@ -441,19 +421,33 @@ class _HomeWideSection extends StatelessWidget {
     required this.title,
     required this.icon,
     required this.child,
+    this.showRightBorder = false,
+    this.showBottomBorder = false,
   });
 
   final String title;
   final IconData icon;
   final Widget child;
+  final bool showRightBorder;
+  final bool showBottomBorder;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      constraints: const BoxConstraints(minHeight: 180),
       padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        border: Border(
+          right: showRightBorder
+              ? const BorderSide(color: Color(0xffE6EAF4))
+              : BorderSide.none,
+          bottom: showBottomBorder
+              ? const BorderSide(color: Color(0xffE6EAF4))
+              : BorderSide.none,
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
@@ -561,11 +555,10 @@ class _HomeHabitGrid extends StatelessWidget {
         final cellCount =
             marks.length > _minimumCells ? marks.length : _minimumCells;
 
-        return SingleChildScrollView(
-          child: Wrap(
-            spacing: spacing,
-            runSpacing: spacing,
-            children: List.generate(cellCount, (index) {
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: List.generate(cellCount, (index) {
             final hasRecord = index < marks.length;
 
             return Container(
@@ -584,7 +577,6 @@ class _HomeHabitGrid extends StatelessWidget {
               ),
             );
           }),
-          ),
         );
       },
     );
