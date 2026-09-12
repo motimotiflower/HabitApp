@@ -169,9 +169,21 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                     children: [
                       TextField(
                         controller: _titleController,
-                        decoration: const InputDecoration(
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        decoration: InputDecoration(
                           labelText: 'タイトル',
-                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 20,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
                       ),
 
