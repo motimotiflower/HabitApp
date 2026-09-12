@@ -21,6 +21,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   Map<String, int> _categoryColors = {};
   String _selectedCategory = '未設定';
   IconData _selectedIcon = Icons.check;
+  bool _notificationEnabled = false;
+  TimeOfDay _notificationTime = const TimeOfDay(hour: 9, minute: 0);
 
   //青系UIになじむジャンルカラー
   static const List<Color> _categoryPalette = [
@@ -157,6 +159,19 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
     await HabitCategoryStorage.saveCategories(_categories);
     await HabitCategoryStorage.saveCategoryColors(_categoryColors);
+  }
+
+  Future<void> _selectNotificationTime() async {
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: _notificationTime,
+    );
+
+    if (selected == null) return;
+
+    setState(() {
+      _notificationTime = selected;
+    });
   }
 
   @override
@@ -303,6 +318,45 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
                     const SizedBox(height: 18),
 
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      secondary: const Icon(
+                        Icons.notifications_outlined,
+                        color: Color(0xff526FC5),
+                      ),
+                      title: const Text(
+                        '通知',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      subtitle: const Text('選んだ曜日の指定時刻に通知します'),
+                      value: _notificationEnabled,
+                      onChanged: (value) {
+                        setState(() {
+                          _notificationEnabled = value;
+                        });
+                      },
+                    ),
+
+                    if (_notificationEnabled)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(
+                          Icons.schedule,
+                          color: Color(0xff526FC5),
+                        ),
+                        title: const Text('通知時刻'),
+                        trailing: Text(
+                          _notificationTime.format(context),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        onTap: _selectNotificationTime,
+                      ),
+
+                    const SizedBox(height: 18),
+
                     const Text("ジャンル", style: TextStyle(fontSize: 20)),
                     const SizedBox(height: 8),
 
@@ -434,6 +488,9 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     icon: _selectedIcon,
                     days: List.from(selectedDays),
                     category: _selectedCategory,
+                    notificationEnabled: _notificationEnabled,
+                    notificationHour: _notificationTime.hour,
+                    notificationMinute: _notificationTime.minute,
                   );
 
                   widget.onAddHabit(habit);
