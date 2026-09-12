@@ -31,6 +31,7 @@ class HomePageState extends State<HomePage> {
   List<Memo> _pinnedMemos = [];
   Map<String, int> _categoryColors = {};
   int _starFragments = 0;
+  int _ownedConstellations = 0;
 
   @override
   void initState() {
@@ -88,6 +89,7 @@ class HomePageState extends State<HomePage> {
       _pinnedMemos = pinnedMemos;
       _categoryColors = categoryColors;
       _starFragments = starState.fragments;
+      _ownedConstellations = starState.constellations.length;
     });
   }
 
@@ -341,36 +343,10 @@ class HomePageState extends State<HomePage> {
           icon: Icons.grid_view_rounded,
           minHeight: 190,
           onTap: _openHabitRecord,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              //Homeからでも星の貯まり具合が分かる
-              Row(
-                children: [
-                  const Icon(
-                    Icons.star_rounded,
-                    size: 20,
-                    color: Color(0xffE7B95A),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    _starFragments >= StarStorage.drawCost
-                        ? '星の欠片  $_starFragments個・ガチャできます'
-                        : '星の欠片  $_starFragments / ${StarStorage.drawCost}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xff526FC5),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _HomeHabitGrid(
-                marks: habitMarks,
-                fillCard: true,
-              ),
-            ],
+          child: _HomeRecordPreview(
+            marks: habitMarks,
+            fragments: _starFragments,
+            ownedConstellations: _ownedConstellations,
           ),
         );
 
@@ -736,35 +712,11 @@ class HomePageState extends State<HomePage> {
                             icon: Icons.grid_view_rounded,
                             minHeight: sectionMinHeight,
                             onTap: _openHabitRecord,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.star_rounded,
-                                      size: 20,
-                                      color: Color(0xffE7B95A),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      _starFragments >= StarStorage.drawCost
-                                          ? '星の欠片  $_starFragments個・ガチャできます'
-                                          : '星の欠片  $_starFragments / ${StarStorage.drawCost}',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xff526FC5),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                _HomeHabitGrid(
-                                  marks: habitMarks,
-                                  isWide: true,
-                                ),
-                              ],
+                            child: _HomeRecordPreview(
+                              marks: habitMarks,
+                              fragments: _starFragments,
+                              ownedConstellations: _ownedConstellations,
+                              isWide: true,
                             ),
                           ),
                           _HomeWideSection(
@@ -955,6 +907,89 @@ class _HomeSectionCard extends StatelessWidget {
         ],
       ),
       ),
+    );
+  }
+}
+
+//Homeの記録プレビュー：左半分に星、右半分に習慣記録
+class _HomeRecordPreview extends StatelessWidget {
+  const _HomeRecordPreview({
+    required this.marks,
+    required this.fragments,
+    required this.ownedConstellations,
+    this.isWide = false,
+  });
+
+  final List<_HabitMark> marks;
+  final int fragments;
+  final int ownedConstellations;
+  final bool isWide;
+
+  @override
+  Widget build(BuildContext context) {
+    final starSide = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        //瓶をシンプルな仮アイコンで表現
+        Container(
+          width: isWide ? 86 : 72,
+          height: isWide ? 96 : 82,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: const Color(0xffF3F2FC),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xffA9B8E5)),
+          ),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 1,
+              runSpacing: 1,
+              children: List.generate(
+                fragments.clamp(0, StarStorage.drawCost).toInt(),
+                (_) => const Icon(
+                  Icons.star_rounded,
+                  size: 12,
+                  color: Color(0xffE7B95A),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 7),
+        Text(
+          '$fragments / ${StarStorage.drawCost}',
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xff35415F),
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          '図鑑  $ownedConstellations / ${StarStorage.constellationNames.length}',
+          style: const TextStyle(
+            fontSize: 12,
+            color: Color(0xff697188),
+          ),
+        ),
+      ],
+    );
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(child: starSide),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _HomeHabitGrid(
+            marks: marks,
+            isWide: isWide,
+            fillCard: true,
+          ),
+        ),
+      ],
     );
   }
 }
