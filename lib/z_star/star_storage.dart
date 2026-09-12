@@ -111,7 +111,22 @@ class StarStorage {
     final jsonString = prefs.getString(_key);
 
     if (jsonString == null) {
-      return StarState(awards: [], constellations: []);
+      //初回だけ、ガチャをすぐ試せるよう星の欠片を30個プレゼント
+      final starterAwards = List.generate(
+        30,
+        (index) => StarAward(
+          key: 'starter|$index',
+          source: 'starter',
+        ),
+      );
+
+      final initialState = StarState(
+        awards: starterAwards,
+        constellations: [],
+      );
+
+      await _save(initialState);
+      return initialState;
     }
 
     final json = jsonDecode(jsonString) as Map<String, dynamic>;
