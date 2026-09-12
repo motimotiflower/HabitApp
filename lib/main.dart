@@ -5,10 +5,21 @@ import 'package:habitapp/main/main_page.dart'; //habit_pageをつかえるよう
 import 'package:habitapp/user/user_profile_storage.dart';
 import 'package:habitapp/user/user_setup_page.dart';
 import 'package:habitapp/notifications/notification_service.dart';
+import 'package:habitapp/z_habit/habit_storage.dart';
+import 'package:habitapp/z_task/task_storage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService.initialize();
+
+  //保存済みの設定から通知予定を作り直す
+  await NotificationService.syncHabits(
+    await HabitStorage.loadHabits(),
+  );
+  await NotificationService.syncTasks(
+    await TaskStorage.loadTasks(),
+  );
+
   runApp(const MyApp());
 }
 
