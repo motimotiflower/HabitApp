@@ -24,6 +24,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
   late List<String> _selectedDays;
   late String _selectedCategory;
   late IconData _selectedIcon;
+  late bool _notificationEnabled;
+  late TimeOfDay _notificationTime;
 
   List<String> _categories = [];
   Map<String, int> _categoryColors = {};
@@ -58,6 +60,11 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
     _selectedDays = [...widget.habit.days];
     _selectedCategory = widget.habit.category;
     _selectedIcon = widget.habit.icon;
+    _notificationEnabled = widget.habit.notificationEnabled;
+    _notificationTime = TimeOfDay(
+      hour: widget.habit.notificationHour ?? 9,
+      minute: widget.habit.notificationMinute ?? 0,
+    );
 
     _loadCategories();
   }
@@ -76,6 +83,19 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
           !_categories.contains(_selectedCategory)) {
         _categories.add(_selectedCategory);
       }
+    });
+  }
+
+  Future<void> _selectNotificationTime() async {
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: _notificationTime,
+    );
+
+    if (selected == null) return;
+
+    setState(() {
+      _notificationTime = selected;
     });
   }
 
@@ -100,6 +120,9 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
         icon: _selectedIcon,
         days: _selectedDays,
         category: _selectedCategory,
+        notificationEnabled: _notificationEnabled,
+        notificationHour: _notificationTime.hour,
+        notificationMinute: _notificationTime.minute,
 
         //編集しても達成履歴は残す
         completionHistory: Map<String, bool>.from(
@@ -221,6 +244,45 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                           );
                         }).toList(),
                       ),
+
+                      const SizedBox(height: 18),
+
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        secondary: const Icon(
+                          Icons.notifications_outlined,
+                          color: Color(0xff526FC5),
+                        ),
+                        title: const Text(
+                          '通知',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        subtitle: const Text('選んだ曜日の指定時刻に通知します'),
+                        value: _notificationEnabled,
+                        onChanged: (value) {
+                          setState(() {
+                            _notificationEnabled = value;
+                          });
+                        },
+                      ),
+
+                      if (_notificationEnabled)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.schedule,
+                            color: Color(0xff526FC5),
+                          ),
+                          title: const Text('通知時刻'),
+                          trailing: Text(
+                            _notificationTime.format(context),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onTap: _selectNotificationTime,
+                        ),
 
                       const SizedBox(height: 18),
                       const Text('ジャンル', style: TextStyle(fontSize: 18)),
