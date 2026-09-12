@@ -331,7 +331,7 @@ class _StarFragmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visibleStars = fragments.clamp(0, 30);
+    final visibleStars = fragments.clamp(0, 30).toInt();
     final drawCount = fragments ~/ 30;
     final allCollected =
         ownedCount >= StarStorage.constellationNames.length;
