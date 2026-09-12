@@ -4,6 +4,7 @@ import 'package:habitapp/models/task.dart';
 import 'package:habitapp/z_task/widgets/task_card.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
 import 'package:habitapp/main/widgets/main_background.dart';
+import 'package:habitapp/main/widgets/adaptive_editor_panel.dart';
 import 'package:habitapp/z_task/task_storage.dart';
 import 'package:habitapp/z_task/category_storage.dart';
 import 'package:habitapp/z_task/sheets/edit_task_sheet.dart';
@@ -135,21 +136,15 @@ class TaskPageState extends State<TaskPage> {
 
   //編集画面
   void showEditSheet(Task task) {
-    showModalBottomSheet(
+    showAdaptiveEditor(
       context: context,
-      isScrollControlled: true,
-        //大画面でも追加・編集画面を横幅いっぱいに広げる
-        constraints: const BoxConstraints(maxWidth: double.infinity),
-      backgroundColor: Colors.transparent,
+      mobileHeightFactor: 0.80,
       builder: (context) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.80,
-          child: EditTaskSheet(
-            task: task,
-            onSave: (editedTask) {
-              editTask(task, editedTask);
-            },
-          ),
+        return EditTaskSheet(
+          task: task,
+          onSave: (editedTask) {
+            editTask(task, editedTask);
+          },
         );
       },
     );
