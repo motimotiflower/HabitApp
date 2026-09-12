@@ -380,7 +380,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 20,
+            fontSize: 21,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -537,7 +537,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                                 Text(
                                                   _userName,
                                                   style: const TextStyle(
-                                                    fontSize: 16,
+                                                    fontSize: 17,
                                                     fontWeight:
                                                         FontWeight.w600,
                                                     color:
@@ -566,7 +566,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                               message.content,
                                               textAlign: TextAlign.left,
                                               style: const TextStyle(
-                                                fontSize: 17,
+                                                fontSize: 18,
                                                 height: 1.55,
                                                 color: Color(0xff35415F),
                                               ),
