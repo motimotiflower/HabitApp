@@ -1,5 +1,6 @@
 //Homeから開く習慣記録の詳細画面
 import 'package:flutter/material.dart';
+import 'package:habitapp/main/widgets/main_background.dart';
 import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/z_star/constellation_book_page.dart';
 import 'package:habitapp/z_star/star_sky_page.dart';
@@ -209,7 +210,7 @@ class _HomeHabitRecordPageState
       //メモ部屋と同じ高さ・余白・戻るボタンのヘッダー
       appBar: AppBar(
         //各詳細ページで上下の余白をそろえる
-        toolbarHeight: 52,
+        toolbarHeight: MainBackground.detailToolbarHeight,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
