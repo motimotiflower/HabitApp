@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
+import 'package:habitapp/notifications/notification_settings_card.dart';
 
 class AddHabitSheet extends StatefulWidget {
   const AddHabitSheet({super.key, required this.onAddHabit});
@@ -22,6 +23,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   String _selectedCategory = '未設定';
   IconData _selectedIcon = Icons.check;
   bool _notificationEnabled = false;
+  List<String> _notificationDays = [];
+  DateTime? _notificationDate;
   TimeOfDay _notificationTime = const TimeOfDay(hour: 9, minute: 0);
 
   //青系UIになじむジャンルカラー
@@ -321,42 +324,36 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
                     const SizedBox(height: 18),
 
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      secondary: const Icon(
-                        Icons.notifications_outlined,
-                        color: Color(0xff526FC5),
-                      ),
-                      title: const Text(
-                        '通知',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      subtitle: const Text('選んだ曜日の指定時刻に通知します'),
-                      value: _notificationEnabled,
-                      onChanged: (value) {
+                    NotificationSettingsCard(
+                      enabled: _notificationEnabled,
+                      days: _notificationDays,
+                      date: _notificationDate,
+                      time: _notificationTime,
+                      onEnabledChanged: (value) {
                         setState(() {
                           _notificationEnabled = value;
                         });
                       },
+                      onDaysChanged: (value) {
+                        setState(() {
+                          _notificationDays = value;
+                          _notificationDate = null;
+                        });
+                      },
+                      onDateChanged: (value) {
+                        setState(() {
+                          _notificationDate = value;
+                          if (value != null) {
+                            _notificationDays = [];
+                          }
+                        });
+                      },
+                      onTimeChanged: (value) {
+                        setState(() {
+                          _notificationTime = value;
+                        });
+                      },
                     ),
-
-                    if (_notificationEnabled)
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(
-                          Icons.schedule,
-                          color: Color(0xff526FC5),
-                        ),
-                        title: const Text('通知時刻'),
-                        trailing: Text(
-                          _notificationTime.format(context),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        onTap: _selectNotificationTime,
-                      ),
 
                     const SizedBox(height: 18),
 
@@ -377,54 +374,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                       ],
                     ),
 
-                    if (_selectedCategory != '未設定') ...[
-                      const SizedBox(height: 12),
-                      const Text(
-                        'ジャンルカラー',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Color(0xff697188),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: _categoryPalette.map((color) {
-                          final selectedValue =
-                              _categoryColors[_selectedCategory] ??
-                                  _categoryPalette.first.toARGB32();
-                          final selected =
-                              selectedValue == color.toARGB32();
 
-                          return GestureDetector(
-                            onTap: () async {
-                              setState(() {
-                                _categoryColors[_selectedCategory] =
-                                    color.toARGB32();
-                              });
-
-                              await HabitCategoryStorage.saveCategoryColors(
-                                _categoryColors,
-                              );
-                            },
-                            child: Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: color,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: selected
-                                      ? const Color(0xff263A70)
-                                      : Colors.transparent,
-                                  width: 3,
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
 
                     const SizedBox(height: 18),
 
@@ -486,12 +436,25 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     return;
                   }
 
+                  if (_notificationEnabled &&
+                      _notificationDate == null &&
+                      _notificationDays.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('通知する曜日か日にちを選んでください'),
+                      ),
+                    );
+                    return;
+                  }
+
                   final habit = Habit(
                     title: titleController.text.trim(),
                     icon: _selectedIcon,
                     days: List.from(selectedDays),
                     category: _selectedCategory,
                     notificationEnabled: _notificationEnabled,
+                    notificationDays: _notificationDays,
+                    notificationDate: _notificationDate,
                     notificationHour: _notificationTime.hour,
                     notificationMinute: _notificationTime.minute,
                   );
