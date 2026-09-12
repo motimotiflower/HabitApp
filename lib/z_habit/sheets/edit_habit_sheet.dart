@@ -24,6 +24,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
   late final TextEditingController _titleController;
   late List<String> _selectedDays;
   late String _selectedCategory;
+  String? _hoveredCategory;
   late IconData _selectedIcon;
   late bool _notificationEnabled;
   late List<String> _notificationDays;
@@ -368,6 +369,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
 
   Widget _categoryChip(String category) {
     final selected = _selectedCategory == category;
+    final hovered = _hoveredCategory == category;
     final categoryColor = category == '未設定'
         ? const Color(0xff526FC5)
         : Color(
@@ -375,20 +377,45 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                 _categoryPalette.first.toARGB32(),
           );
 
-    return ChoiceChip(
-      label: Text(category),
-      selected: selected,
-      showCheckmark: false,
-      selectedColor: categoryColor,
-      backgroundColor: categoryColor.withValues(alpha: 0.12),
-      labelStyle: TextStyle(
-        color: selected ? Colors.white : categoryColor,
-      ),
-      onSelected: (_) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) {
         setState(() {
-          _selectedCategory = category;
+          _hoveredCategory = category;
         });
       },
+      onExit: (_) {
+        setState(() {
+          if (_hoveredCategory == category) {
+            _hoveredCategory = null;
+          }
+        });
+      },
+      child: ChoiceChip(
+        label: Text(category),
+        selected: selected,
+        showCheckmark: false,
+        selectedColor: categoryColor,
+        backgroundColor: hovered
+            ? categoryColor.withValues(alpha: 0.28)
+            : categoryColor.withValues(alpha: 0.12),
+        side: BorderSide(
+          color: selected || hovered
+              ? categoryColor
+              : categoryColor.withValues(alpha: 0.35),
+          width: selected || hovered ? 1.8 : 1,
+        ),
+        labelStyle: TextStyle(
+          color: selected ? Colors.white : const Color(0xff35415F),
+          fontWeight:
+              selected || hovered ? FontWeight.w600 : FontWeight.normal,
+        ),
+        onSelected: (_) {
+          setState(() {
+            _selectedCategory = category;
+          });
+        },
+      ),
     );
   }
 
