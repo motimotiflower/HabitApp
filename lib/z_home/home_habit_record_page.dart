@@ -55,92 +55,114 @@ class HomeHabitRecordPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final groups = _groupHabits();
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    //ほかのページと同じ青いヘッダーを使う
+    final headerHeight = screenHeight * 0.26;
+    final titlePosition = headerHeight * 0.26;
+    final titlePadding =
+        (screenWidth * 0.07).clamp(0.0, 60.0).toDouble();
+    final titleFontSize =
+        (screenWidth * 0.08).clamp(0.0, 36.0).toDouble();
 
     return Scaffold(
       backgroundColor: const Color(0xffF7F9FF),
-      appBar: AppBar(
-        backgroundColor: const Color(0xff263A70),
-        foregroundColor: Colors.white,
-        title: const Text('習慣の記録'),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(18),
+      body: Column(
         children: [
-          //星システムの記録はここにまとめる
           Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
+            height: headerHeight,
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xff102d72),
+                  Color(0xff5e78cf),
+                ],
+              ),
             ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Stack(
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.auto_awesome,
-                      color: Color(0xff6880D0),
+                Positioned(
+                  top: titlePosition,
+                  left: titlePadding,
+                  child: Text(
+                    '習慣の記録',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.w500,
                     ),
-                    SizedBox(width: 8),
-                    Text(
-                      '星の記録',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff35415F),
+                  ),
+                ),
+                Positioned(
+                  top: titlePosition,
+                  right: screenWidth > 700 ? 60 : screenWidth * 0.06,
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white,
                       ),
                     ),
-                  ],
-                ),
-                SizedBox(height: 12),
-                Text(
-                  '星の欠片・完成した星座の記録をここに表示します',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Color(0xff81889B),
                   ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 20),
-
-          const Text(
-            '習慣の積み重ね',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xff35415F),
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          if (groups.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 40),
-              child: Center(
-                child: Text(
-                  'まだ記録がありません',
+          //中身はこのあと相談して決める
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(18),
+              children: [
+                const Text(
+                  '星の記録',
                   style: TextStyle(
-                    color: Color(0xff81889B),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff35415F),
                   ),
                 ),
-              ),
-            )
-          else
-            ...groups.entries.map((entry) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: _RecordGrid(
-                  title: entry.key,
-                  completedCount: _completedCount(entry.value),
-                  color: _groupColor(entry.value),
+                const SizedBox(height: 18),
+                const Text(
+                  '習慣の積み重ね',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff35415F),
+                  ),
                 ),
-              );
-            }),
+                const SizedBox(height: 14),
+                if (groups.isEmpty)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Text(
+                        'まだ記録がありません',
+                        style: TextStyle(
+                          color: Color(0xff81889B),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  ...groups.entries.map((entry) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: _RecordGrid(
+                        title: entry.key,
+                        completedCount: _completedCount(entry.value),
+                        color: _groupColor(entry.value),
+                      ),
+                    );
+                  }),
+              ],
+            ),
+          ),
         ],
       ),
     );
