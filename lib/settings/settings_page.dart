@@ -1,6 +1,8 @@
 //アプリ設定画面
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:habitapp/user/user_profile_storage.dart';
+import 'package:habitapp/debug/debug_seed_service.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -86,6 +88,36 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: const Text('保存'),
                   ),
                 ),
+
+                if (kDebugMode) ...[
+                  const SizedBox(height: 32),
+                  const Divider(),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'デバッグ',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff35415F),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      await DebugSeedService.addSampleData();
+
+                      if (!context.mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('確認用データを追加しました'),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.bug_report_outlined),
+                    label: const Text('確認用データを追加'),
+                  ),
+                ],
               ],
             ),
     );
