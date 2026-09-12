@@ -1,6 +1,7 @@
 //獲得した星座を確認する図鑑ページ
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:habitapp/main/widgets/main_background.dart';
 import 'package:habitapp/z_star/constellation_data.dart';
 import 'package:habitapp/z_star/star_storage.dart';
 
@@ -20,7 +21,7 @@ class ConstellationBookPage extends StatelessWidget {
       backgroundColor: const Color(0xffEEE4D3),
       appBar: AppBar(
         //各詳細ページで上下の余白をそろえる
-        toolbarHeight: 52,
+        toolbarHeight: MainBackground.detailToolbarHeight,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
