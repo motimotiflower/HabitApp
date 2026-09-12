@@ -94,7 +94,7 @@ class HomePageState extends State<HomePage> {
     bool? wasDone;
 
     for (final habit in habits) {
-      if (habit.title == targetHabit.title) {
+      if (habit.id == targetHabit.id) {
         wasDone = habit.completionHistory[dateKey] ?? false;
         habit.completionHistory[dateKey] = !wasDone;
         break;
@@ -105,7 +105,7 @@ class HomePageState extends State<HomePage> {
 
     if (wasDone != null) {
       final actionKey =
-          'habit|${targetHabit.title}|$dateKey';
+          'habit|${targetHabit.id}|$dateKey';
 
       if (!wasDone!) {
         await StarStorage.award(
@@ -125,17 +125,11 @@ class HomePageState extends State<HomePage> {
     final tasks = await TaskStorage.loadTasks();
 
     for (final task in tasks) {
-      if (task.title == targetTask.title &&
-          task.deadline == targetTask.deadline &&
-          task.category == targetTask.category &&
-          !task.isDone) {
+      if (task.id == targetTask.id && !task.isDone) {
         task.isDone = true;
 
-        final deadlineKey =
-            task.deadline?.toIso8601String() ?? 'none';
         await StarStorage.award(
-          actionKey:
-              'task|${task.title}|$deadlineKey|${task.category}',
+          actionKey: 'task|${task.id}',
           source: 'task',
         );
         break;
