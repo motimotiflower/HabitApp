@@ -16,6 +16,7 @@ import 'package:habitapp/z_task/sheets/edit_task_sheet.dart';
 import 'package:habitapp/z_star/star_storage.dart';
 import 'package:habitapp/settings/settings_page.dart';
 import 'package:habitapp/main/widgets/adaptive_editor_panel.dart';
+import 'package:habitapp/main/widgets/main_background.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -593,7 +594,7 @@ class HomePageState extends State<HomePage> {
                 ),
         );
         //Homeはヘッダーも白い内容部分も1つのスクロールにする
-        final headerHeight = screenHeight * 0.30;
+        final headerHeight = MainBackground.headerHeight(context);
 
         //ほかのページと同じ位置・大きさにそろえる
         final titlePosition = headerHeight * 0.26;
@@ -611,9 +612,22 @@ class HomePageState extends State<HomePage> {
                 .toDouble()
             : 220.0;
 
-        return SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
+        return Container(
+          decoration: isWide
+              ? null
+              : const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.topRight,
+                    colors: [
+                      Color(0xff102d72),
+                      Color(0xff5e78cf),
+                    ],
+                  ),
+                ),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
             children: [
               //Home専用ヘッダー
               Container(
@@ -735,7 +749,7 @@ class HomePageState extends State<HomePage> {
               else
                 //スマホは今まで通りカードを縦に並べる
                 Container(
-                  color: const Color(0xffF7F9FF),
+                  color: Colors.transparent,
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
@@ -751,6 +765,7 @@ class HomePageState extends State<HomePage> {
                 ),
             ],
           ),
+        ),
         );
       },
     );
