@@ -368,6 +368,10 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
     return Scaffold(
       backgroundColor: const Color(0xffF7F9FF),
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back),
+        ),
         //部屋名の場所を青くして、本文との境目を分かりやすくする
         backgroundColor: const Color(0xff526FC5),
         foregroundColor: Colors.white,
