@@ -153,191 +153,215 @@ class HomePageState extends State<HomePage> {
     final dateKey = _todayKey();
     final habitMarks = _habitMarks();
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16, topSpace, 16, 16),
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          //ジャンルを分けず、全習慣の積み重ねを表示
-          _HomeSectionCard(
-            title: '習慣の積み重ね',
-            icon: Icons.grid_view_rounded,
-            minHeight: 166,
-            child: _HomeHabitGrid(marks: habitMarks),
-          ),
+    //広い画面ではカードを2列、スマホでは今まで通り1列にする
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 800;
 
-          const SizedBox(height: 12),
+        final habitRecordCard = _HomeSectionCard(
+          title: '習慣の積み重ね',
+          icon: Icons.grid_view_rounded,
+          minHeight: 166,
+          child: _HomeHabitGrid(marks: habitMarks),
+        );
 
-          //今日の習慣
-          _HomeSectionCard(
-            title: '今日の習慣',
-            icon: Icons.auto_awesome,
-            minHeight: 128,
-            child: _todayHabits.isEmpty
-                ? const _EmptyText('今日の習慣はありません')
-                : Column(
-                    children: _todayHabits.map((habit) {
-                      final isDone =
-                          habit.completionHistory[dateKey] ?? false;
-                      final habitColor = habit.category == '未設定'
-                          ? const Color(0xff526FC5)
-                          : Color(
-                              _categoryColors[habit.category] ??
-                                  0xff526FC5,
-                            );
+        final todayHabitCard = _HomeSectionCard(
+          title: '今日の習慣',
+          icon: Icons.auto_awesome,
+          minHeight: 128,
+          child: _todayHabits.isEmpty
+              ? const _EmptyText('今日の習慣はありません')
+              : Column(
+                  children: _todayHabits.map((habit) {
+                    final isDone =
+                        habit.completionHistory[dateKey] ?? false;
+                    final habitColor = habit.category == '未設定'
+                        ? const Color(0xff526FC5)
+                        : Color(
+                            _categoryColors[habit.category] ??
+                                0xff526FC5,
+                          );
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Row(
-                          children: [
-                            Icon(
-                              habit.icon,
-                              size: 22,
-                              color: habitColor,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                habit.title,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: const Color(0xff35415F),
-                                  decoration: isDone
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                ),
-                              ),
-                            ),
-                            Checkbox(
-                              value: isDone,
-                              activeColor: habitColor,
-                              onChanged: (_) {
-                                _toggleHabit(habit);
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-          ),
-
-          const SizedBox(height: 12),
-
-          //今日のタスク
-          _HomeSectionCard(
-            title: '今日のタスク',
-            icon: Icons.check_circle_outline,
-            minHeight: 128,
-            child: _todayTasks.isEmpty
-                ? const _EmptyText('今日締切のタスクはありません')
-                : Column(
-                    children: _todayTasks.map((task) {
-                      return Row(
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
                         children: [
-                          Checkbox(
-                            value: false,
-                            activeColor: const Color(0xff526FC5),
-                            onChanged: (_) {
-                              _completeTask(task);
-                            },
+                          Icon(
+                            habit.icon,
+                            size: 22,
+                            color: habitColor,
                           ),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              task.title,
-                              style: const TextStyle(
+                              habit.title,
+                              style: TextStyle(
                                 fontSize: 16,
-                                color: Color(0xff35415F),
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xff35415F),
+                                decoration: isDone
+                                    ? TextDecoration.lineThrough
+                                    : null,
                               ),
                             ),
                           ),
-                          if (task.category != '未設定')
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xffE8EDFC),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                task.category,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xff526FC5),
-                                ),
+                          Checkbox(
+                            value: isDone,
+                            activeColor: habitColor,
+                            onChanged: (_) {
+                              _toggleHabit(habit);
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+        );
+
+        final todayTaskCard = _HomeSectionCard(
+          title: '今日のタスク',
+          icon: Icons.check_circle_outline,
+          minHeight: 128,
+          child: _todayTasks.isEmpty
+              ? const _EmptyText('今日締切のタスクはありません')
+              : Column(
+                  children: _todayTasks.map((task) {
+                    return Row(
+                      children: [
+                        Checkbox(
+                          value: false,
+                          activeColor: const Color(0xff526FC5),
+                          onChanged: (_) {
+                            _completeTask(task);
+                          },
+                        ),
+                        Expanded(
+                          child: Text(
+                            task.title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Color(0xff35415F),
+                            ),
+                          ),
+                        ),
+                        if (task.category != '未設定')
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xffE8EDFC),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              task.category,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xff526FC5),
                               ),
                             ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-          ),
+                          ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+        );
 
-          const SizedBox(height: 12),
-
-          //最近のメモ
-          _HomeSectionCard(
-            title: 'メモ',
-            icon: Icons.edit_note_outlined,
-            minHeight: 128,
-            child: _pinnedMemos.isEmpty
-                ? const _EmptyText('ピン留めしたメモはありません')
-                : Column(
-                    children: _pinnedMemos.map((memo) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (memo.isPinned)
-                              const Padding(
-                                padding: EdgeInsets.only(right: 6, top: 2),
-                                child: Icon(
-                                  Icons.push_pin,
-                                  size: 15,
-                                  color: Color(0xff526FC5),
-                                ),
+        final memoCard = _HomeSectionCard(
+          title: 'メモ',
+          icon: Icons.edit_note_outlined,
+          minHeight: 128,
+          child: _pinnedMemos.isEmpty
+              ? const _EmptyText('ピン留めしたメモはありません')
+              : Column(
+                  children: _pinnedMemos.map((memo) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (memo.isPinned)
+                            const Padding(
+                              padding: EdgeInsets.only(right: 6, top: 2),
+                              child: Icon(
+                                Icons.push_pin,
+                                size: 15,
+                                color: Color(0xff526FC5),
                               ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
+                            ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  memo.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xff35415F),
+                                  ),
+                                ),
+                                if (memo.preview.isNotEmpty) ...[
+                                  const SizedBox(height: 3),
                                   Text(
-                                    memo.title,
-                                    maxLines: 1,
+                                    memo.preview,
+                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xff35415F),
+                                      fontSize: 13,
+                                      color: Color(0xff697188),
                                     ),
                                   ),
-                                  if (memo.preview.isNotEmpty) ...[
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      memo.preview,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0xff697188),
-                                      ),
-                                    ),
-                                  ],
                                 ],
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+        );
+
+        return Padding(
+          padding: EdgeInsets.fromLTRB(16, topSpace, 16, 16),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              if (isWide)
+                //Web・フルスクリーンでは2×2に並べる
+                GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 2.1,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    habitRecordCard,
+                    todayHabitCard,
+                    todayTaskCard,
+                    memoCard,
+                  ],
+                )
+              else ...[
+                //スマホでは今まで通り縦1列
+                habitRecordCard,
+                const SizedBox(height: 12),
+                todayHabitCard,
+                const SizedBox(height: 12),
+                todayTaskCard,
+                const SizedBox(height: 12),
+                memoCard,
+              ],
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -409,23 +433,18 @@ class _HomeHabitGrid extends StatelessWidget {
 
   final List<_HabitMark> marks;
 
-  static const int _columnCount = 11;
-  static const int _minimumRows = 3;
+  static const int _minimumCells = 60;
 
   @override
   Widget build(BuildContext context) {
-    final minimumCells = _columnCount * _minimumRows;
-    final neededCells =
-        ((marks.length + _columnCount - 1) ~/ _columnCount) * _columnCount;
+    //Homeでは小さいマスをたくさん並べる
     final cellCount =
-        neededCells > minimumCells ? neededCells : minimumCells;
+        marks.length > _minimumCells ? marks.length : _minimumCells;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const spacing = 5.0;
-        final cellSize =
-            (constraints.maxWidth - spacing * (_columnCount - 1)) /
-                _columnCount;
+        const cellSize = 14.0;
+        const spacing = 4.0;
 
         return Wrap(
           spacing: spacing,
@@ -440,7 +459,7 @@ class _HomeHabitGrid extends StatelessWidget {
                 color: hasRecord
                     ? marks[index].color
                     : const Color(0xffF7F9FF),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(3),
                 border: Border.all(
                   color: hasRecord
                       ? marks[index].color
