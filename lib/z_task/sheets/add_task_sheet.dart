@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:habitapp/models/task.dart';
 import 'package:habitapp/z_task/category_storage.dart';
+import 'package:habitapp/notifications/notification_settings_card.dart';
 
 class AddTaskSheet extends StatefulWidget {
   const AddTaskSheet({super.key, required this.onAddTask});
@@ -20,6 +21,8 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
   DateTime? _deadline;
   bool _isFlagged = false;
   bool _notificationEnabled = false;
+  List<String> _notificationDays = [];
+  DateTime? _notificationDate;
   TimeOfDay _notificationTime = const TimeOfDay(hour: 9, minute: 0);
   List<String> _categories = [];
   String _selectedCategory = '未設定';
@@ -77,6 +80,15 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
 
     if (title.isEmpty) return;
 
+    if (_notificationEnabled &&
+        _notificationDate == null &&
+        _notificationDays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('通知する曜日か日にちを選んでください')),
+      );
+      return;
+    }
+
     widget.onAddTask(
       Task(
         title: title,
@@ -84,8 +96,9 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
         deadline: _deadline,
         category: _selectedCategory,
         isFlagged: _isFlagged,
-        notificationEnabled:
-            _notificationEnabled && _deadline != null,
+        notificationEnabled: _notificationEnabled,
+        notificationDays: _notificationDays,
+        notificationDate: _notificationDate,
         notificationHour: _notificationTime.hour,
         notificationMinute: _notificationTime.minute,
       ),
@@ -217,45 +230,36 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
                         },
                       ),
 
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        secondary: const Icon(
-                          Icons.notifications_outlined,
-                          color: Color(0xff526FC5),
-                        ),
-                        title: const Text('通知'),
-                        subtitle: Text(
-                          _deadline == null
-                              ? '締切日を設定すると通知できます'
-                              : '締切日の指定時刻に通知します',
-                        ),
-                        value: _notificationEnabled,
-                        onChanged: _deadline == null
-                            ? null
-                            : (value) {
-                                setState(() {
-                                  _notificationEnabled = value;
-                                });
-                              },
+                      NotificationSettingsCard(
+                        enabled: _notificationEnabled,
+                        days: _notificationDays,
+                        date: _notificationDate,
+                        time: _notificationTime,
+                        onEnabledChanged: (value) {
+                          setState(() {
+                            _notificationEnabled = value;
+                          });
+                        },
+                        onDaysChanged: (value) {
+                          setState(() {
+                            _notificationDays = value;
+                            _notificationDate = null;
+                          });
+                        },
+                        onDateChanged: (value) {
+                          setState(() {
+                            _notificationDate = value;
+                            if (value != null) {
+                              _notificationDays = [];
+                            }
+                          });
+                        },
+                        onTimeChanged: (value) {
+                          setState(() {
+                            _notificationTime = value;
+                          });
+                        },
                       ),
-
-                      if (_notificationEnabled && _deadline != null)
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(
-                            Icons.schedule,
-                            color: Color(0xff526FC5),
-                          ),
-                          title: const Text('通知時刻'),
-                          trailing: Text(
-                            _notificationTime.format(context),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          onTap: _selectNotificationTime,
-                        ),
 
                       const SizedBox(height: 16),
 
