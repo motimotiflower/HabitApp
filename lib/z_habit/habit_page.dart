@@ -7,7 +7,7 @@ import 'package:habitapp/main/widgets/adaptive_editor_panel.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/z_habit/sheets/edit_habit_sheet.dart';
-import 'package:habitapp/z_habit/sheets/habit_record_sheet.dart';
+import 'package:habitapp/z_home/home_habit_record_page.dart';
 import 'package:habitapp/z_habit/sheets/habit_category_manage_sheet.dart';
 import 'package:habitapp/z_star/star_storage.dart';
 
@@ -196,23 +196,16 @@ class HabitPageState extends State<HabitPage> {
     ).whenComplete(_reloadCategoryColors);
   }
 
-  //記録画面
+  //HomeとHabitで同じ記録ページを使う
   void _showRecordSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-        //大画面でも追加・編集画面を横幅いっぱいに広げる
-        constraints: const BoxConstraints(maxWidth: double.infinity),
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.86,
-          child: HabitRecordSheet(
-            habits: habits,
-            categoryColors: _categoryColors,
-          ),
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => HomeHabitRecordPage(
+          habits: habits,
+          categoryColors: _categoryColors,
+        ),
+      ),
     );
   }
 
