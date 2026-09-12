@@ -10,6 +10,10 @@ class Task {
   final String title; //タスク名
   final DateTime? deadline; //締切日
   final String category; //ジャンル
+  final bool isFlagged; //Homeに優先表示するフラグ
+  final bool notificationEnabled; //通知を使うか
+  final int? notificationHour; //通知時刻
+  final int? notificationMinute;
   bool isDone; //完了状態
 
   Task({
@@ -17,6 +21,10 @@ class Task {
     required this.title,
     this.deadline,
     this.category = '未設定',
+    this.isFlagged = false,
+    this.notificationEnabled = false,
+    this.notificationHour,
+    this.notificationMinute,
     this.isDone = false,
   }) : id = id ?? _createId();
 
@@ -27,6 +35,10 @@ class Task {
       'title': title,
       'deadline': deadline?.toIso8601String(),
       'category': category,
+      'isFlagged': isFlagged,
+      'notificationEnabled': notificationEnabled,
+      'notificationHour': notificationHour,
+      'notificationMinute': notificationMinute,
       'isDone': isDone,
     };
   }
@@ -40,6 +52,10 @@ class Task {
           ? DateTime.parse(json['deadline'])
           : null,
       category: json['category'] ?? '未設定',
+      isFlagged: json['isFlagged'] ?? false,
+      notificationEnabled: json['notificationEnabled'] ?? false,
+      notificationHour: json['notificationHour'],
+      notificationMinute: json['notificationMinute'],
       isDone: json['isDone'] ?? false,
     );
   }
