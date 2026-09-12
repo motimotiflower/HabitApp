@@ -6,9 +6,14 @@ import 'package:habitapp/models/memo.dart';
 import 'package:habitapp/models/task.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
+import 'package:habitapp/z_habit/sheets/add_habit_sheet.dart';
+import 'package:habitapp/z_habit/sheets/edit_habit_sheet.dart';
 import 'package:habitapp/z_home/home_habit_record_page.dart';
 import 'package:habitapp/z_memo/memo_storage.dart';
+import 'package:habitapp/z_memo/memo_room_page.dart';
 import 'package:habitapp/z_task/task_storage.dart';
+import 'package:habitapp/z_task/sheets/add_task_sheet.dart';
+import 'package:habitapp/z_task/sheets/edit_task_sheet.dart';
 import 'package:habitapp/z_star/star_storage.dart';
 
 class HomePage extends StatefulWidget {
@@ -24,6 +29,7 @@ class HomePageState extends State<HomePage> {
   List<Task> _todayTasks = [];
   List<Memo> _pinnedMemos = [];
   Map<String, int> _categoryColors = {};
+  int _starFragments = 0;
 
   @override
   void initState() {
@@ -38,6 +44,7 @@ class HomePageState extends State<HomePage> {
     final memos = await MemoStorage.loadMemos();
     final categoryColors =
         await HabitCategoryStorage.loadCategoryColors();
+    final starState = await StarStorage.load();
 
     final now = DateTime.now();
 
@@ -75,6 +82,7 @@ class HomePageState extends State<HomePage> {
       _todayTasks = todayTasks;
       _pinnedMemos = pinnedMemos;
       _categoryColors = categoryColors;
+      _starFragments = starState.fragments;
     });
   }
 
@@ -120,7 +128,7 @@ class HomePageState extends State<HomePage> {
     await reload();
   }
 
-  //Homeからタスクを完了
+  //Homeではチェック後すぐ消さず、別ページへ移動後の再読込で消す
   Future<void> _completeTask(Task targetTask) async {
     final tasks = await TaskStorage.loadTasks();
 
@@ -137,7 +145,13 @@ class HomePageState extends State<HomePage> {
     }
 
     await TaskStorage.saveTasks(tasks);
-    await reload();
+
+    if (!mounted) return;
+
+    setState(() {
+      targetTask.isDone = true;
+      _starFragments += 1;
+    });
   }
 
   //全習慣の達成記録を1つのマス列にまとめる
@@ -165,6 +179,140 @@ class HomePageState extends State<HomePage> {
 
     marks.sort((a, b) => a.dateKey.compareTo(b.dateKey));
     return marks;
+  }
+
+  //Home上から習慣を追加
+  Future<void> _openAddHabit() async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      builder: (context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.80,
+          child: AddHabitSheet(
+            onAddHabit: (habit) async {
+              final habits = await HabitStorage.loadHabits();
+              habits.add(habit);
+              await HabitStorage.saveHabits(habits);
+              await reload();
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  //チェック欄を避け、本文側をタップしたときだけ編集を開く
+  Future<void> _openEditHabit(Habit habit) async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.80,
+          child: EditHabitSheet(
+            habit: habit,
+            onSave: (updatedHabit) async {
+              final habits = await HabitStorage.loadHabits();
+              final index =
+                  habits.indexWhere((item) => item.id == habit.id);
+
+              if (index != -1) {
+                habits[index] = updatedHabit;
+                await HabitStorage.saveHabits(habits);
+              }
+
+              await reload();
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  //Home上からタスクを追加
+  Future<void> _openAddTask() async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.80,
+          child: AddTaskSheet(
+            onAddTask: (task) async {
+              final tasks = await TaskStorage.loadTasks();
+              tasks.add(task);
+              await TaskStorage.saveTasks(tasks);
+              await reload();
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _openEditTask(Task task) async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.80,
+          child: EditTaskSheet(
+            task: task,
+            onSave: (updatedTask) async {
+              final tasks = await TaskStorage.loadTasks();
+              final index =
+                  tasks.indexWhere((item) => item.id == task.id);
+
+              if (index != -1) {
+                tasks[index] = updatedTask;
+                await TaskStorage.saveTasks(tasks);
+              }
+
+              await reload();
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  //Homeから部屋を開いた場合、戻る矢印でそのままHomeへ戻る
+  Future<void> _openMemoRoom(Memo memo) async {
+    Memo currentMemo = memo;
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MemoRoomPage(
+          memo: memo,
+          onChanged: (updatedMemo) async {
+            final memos = await MemoStorage.loadMemos();
+            final index = memos.indexWhere(
+              (item) =>
+                  item.title == currentMemo.title &&
+                  item.updatedAt == currentMemo.updatedAt,
+            );
+
+            if (index != -1) {
+              memos[index] = updatedMemo;
+              await MemoStorage.saveMemos(memos);
+            }
+
+            currentMemo = updatedMemo;
+          },
+        ),
+      ),
+    );
+
+    await reload();
   }
 
   //Homeの習慣記録を開く
