@@ -133,29 +133,41 @@ class HomePageState extends State<HomePage> {
     await reload();
   }
 
-  //Homeではチェック後すぐ消さず、別ページへ移動後の再読込で消す
-  Future<void> _completeTask(Task targetTask) async {
+  //Homeでは完了後も残し、もう一度押せば解除できる
+  Future<void> _toggleTask(Task targetTask) async {
     final tasks = await TaskStorage.loadTasks();
+    bool? wasDone;
 
     for (final task in tasks) {
-      if (task.id == targetTask.id && !task.isDone) {
-        task.isDone = true;
-
-        await StarStorage.award(
-          actionKey: 'task|${task.id}',
-          source: 'task',
-        );
+      if (task.id == targetTask.id) {
+        wasDone = task.isDone;
+        task.isDone = !task.isDone;
         break;
       }
     }
 
+    if (wasDone == null) return;
+
     await TaskStorage.saveTasks(tasks);
+
+    final actionKey = 'task|${targetTask.id}';
+
+    if (!wasDone) {
+      await StarStorage.award(
+        actionKey: actionKey,
+        source: 'task',
+      );
+    } else {
+      await StarStorage.revoke(actionKey);
+    }
+
+    final starState = await StarStorage.load();
 
     if (!mounted) return;
 
     setState(() {
-      targetTask.isDone = true;
-      _starFragments += 1;
+      targetTask.isDone = !wasDone!;
+      _starFragments = starState.fragments;
     });
   }
 
@@ -517,11 +529,9 @@ class HomePageState extends State<HomePage> {
                         Checkbox(
                           value: task.isDone,
                           activeColor: const Color(0xff526FC5),
-                          onChanged: task.isDone
-                              ? null
-                              : (_) {
-                                  _completeTask(task);
-                                },
+                          onChanged: (_) {
+                            _toggleTask(task);
+                          },
                         ),
                       ],
                     );
