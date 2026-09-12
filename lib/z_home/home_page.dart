@@ -543,14 +543,21 @@ class _HomeWideSection extends StatelessWidget {
                   color: const Color(0xff526FC5),
                 ),
                 const SizedBox(width: 9),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xff35415F),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff35415F),
+                    ),
                   ),
                 ),
+                if (onTap != null)
+                  const Icon(
+                    Icons.chevron_right,
+                    color: Color(0xff81889B),
+                  ),
               ],
             ),
             const SizedBox(height: 14),
@@ -609,14 +616,21 @@ class _HomeSectionCard extends StatelessWidget {
                 color: const Color(0xff526FC5),
               ),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xff35415F),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff35415F),
+                  ),
                 ),
               ),
+              if (onTap != null)
+                const Icon(
+                  Icons.chevron_right,
+                  color: Color(0xff81889B),
+                ),
             ],
           ),
           const SizedBox(height: 12),
