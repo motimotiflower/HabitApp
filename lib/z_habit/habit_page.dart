@@ -298,7 +298,7 @@ class HabitPageState extends State<HabitPage> {
 
                           //達成で星の欠片+1、ガチャ前なら解除で取り消す
                           final actionKey =
-                              'habit|${habit.title}|$dateKey';
+                              'habit|${habit.id}|$dateKey';
 
                           if (!wasDone) {
                             await StarStorage.award(
