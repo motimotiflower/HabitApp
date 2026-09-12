@@ -1,5 +1,11 @@
 //タスクのデータの型
 class Task {
+  static int _idCounter = 0;
+
+  static String _createId() {
+    return '${DateTime.now().microsecondsSinceEpoch}_${_idCounter++}';
+  }
+
   final String id; //同じタイトルでも別のタスクとして判定するID
   final String title; //タスク名
   final DateTime? deadline; //締切日
@@ -12,7 +18,7 @@ class Task {
     this.deadline,
     this.category = '未設定',
     this.isDone = false,
-  }) : id = id ?? DateTime.now().microsecondsSinceEpoch.toString();
+  }) : id = id ?? _createId();
 
   //Taskを保存しやすい形に変換
   Map<String, dynamic> toJson() {
