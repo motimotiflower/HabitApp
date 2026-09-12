@@ -318,34 +318,35 @@ class MemoPageState extends State<MemoPage> {
                           ),
                         ),
                       ),
-                      trailing: PopupMenuButton<String>(
-                        icon: Icon(
-                          memo.isPinned
-                              ? Icons.push_pin
-                              : Icons.more_vert,
-                          color: memo.isPinned
-                              ? const Color(0xff526FC5)
-                              : const Color(0xff81889B),
-                        ),
-                        onSelected: (value) {
-                          if (value == 'pin') {
-                            _togglePin(memo);
-                          } else if (value == 'delete') {
-                            _showDeleteDialog(memo);
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: 'pin',
-                            child: Text(
+                      //よく使う操作はメニューを開かず直接押せるようにする
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: memo.isPinned
+                                ? 'ピン留めを外す'
+                                : 'ピン留め',
+                            onPressed: () {
+                              _togglePin(memo);
+                            },
+                            icon: Icon(
                               memo.isPinned
-                                  ? 'ピン留めを外す'
-                                  : 'ピン留め',
+                                  ? Icons.push_pin
+                                  : Icons.push_pin_outlined,
+                              color: memo.isPinned
+                                  ? const Color(0xff526FC5)
+                                  : const Color(0xff81889B),
                             ),
                           ),
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: Text('削除'),
+                          IconButton(
+                            tooltip: '削除',
+                            onPressed: () {
+                              _showDeleteDialog(memo);
+                            },
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Color(0xff81889B),
+                            ),
                           ),
                         ],
                       ),
