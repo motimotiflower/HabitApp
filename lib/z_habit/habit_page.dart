@@ -4,6 +4,7 @@ import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/z_habit/widgets/habit_card.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
+import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/z_habit/sheets/edit_habit_sheet.dart';
 import 'package:habitapp/z_habit/sheets/habit_record_sheet.dart';
 
@@ -29,6 +30,9 @@ class HabitPageState extends State<HabitPage> {
   //習慣一覧
   List<Habit> habits = [];
 
+  //ジャンルごとの色
+  Map<String, int> _categoryColors = {};
+
   //データの追加
   void addHabit(Habit habit) {
     setState(() {
@@ -36,6 +40,7 @@ class HabitPageState extends State<HabitPage> {
     });
 
     HabitStorage.saveHabits(habits);
+    _reloadCategoryColors();
   }
 
   //データの編集
@@ -76,7 +81,7 @@ class HabitPageState extends State<HabitPage> {
           ),
         );
       },
-    );
+    ).whenComplete(_reloadCategoryColors);
   }
 
   //記録画面
@@ -90,6 +95,7 @@ class HabitPageState extends State<HabitPage> {
           height: MediaQuery.of(context).size.height * 0.86,
           child: HabitRecordSheet(
             habits: habits,
+            categoryColors: _categoryColors,
           ),
         );
       },
@@ -167,11 +173,26 @@ class HabitPageState extends State<HabitPage> {
   //保存データの読み込み
   Future<void> reloadHabits() async {
     final loadedHabits = await HabitStorage.loadHabits();
+    final categoryColors =
+        await HabitCategoryStorage.loadCategoryColors();
 
     if (!mounted) return;
 
     setState(() {
       habits = loadedHabits;
+      _categoryColors = categoryColors;
+    });
+  }
+
+  //ジャンル色だけを読み直す
+  Future<void> _reloadCategoryColors() async {
+    final categoryColors =
+        await HabitCategoryStorage.loadCategoryColors();
+
+    if (!mounted) return;
+
+    setState(() {
+      _categoryColors = categoryColors;
     });
   }
 
@@ -249,9 +270,17 @@ class HabitPageState extends State<HabitPage> {
                     itemBuilder: (context, index) {
                       final habit = selectedDayHabits[index];
 
+                      final categoryColor = habit.category == '未設定'
+                          ? null
+                          : Color(
+                              _categoryColors[habit.category] ??
+                                  0xff526FC5,
+                            );
+
                       return HabitCard(
                         habit: habit,
                         isDone: habit.completionHistory[dateKey] ?? false,
+                        categoryColor: categoryColor,
 
                         //達成状態の変更
                         onChanged: () {
