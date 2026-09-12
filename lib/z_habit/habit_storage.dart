@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:habitapp/models/habit.dart';
+import 'package:habitapp/notifications/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HabitStorage {
@@ -17,6 +18,7 @@ class HabitStorage {
     final jsonString = jsonEncode(habitList);
 
     await prefs.setString(_key, jsonString);
+    await NotificationService.syncHabits(habits);
   }
 
   //読み込み===========================
