@@ -138,6 +138,8 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       backgroundColor: const Color(0xffF7F9FF),
       appBar: AppBar(
+        //各詳細ページで上下の余白をそろえる
+        toolbarHeight: 52,
         backgroundColor: const Color(0xff526FC5),
         foregroundColor: Colors.white,
         leading: IconButton(
