@@ -72,6 +72,9 @@ class StarState {
 class StarStorage {
   static const String _key = 'star_system';
 
+  //星座ガチャ1回に必要な欠片数
+  static const int drawCost = 15;
+
   //最初に用意する30種類。ガチャでは被らない
   static const List<String> constellationNames = [
     'おひつじ座',
@@ -111,9 +114,9 @@ class StarStorage {
     final jsonString = prefs.getString(_key);
 
     if (jsonString == null) {
-      //初回だけ、ガチャをすぐ試せるよう星の欠片を30個プレゼント
+      //初回だけ、ガチャをすぐ試せるよう星の欠片を15個プレゼント
       final starterAwards = List.generate(
-        30,
+        drawCost,
         (index) => StarAward(
           key: 'starter|$index',
           source: 'starter',
@@ -195,12 +198,12 @@ class StarStorage {
     await _save(state);
   }
 
-  //30個を消費して、未獲得の星座からランダムに1つ獲得
+  //15個を消費して、未獲得の星座からランダムに1つ獲得
   static Future<ConstellationRecord?> draw() async {
     final state = await load();
     final unspent = state.awards.where((award) => !award.spent).toList();
 
-    if (unspent.length < 30) return null;
+    if (unspent.length < drawCost) return null;
 
     final owned =
         state.constellations.map((record) => record.name).toSet();
@@ -210,7 +213,7 @@ class StarStorage {
 
     if (available.isEmpty) return null;
 
-    for (final award in unspent.take(30)) {
+    for (final award in unspent.take(drawCost)) {
       award.spent = true;
     }
 
