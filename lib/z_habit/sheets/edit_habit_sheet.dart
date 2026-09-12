@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
+import 'package:habitapp/notifications/notification_settings_card.dart';
 
 class EditHabitSheet extends StatefulWidget {
   const EditHabitSheet({
@@ -25,6 +26,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
   late String _selectedCategory;
   late IconData _selectedIcon;
   late bool _notificationEnabled;
+  late List<String> _notificationDays;
+  DateTime? _notificationDate;
   late TimeOfDay _notificationTime;
 
   List<String> _categories = [];
@@ -61,6 +64,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
     _selectedCategory = widget.habit.category;
     _selectedIcon = widget.habit.icon;
     _notificationEnabled = widget.habit.notificationEnabled;
+    _notificationDays = [...widget.habit.notificationDays];
+    _notificationDate = widget.habit.notificationDate;
     _notificationTime = TimeOfDay(
       hour: widget.habit.notificationHour ?? 9,
       minute: widget.habit.notificationMinute ?? 0,
@@ -113,6 +118,17 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
       return;
     }
 
+    if (_notificationEnabled &&
+        _notificationDate == null &&
+        _notificationDays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('通知する曜日か日にちを選んでください'),
+        ),
+      );
+      return;
+    }
+
     widget.onSave(
       Habit(
         id: widget.habit.id,
@@ -121,6 +137,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
         days: _selectedDays,
         category: _selectedCategory,
         notificationEnabled: _notificationEnabled,
+        notificationDays: _notificationDays,
+        notificationDate: _notificationDate,
         notificationHour: _notificationTime.hour,
         notificationMinute: _notificationTime.minute,
 
@@ -259,42 +277,36 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
 
                       const SizedBox(height: 18),
 
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        secondary: const Icon(
-                          Icons.notifications_outlined,
-                          color: Color(0xff526FC5),
-                        ),
-                        title: const Text(
-                          '通知',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        subtitle: const Text('選んだ曜日の指定時刻に通知します'),
-                        value: _notificationEnabled,
-                        onChanged: (value) {
+                      NotificationSettingsCard(
+                        enabled: _notificationEnabled,
+                        days: _notificationDays,
+                        date: _notificationDate,
+                        time: _notificationTime,
+                        onEnabledChanged: (value) {
                           setState(() {
                             _notificationEnabled = value;
                           });
                         },
+                        onDaysChanged: (value) {
+                          setState(() {
+                            _notificationDays = value;
+                            _notificationDate = null;
+                          });
+                        },
+                        onDateChanged: (value) {
+                          setState(() {
+                            _notificationDate = value;
+                            if (value != null) {
+                              _notificationDays = [];
+                            }
+                          });
+                        },
+                        onTimeChanged: (value) {
+                          setState(() {
+                            _notificationTime = value;
+                          });
+                        },
                       ),
-
-                      if (_notificationEnabled)
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(
-                            Icons.schedule,
-                            color: Color(0xff526FC5),
-                          ),
-                          title: const Text('通知時刻'),
-                          trailing: Text(
-                            _notificationTime.format(context),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          onTap: _selectNotificationTime,
-                        ),
 
                       const SizedBox(height: 18),
                       const Text('ジャンル', style: TextStyle(fontSize: 18)),
@@ -309,54 +321,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                         ],
                       ),
 
-                      if (_selectedCategory != '未設定') ...[
-                        const SizedBox(height: 12),
-                        const Text(
-                          'ジャンルカラー',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Color(0xff697188),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          children: _categoryPalette.map((color) {
-                            final selectedValue =
-                                _categoryColors[_selectedCategory] ??
-                                    _categoryPalette.first.toARGB32();
-                            final selected =
-                                selectedValue == color.toARGB32();
 
-                            return GestureDetector(
-                              onTap: () async {
-                                setState(() {
-                                  _categoryColors[_selectedCategory] =
-                                      color.toARGB32();
-                                });
-
-                                await HabitCategoryStorage.saveCategoryColors(
-                                  _categoryColors,
-                                );
-                              },
-                              child: Container(
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: selected
-                                        ? const Color(0xff263A70)
-                                        : Colors.transparent,
-                                    width: 3,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
 
                       const SizedBox(height: 18),
                       const Text('アイコン', style: TextStyle(fontSize: 18)),
