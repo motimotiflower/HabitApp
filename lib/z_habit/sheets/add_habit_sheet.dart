@@ -18,8 +18,19 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   final titleController = TextEditingController();
 
   List<String> _categories = [];
+  Map<String, int> _categoryColors = {};
   String _selectedCategory = '未設定';
   IconData _selectedIcon = Icons.check;
+
+  //青系UIになじむジャンルカラー
+  static const List<Color> _categoryPalette = [
+    Color(0xff526FC5),
+    Color(0xff6F86D6),
+    Color(0xff7D78C9),
+    Color(0xff5D8FBF),
+    Color(0xff5E9AA0),
+    Color(0xff7B88A8),
+  ];
 
   final List<IconData> _icons = const [
     Icons.menu_book,
@@ -41,48 +52,93 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   //保存されているジャンルを読み込む
   Future<void> _loadCategories() async {
     final categories = await HabitCategoryStorage.loadCategories();
+    final categoryColors = await HabitCategoryStorage.loadCategoryColors();
 
     if (!mounted) return;
 
     setState(() {
       _categories = categories;
+      _categoryColors = categoryColors;
     });
   }
 
   //ジャンルを追加
   Future<void> _addCategory() async {
     final controller = TextEditingController();
+    Color selectedColor = _categoryPalette.first;
 
     final name = await showDialog<String>(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('ジャンルを追加'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'ジャンル名',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('キャンセル'),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xff526FC5),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('ジャンルを追加'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      labelText: 'ジャンル名',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('色'),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _categoryPalette.map((color) {
+                      final selected = selectedColor == color;
+
+                      return GestureDetector(
+                        onTap: () {
+                          setDialogState(() {
+                            selectedColor = color;
+                          });
+                        },
+                        child: Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: selected
+                                  ? const Color(0xff263A70)
+                                  : Colors.transparent,
+                              width: 3,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
-              onPressed: () {
-                final value = controller.text.trim();
-                if (value.isEmpty) return;
-                Navigator.pop(dialogContext, value);
-              },
-              child: const Text('追加'),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('キャンセル'),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xff526FC5),
+                  ),
+                  onPressed: () {
+                    final value = controller.text.trim();
+                    if (value.isEmpty) return;
+                    Navigator.pop(dialogContext, value);
+                  },
+                  child: const Text('追加'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -95,9 +151,11 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
       _categories.add(name);
       _categories.sort();
       _selectedCategory = name;
+      _categoryColors[name] = selectedColor.toARGB32();
     });
 
     await HabitCategoryStorage.saveCategories(_categories);
+    await HabitCategoryStorage.saveCategoryColors(_categoryColors);
   }
 
   @override
@@ -261,6 +319,55 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                       ],
                     ),
 
+                    if (_selectedCategory != '未設定') ...[
+                      const SizedBox(height: 12),
+                      const Text(
+                        'ジャンルカラー',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xff697188),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        children: _categoryPalette.map((color) {
+                          final selectedValue =
+                              _categoryColors[_selectedCategory] ??
+                                  _categoryPalette.first.toARGB32();
+                          final selected =
+                              selectedValue == color.toARGB32();
+
+                          return GestureDetector(
+                            onTap: () async {
+                              setState(() {
+                                _categoryColors[_selectedCategory] =
+                                    color.toARGB32();
+                              });
+
+                              await HabitCategoryStorage.saveCategoryColors(
+                                _categoryColors,
+                              );
+                            },
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: selected
+                                      ? const Color(0xff263A70)
+                                      : Colors.transparent,
+                                  width: 3,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+
                     const SizedBox(height: 18),
 
                     const Text("アイコン", style: TextStyle(fontSize: 20)),
@@ -343,15 +450,21 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   //ジャンル選択ボタン
   Widget _categoryChip(String category) {
     final selected = _selectedCategory == category;
+    final categoryColor = category == '未設定'
+        ? const Color(0xff526FC5)
+        : Color(
+            _categoryColors[category] ??
+                _categoryPalette.first.toARGB32(),
+          );
 
     return ChoiceChip(
       label: Text(category),
       selected: selected,
       showCheckmark: false,
-      selectedColor: const Color(0xff526FC5),
-      backgroundColor: const Color(0xffE8EDFC),
+      selectedColor: categoryColor,
+      backgroundColor: categoryColor.withValues(alpha: 0.12),
       labelStyle: TextStyle(
-        color: selected ? Colors.white : const Color(0xff4763B4),
+        color: selected ? Colors.white : categoryColor,
       ),
       onSelected: (_) {
         setState(() {
