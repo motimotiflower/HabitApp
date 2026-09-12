@@ -149,7 +149,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final topSpace = screenHeight * MainBackground.headerRatio;
+    final topSpace = screenHeight * MainBackground.headerRatio * 0.58;
     final dateKey = _todayKey();
     final habitMarks = _habitMarks();
 
