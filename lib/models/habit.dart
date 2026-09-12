@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 class Habit {
+  final String id; //同じタイトルでも別の習慣として判定するID
   final String title;
   final IconData icon;
   final List<String> days; //習慣を行う曜日
@@ -9,16 +10,19 @@ class Habit {
   final Map<String, bool> completionHistory; //日付ごとの達成記録
 
   Habit({
+    String? id,
     required this.title,
     required this.icon,
     this.days = const [],
     this.category = '未設定',
     Map<String, bool>? completionHistory,
-  }) : completionHistory = completionHistory ?? {};
+  })  : id = id ?? DateTime.now().microsecondsSinceEpoch.toString(),
+        completionHistory = completionHistory ?? {};
 
   //Habitを保存しやすい形に変換
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'title': title,
       'icon': icon.codePoint,
       'days': days,
@@ -30,6 +34,7 @@ class Habit {
   //保存データからHabitを作り直す
   factory Habit.fromJson(Map<String, dynamic> json) {
     return Habit(
+      id: json['id'],
       title: json['title'],
       icon: IconData(json['icon'], fontFamily: 'MaterialIcons'),
       days: List<String>.from(json['days'] ?? []),
