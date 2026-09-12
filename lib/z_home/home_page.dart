@@ -165,7 +165,6 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    final topSpace = screenHeight * MainBackground.headerRatio * 0.58;
     final dateKey = _todayKey();
     final habitMarks = _habitMarks();
 
@@ -559,6 +558,7 @@ class _HomeWideSection extends StatelessWidget {
           ],
         ),
       ),
+      ),
     );
   }
 }
@@ -622,6 +622,7 @@ class _HomeSectionCard extends StatelessWidget {
           const SizedBox(height: 12),
           child,
         ],
+      ),
       ),
     );
   }
