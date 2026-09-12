@@ -153,7 +153,7 @@ class HomePageState extends State<HomePage> {
     final dateKey = _todayKey();
     final habitMarks = _habitMarks();
 
-    //広い画面ではカードを2列、スマホでは今まで通り1列にする
+    //スマホ以外は白い土台を2×2に区切り、スマホはカード表示
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 600;
@@ -327,108 +327,100 @@ class HomePageState extends State<HomePage> {
                 ),
         );
 
-        return Padding(
-          padding: EdgeInsets.fromLTRB(16, topSpace, 16, 16),
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              if (isWide)
-                //スマホ以外では1つの白い領域を薄い線で2×2に区切る
-                SizedBox(
-                  height: (constraints.maxHeight - topSpace - 24)
-                      .clamp(420.0, 620.0)
-                      .toDouble(),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.96),
-                      borderRadius: BorderRadius.circular(22),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x22000000),
-                          blurRadius: 14,
-                          offset: Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
+        if (isWide) {
+          //スマホ以外は、ほかのページと同じ白い土台を使う
+          final headerHeight =
+              screenHeight * MainBackground.headerRatio;
+
+          return Padding(
+            padding: EdgeInsets.only(top: headerHeight),
+            child: Container(
+              width: double.infinity,
+              color: const Color(0xffF7F9FF),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Expanded(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(
-                                child: _HomeWideSection(
-                                  title: '今日の習慣',
-                                  icon: Icons.auto_awesome,
-                                  child: todayHabitCard.child,
-                                ),
-                              ),
-                              const VerticalDivider(
-                                width: 1,
-                                thickness: 1,
-                                color: Color(0xffE6EAF4),
-                              ),
-                              Expanded(
-                                child: _HomeWideSection(
-                                  title: '今日のタスク',
-                                  icon: Icons.check_circle_outline,
-                                  child: todayTaskCard.child,
-                                ),
-                              ),
-                            ],
+                          child: _HomeWideSection(
+                            title: '今日の習慣',
+                            icon: Icons.auto_awesome,
+                            child: todayHabitCard.child,
                           ),
                         ),
-                        const Divider(
-                          height: 1,
+                        const VerticalDivider(
+                          width: 1,
                           thickness: 1,
                           color: Color(0xffE6EAF4),
                         ),
                         Expanded(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(
-                                //3番目に習慣の記録を配置
-                                child: _HomeWideSection(
-                                  title: '習慣の積み重ね',
-                                  icon: Icons.grid_view_rounded,
-                                  fillChild: true,
-                                  child: _HomeHabitGrid(
-                                    marks: habitMarks,
-                                    fillAvailable: true,
-                                  ),
-                                ),
-                              ),
-                              const VerticalDivider(
-                                width: 1,
-                                thickness: 1,
-                                color: Color(0xffE6EAF4),
-                              ),
-                              Expanded(
-                                child: _HomeWideSection(
-                                  title: 'メモ',
-                                  icon: Icons.edit_note_outlined,
-                                  child: memoCard.child,
-                                ),
-                              ),
-                            ],
+                          child: _HomeWideSection(
+                            title: '今日のタスク',
+                            icon: Icons.check_circle_outline,
+                            child: todayTaskCard.child,
                           ),
                         ),
                       ],
                     ),
                   ),
-                )
-              else ...[
-                //スマホでは今まで通り縦1列
-                habitRecordCard,
-                const SizedBox(height: 12),
-                todayHabitCard,
-                const SizedBox(height: 12),
-                todayTaskCard,
-                const SizedBox(height: 12),
-                memoCard,
-              ],
+                  const Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: Color(0xffE6EAF4),
+                  ),
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          //3番目に習慣の記録を配置
+                          child: _HomeWideSection(
+                            title: '習慣の積み重ね',
+                            icon: Icons.grid_view_rounded,
+                            fillChild: true,
+                            child: _HomeHabitGrid(
+                              marks: habitMarks,
+                              fillAvailable: true,
+                            ),
+                          ),
+                        ),
+                        const VerticalDivider(
+                          width: 1,
+                          thickness: 1,
+                          color: Color(0xffE6EAF4),
+                        ),
+                        Expanded(
+                          child: _HomeWideSection(
+                            title: 'メモ',
+                            icon: Icons.edit_note_outlined,
+                            child: memoCard.child,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        //スマホ版は今まで通りカード表示
+        return Padding(
+          padding: EdgeInsets.fromLTRB(16, topSpace, 16, 16),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              habitRecordCard,
+              const SizedBox(height: 12),
+              todayHabitCard,
+              const SizedBox(height: 12),
+              todayTaskCard,
+              const SizedBox(height: 12),
+              memoCard,
             ],
           ),
         );
