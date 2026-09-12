@@ -385,63 +385,78 @@ class NotificationService {
     final ids = <String>[];
     final now = tz.TZDateTime.now(tz.local);
 
-    for (final entry in weekdayItems.entries) {
-      final weekday = entry.key;
-      var scheduled = tz.TZDateTime(
-        tz.local,
-        now.year,
-        now.month,
-        now.day,
-        settings.batchHour,
-        settings.batchMinute,
-      );
+    for (final timeText in settings.batchTimes) {
+      final parts = timeText.split(':');
+      final hour = int.tryParse(parts.first) ?? 21;
+      final minute =
+          int.tryParse(parts.length > 1 ? parts[1] : '') ?? 0;
 
-      while (scheduled.weekday != weekday ||
-          !scheduled.isAfter(now)) {
-        scheduled = scheduled.add(const Duration(days: 1));
+      for (final entry in weekdayItems.entries) {
+        final weekday = entry.key;
+
+        var scheduled = tz.TZDateTime(
+          tz.local,
+          now.year,
+          now.month,
+          now.day,
+          hour,
+          minute,
+        );
+
+        while (scheduled.weekday != weekday ||
+            !scheduled.isAfter(now)) {
+          scheduled = scheduled.add(const Duration(days: 1));
+        }
+
+        final id = _stableId(
+          'batch|weekday|$weekday|$hour|$minute',
+        );
+
+        await _plugin.zonedSchedule(
+          id: id,
+          title: '今日のリマインダー',
+          body: entry.value.join('・'),
+          scheduledDate: scheduled,
+          notificationDetails: _details,
+          androidScheduleMode:
+              AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents:
+              DateTimeComponents.dayOfWeekAndTime,
+        );
+
+        ids.add(id.toString());
       }
 
-      final id = _stableId('batch|weekday|$weekday');
+      for (final entry in dateItems.entries) {
+        final date = dateValues[entry.key]!;
 
-      await _plugin.zonedSchedule(
-        id: id,
-        title: '今日のリマインダー',
-        body: entry.value.join('・'),
-        scheduledDate: scheduled,
-        notificationDetails: _details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-      );
+        final scheduled = tz.TZDateTime(
+          tz.local,
+          date.year,
+          date.month,
+          date.day,
+          hour,
+          minute,
+        );
 
-      ids.add(id.toString());
-    }
+        if (!scheduled.isAfter(now)) continue;
 
-    for (final entry in dateItems.entries) {
-      final date = dateValues[entry.key]!;
+        final id = _stableId(
+          'batch|date|${entry.key}|$hour|$minute',
+        );
 
-      final scheduled = tz.TZDateTime(
-        tz.local,
-        date.year,
-        date.month,
-        date.day,
-        settings.batchHour,
-        settings.batchMinute,
-      );
+        await _plugin.zonedSchedule(
+          id: id,
+          title: '今日のリマインダー',
+          body: entry.value.join('・'),
+          scheduledDate: scheduled,
+          notificationDetails: _details,
+          androidScheduleMode:
+              AndroidScheduleMode.inexactAllowWhileIdle,
+        );
 
-      if (!scheduled.isAfter(now)) continue;
-
-      final id = _stableId('batch|date|${entry.key}');
-
-      await _plugin.zonedSchedule(
-        id: id,
-        title: '今日のリマインダー',
-        body: entry.value.join('・'),
-        scheduledDate: scheduled,
-        notificationDetails: _details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      );
-
-      ids.add(id.toString());
+        ids.add(id.toString());
+      }
     }
 
     final prefs = await SharedPreferences.getInstance();
