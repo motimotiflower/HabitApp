@@ -384,7 +384,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 21,
+            fontSize: 23,
             fontWeight: FontWeight.w600,
           ),
         ),
