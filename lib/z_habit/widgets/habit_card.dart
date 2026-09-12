@@ -57,7 +57,7 @@ class HabitCard extends StatelessWidget {
                 Text(
                   habit.title,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 19,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xff35415F),
                     decoration:
