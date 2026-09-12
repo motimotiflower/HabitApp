@@ -337,72 +337,73 @@ class HomePageState extends State<HomePage> {
             child: Container(
               width: double.infinity,
               color: const Color(0xffF7F9FF),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: _HomeWideSection(
-                            title: '今日の習慣',
-                            icon: Icons.auto_awesome,
-                            child: todayHabitCard.child,
-                          ),
-                        ),
-                        const VerticalDivider(
-                          width: 1,
-                          thickness: 1,
-                          color: Color(0xffE6EAF4),
-                        ),
-                        Expanded(
-                          child: _HomeWideSection(
-                            title: '今日のタスク',
-                            icon: Icons.check_circle_outline,
-                            child: todayTaskCard.child,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: Color(0xffE6EAF4),
-                  ),
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          //3番目に習慣の記録を配置
-                          child: _HomeWideSection(
-                            title: '習慣の積み重ね',
-                            icon: Icons.grid_view_rounded,
-                            fillChild: true,
-                            child: _HomeHabitGrid(
-                              marks: habitMarks,
-                              fillAvailable: true,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    //習慣・タスクが増えた分だけ上段も自然に伸びる
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: _HomeWideSection(
+                              title: '今日の習慣',
+                              icon: Icons.auto_awesome,
+                              child: todayHabitCard.child,
                             ),
                           ),
-                        ),
-                        const VerticalDivider(
-                          width: 1,
-                          thickness: 1,
-                          color: Color(0xffE6EAF4),
-                        ),
-                        Expanded(
-                          child: _HomeWideSection(
-                            title: 'メモ',
-                            icon: Icons.edit_note_outlined,
-                            child: memoCard.child,
+                          const VerticalDivider(
+                            width: 1,
+                            thickness: 1,
+                            color: Color(0xffE6EAF4),
                           ),
-                        ),
-                      ],
+                          Expanded(
+                            child: _HomeWideSection(
+                              title: '今日のタスク',
+                              icon: Icons.check_circle_outline,
+                              child: todayTaskCard.child,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    const Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: Color(0xffE6EAF4),
+                    ),
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            //3番目に習慣の記録を配置
+                            child: _HomeWideSection(
+                              title: '習慣の積み重ね',
+                              icon: Icons.grid_view_rounded,
+                              child: _HomeHabitGrid(
+                                marks: habitMarks,
+                              ),
+                            ),
+                          ),
+                          const VerticalDivider(
+                            width: 1,
+                            thickness: 1,
+                            color: Color(0xffE6EAF4),
+                          ),
+                          Expanded(
+                            child: _HomeWideSection(
+                              title: 'メモ',
+                              icon: Icons.edit_note_outlined,
+                              child: memoCard.child,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -414,11 +415,12 @@ class HomePageState extends State<HomePage> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              habitRecordCard,
-              const SizedBox(height: 12),
               todayHabitCard,
               const SizedBox(height: 12),
               todayTaskCard,
+              const SizedBox(height: 12),
+              //スマホでも3番目に習慣の記録を配置
+              habitRecordCard,
               const SizedBox(height: 12),
               memoCard,
             ],
@@ -435,13 +437,11 @@ class _HomeWideSection extends StatelessWidget {
     required this.title,
     required this.icon,
     required this.child,
-    this.fillChild = false,
   });
 
   final String title;
   final IconData icon;
   final Widget child;
-  final bool fillChild;
 
   @override
   Widget build(BuildContext context) {
@@ -449,6 +449,7 @@ class _HomeWideSection extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
@@ -469,15 +470,7 @@ class _HomeWideSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-
-          if (fillChild)
-            Expanded(child: child)
-          else
-            Expanded(
-              child: SingleChildScrollView(
-                child: child,
-              ),
-            ),
+          child,
         ],
       ),
     );
@@ -547,11 +540,9 @@ class _HomeSectionCard extends StatelessWidget {
 class _HomeHabitGrid extends StatelessWidget {
   const _HomeHabitGrid({
     required this.marks,
-    this.fillAvailable = false,
   });
 
   final List<_HabitMark> marks;
-  final bool fillAvailable;
 
   static const int _minimumCells = 60;
 
@@ -562,28 +553,9 @@ class _HomeHabitGrid extends StatelessWidget {
         const cellSize = 14.0;
         const spacing = 4.0;
 
-        //Webでは区画いっぱいに薄いマスを敷き詰める
-        int minimumCells = _minimumCells;
-
-        if (fillAvailable &&
-            constraints.maxWidth.isFinite &&
-            constraints.maxHeight.isFinite) {
-          final columns =
-              ((constraints.maxWidth + spacing) / (cellSize + spacing))
-                  .floor();
-          final rows =
-              ((constraints.maxHeight + spacing) / (cellSize + spacing))
-                  .floor();
-
-          final availableCells = columns * rows;
-
-          if (availableCells > minimumCells) {
-            minimumCells = availableCells;
-          }
-        }
-
+        //記録が増えるほどマスも増え、区画自体も縦に伸びる
         final cellCount =
-            marks.length > minimumCells ? marks.length : minimumCells;
+            marks.length > _minimumCells ? marks.length : _minimumCells;
 
         return SingleChildScrollView(
           child: Wrap(
