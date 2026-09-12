@@ -35,7 +35,19 @@ class HabitStorage {
     // JSON文字列 → List
     final List<dynamic> decodedList = jsonDecode(jsonString);
 
-    // List<Map> → List<Habit>
-    return decodedList.map((json) => Habit.fromJson(json)).toList();
+    //以前のデータにIDが無ければ読み込み時に付与して保存し直す
+    final hadMissingIds = decodedList.any(
+      (json) => json is Map && json['id'] == null,
+    );
+
+    final habits = decodedList
+        .map((json) => Habit.fromJson(Map<String, dynamic>.from(json)))
+        .toList();
+
+    if (hadMissingIds) {
+      await saveHabits(habits);
+    }
+
+    return habits;
   }
 }
