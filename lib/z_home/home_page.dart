@@ -16,6 +16,7 @@ import 'package:habitapp/z_task/sheets/add_task_sheet.dart';
 import 'package:habitapp/z_task/sheets/edit_task_sheet.dart';
 import 'package:habitapp/z_star/star_storage.dart';
 import 'package:habitapp/settings/settings_page.dart';
+import 'package:habitapp/main/widgets/adaptive_editor_panel.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -188,116 +189,87 @@ class HomePageState extends State<HomePage> {
 
   //Home上から習慣を追加
   Future<void> _openAddHabit() async {
-    await showModalBottomSheet(
+    await showAdaptiveEditor(
       context: context,
-      isScrollControlled: true,
-        //大画面でも追加・編集画面を横幅いっぱいに広げる
-        constraints: const BoxConstraints(maxWidth: double.infinity),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
+      mobileHeightFactor: 0.80,
       builder: (context) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.80,
-          child: AddHabitSheet(
-            onAddHabit: (habit) async {
-              final habits = await HabitStorage.loadHabits();
-              habits.add(habit);
-              await HabitStorage.saveHabits(habits);
-              await reload();
-            },
-          ),
+        return AddHabitSheet(
+          onAddHabit: (habit) async {
+            final habits = await HabitStorage.loadHabits();
+            habits.add(habit);
+            await HabitStorage.saveHabits(habits);
+            await reload();
+          },
         );
       },
     );
   }
 
-  //チェック欄を避け、本文側をタップしたときだけ編集を開く
   Future<void> _openEditHabit(Habit habit) async {
-    await showModalBottomSheet(
+    await showAdaptiveEditor(
       context: context,
-      isScrollControlled: true,
-        //大画面でも追加・編集画面を横幅いっぱいに広げる
-        constraints: const BoxConstraints(maxWidth: double.infinity),
-      backgroundColor: Colors.transparent,
+      mobileHeightFactor: 0.80,
       builder: (context) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.80,
-          child: EditHabitSheet(
-            habit: habit,
-            onSave: (updatedHabit) async {
-              final habits = await HabitStorage.loadHabits();
-              final index =
-                  habits.indexWhere((item) => item.id == habit.id);
+        return EditHabitSheet(
+          habit: habit,
+          onSave: (updatedHabit) async {
+            final habits = await HabitStorage.loadHabits();
+            final index =
+                habits.indexWhere((item) => item.id == habit.id);
 
-              if (index != -1) {
-                habits[index] = updatedHabit;
-                await HabitStorage.saveHabits(habits);
-              }
+            if (index != -1) {
+              habits[index] = updatedHabit;
+              await HabitStorage.saveHabits(habits);
+            }
 
-              await reload();
-            },
-          ),
+            await reload();
+          },
         );
       },
     );
   }
 
-  //Home上からタスクを追加
   Future<void> _openAddTask() async {
-    await showModalBottomSheet(
+    await showAdaptiveEditor(
       context: context,
-      isScrollControlled: true,
-        //大画面でも追加・編集画面を横幅いっぱいに広げる
-        constraints: const BoxConstraints(maxWidth: double.infinity),
-      backgroundColor: Colors.transparent,
+      mobileHeightFactor: 0.80,
       builder: (context) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.80,
-          child: AddTaskSheet(
-            onAddTask: (task) async {
-              final tasks = await TaskStorage.loadTasks();
-              tasks.add(task);
-              await TaskStorage.saveTasks(tasks);
-              await reload();
-            },
-          ),
+        return AddTaskSheet(
+          onAddTask: (task) async {
+            final tasks = await TaskStorage.loadTasks();
+            tasks.add(task);
+            await TaskStorage.saveTasks(tasks);
+            await reload();
+          },
         );
       },
     );
   }
 
   Future<void> _openEditTask(Task task) async {
-    await showModalBottomSheet(
+    await showAdaptiveEditor(
       context: context,
-      isScrollControlled: true,
-        //大画面でも追加・編集画面を横幅いっぱいに広げる
-        constraints: const BoxConstraints(maxWidth: double.infinity),
-      backgroundColor: Colors.transparent,
+      mobileHeightFactor: 0.80,
       builder: (context) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.80,
-          child: EditTaskSheet(
-            task: task,
-            onSave: (updatedTask) async {
-              final tasks = await TaskStorage.loadTasks();
-              final index =
-                  tasks.indexWhere((item) => item.id == task.id);
+        return EditTaskSheet(
+          task: task,
+          onSave: (updatedTask) async {
+            final tasks = await TaskStorage.loadTasks();
+            final index =
+                tasks.indexWhere((item) => item.id == task.id);
 
-              if (index != -1) {
-                tasks[index] = updatedTask;
-                await TaskStorage.saveTasks(tasks);
-              }
+            if (index != -1) {
+              tasks[index] = updatedTask;
+              await TaskStorage.saveTasks(tasks);
+            }
 
-              await reload();
-            },
-          ),
+            await reload();
+          },
         );
       },
     );
   }
 
-  //Homeから部屋を開いた場合、戻る矢印でそのままHomeへ戻る
   Future<void> _openMemoRoom(Memo memo) async {
     Memo currentMemo = memo;
 
