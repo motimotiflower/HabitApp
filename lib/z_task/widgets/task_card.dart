@@ -109,6 +109,20 @@ class TaskCard extends StatelessWidget {
                     ),
                   ),
 
+                  if (task.description.isNotEmpty) ...[
+                    const SizedBox(height: 5),
+                    Text(
+                      task.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.4,
+                        color: Color(0xff697188),
+                      ),
+                    ),
+                  ],
+
                   const SizedBox(height: 5),
 
                   Wrap(
