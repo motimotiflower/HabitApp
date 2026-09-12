@@ -163,8 +163,11 @@ class HomePageState extends State<HomePage> {
         final habitRecordCard = _HomeSectionCard(
           title: '習慣の積み重ね',
           icon: Icons.grid_view_rounded,
-          minHeight: 166,
-          child: _HomeHabitGrid(marks: habitMarks),
+          minHeight: 190,
+          child: _HomeHabitGrid(
+            marks: habitMarks,
+            fillCard: true,
+          ),
         );
 
         final todayHabitCard = _HomeSectionCard(
@@ -604,10 +607,12 @@ class _HomeHabitGrid extends StatelessWidget {
   const _HomeHabitGrid({
     required this.marks,
     this.isWide = false,
+    this.fillCard = false,
   });
 
   final List<_HabitMark> marks;
   final bool isWide;
+  final bool fillCard;
 
   static const int _minimumCells = 60;
 
@@ -615,20 +620,21 @@ class _HomeHabitGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        //Webでは少し大きめ、スマホでは今までのサイズ
-        final cellSize = isWide ? 20.0 : 14.0;
+        //Web・スマホとも少し大きめのマスにする
+        final cellSize = isWide ? 22.0 : 16.0;
         final spacing = isWide ? 5.0 : 4.0;
 
-        //Webでは横幅いっぱい×最低6行になる数のマスを用意
         final columns = constraints.maxWidth.isFinite
             ? ((constraints.maxWidth + spacing) / (cellSize + spacing))
                 .floor()
                 .clamp(1, 1000)
             : 1;
-        final wideMinimumCells = columns * 6;
+
+        //カード表示では横幅いっぱい×最低5行までマスを敷き詰める
+        final fillMinimumCells = columns * (isWide ? 6 : 5);
         final minimumCells =
-            isWide && wideMinimumCells > _minimumCells
-                ? wideMinimumCells
+            (isWide || fillCard) && fillMinimumCells > _minimumCells
+                ? fillMinimumCells
                 : _minimumCells;
 
         //記録が増えるほどマスも増え、区画自体も縦に伸びる
