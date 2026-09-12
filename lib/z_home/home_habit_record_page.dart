@@ -191,6 +191,19 @@ class _HomeHabitRecordPageState
   Widget build(BuildContext context) {
     final groups = _groupHabits();
 
+    //並んだカード同士で縦のマス数もそろえる
+    final maxCompleted = groups.values.isEmpty
+        ? 0
+        : groups.values
+            .map(_completedCount)
+            .reduce((a, b) => a > b ? a : b);
+    const columns = 11;
+    const minimumCells = columns * 3;
+    final roundedCells =
+        ((maxCompleted + columns - 1) ~/ columns) * columns;
+    final commonCellCount =
+        roundedCells > minimumCells ? roundedCells : minimumCells;
+
     return Scaffold(
       backgroundColor: const Color(0xffF7F9FF),
       //メモ部屋と同じ高さ・余白・戻るボタンのヘッダー
@@ -275,6 +288,7 @@ class _HomeHabitRecordPageState
                         completedCount: _completedCount(entry.value),
                         color: _groupColor(entry.value),
                         compact: isWide,
+                        cellCount: commonCellCount,
                       ),
                     );
                   }).toList(),
@@ -462,24 +476,30 @@ class _StarFragmentCard extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onSky,
-                  icon: const Icon(Icons.nightlight_outlined),
-                  label: const Text('空を見る'),
-                ),
+          SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: OutlinedButton.icon(
+              onPressed: onSky,
+              icon: const Icon(Icons.nightlight_outlined),
+              label: const Text(
+                '空を見る',
+                style: TextStyle(fontSize: 16),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onBook,
-                  icon: const Icon(Icons.menu_book_outlined),
-                  label: const Text('図鑑を見る'),
-                ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: OutlinedButton.icon(
+              onPressed: onBook,
+              icon: const Icon(Icons.menu_book_outlined),
+              label: const Text(
+                '図鑑を見る',
+                style: TextStyle(fontSize: 16),
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -536,25 +556,20 @@ class _RecordGrid extends StatelessWidget {
     required this.title,
     required this.completedCount,
     required this.color,
+    required this.cellCount,
     this.compact = false,
   });
 
   final String title;
   final int completedCount;
   final Color color;
+  final int cellCount;
   final bool compact;
 
   static const int _columnCount = 11;
-  static const int _minimumRows = 3;
 
   @override
   Widget build(BuildContext context) {
-    final minimumCells = _columnCount * _minimumRows;
-    final neededCells =
-        ((completedCount + _columnCount - 1) ~/ _columnCount) *
-            _columnCount;
-    final cellCount =
-        neededCells > minimumCells ? neededCells : minimumCells;
 
     //ジャンル・習慣ごとにカードで分けて見やすくする
     return Container(
