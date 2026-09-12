@@ -46,17 +46,18 @@ class HomePageState extends State<HomePage> {
       return habit.days.contains(todayName);
     }).toList();
 
+    //Homeでは未完了タスクを締切が近い順に表示する
     final todayTasks = tasks.where((task) {
-      final deadline = task.deadline;
-
-      if (deadline == null || task.isDone) {
-        return false;
-      }
-
-      return deadline.year == now.year &&
-          deadline.month == now.month &&
-          deadline.day == now.day;
-    }).toList();
+      return !task.isDone;
+    }).toList()
+      ..sort((a, b) {
+        if (a.deadline != null && b.deadline != null) {
+          return a.deadline!.compareTo(b.deadline!);
+        }
+        if (a.deadline != null) return -1;
+        if (b.deadline != null) return 1;
+        return 0;
+      });
 
     //Homeにはピン留めしたメモだけ表示
     final pinnedMemos = memos
@@ -220,11 +221,11 @@ class HomePageState extends State<HomePage> {
         );
 
         final todayTaskCard = _HomeSectionCard(
-          title: '今日のタスク',
+          title: 'タスク',
           icon: Icons.check_circle_outline,
           minHeight: 128,
           child: _todayTasks.isEmpty
-              ? const _EmptyText('今日締切のタスクはありません')
+              ? const _EmptyText('未完了のタスクはありません')
               : Column(
                   children: _todayTasks.map((task) {
                     return Row(
@@ -263,6 +264,16 @@ class HomePageState extends State<HomePage> {
                               ),
                             ),
                           ),
+                        if (task.deadline != null) ...[
+                          const SizedBox(width: 10),
+                          Text(
+                            '${task.deadline!.month}/${task.deadline!.day}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xff81889B),
+                            ),
+                          ),
+                        ],
                       ],
                     );
                   }).toList(),
@@ -327,103 +338,132 @@ class HomePageState extends State<HomePage> {
                 ),
         );
 
-        if (isWide) {
-          //Homeは上の青い余白を残し、その下を2×2の白い領域にする
-          final headerHeight = screenHeight * 0.30;
-          final contentHeight =
-              (constraints.maxHeight - headerHeight)
-                  .clamp(0.0, double.infinity)
-                  .toDouble();
+        //Homeはヘッダーも白い内容部分も1つのスクロールにする
+        final headerHeight = screenHeight * 0.30;
 
-          //4区画それぞれが最低でも白い領域の1/4を使う
-          final sectionMinHeight =
-              ((contentHeight - 32) / 2).clamp(180.0, double.infinity);
-
-          return Padding(
-            padding: EdgeInsets.only(top: headerHeight),
-            child: SizedBox(
-              width: double.infinity,
-              height: contentHeight,
-              child: Container(
-                color: const Color(0xffF7F9FF),
-                child: Scrollbar(
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16),
-                    child: Table(
-                      border: const TableBorder(
-                        horizontalInside: BorderSide(
-                          color: Color(0xffE6EAF4),
-                          width: 1,
-                        ),
-                        verticalInside: BorderSide(
-                          color: Color(0xffE6EAF4),
-                          width: 1,
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              //Home専用ヘッダー
+              Container(
+                height: headerHeight,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xff102d72),
+                      Color(0xff5e78cf),
+                    ],
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 36),
+                child: SafeArea(
+                  bottom: false,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 42),
+                        child: Text(
+                          'Home',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 36,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                      columnWidths: const {
-                        0: FlexColumnWidth(),
-                        1: FlexColumnWidth(),
-                      },
-                      children: [
-                        TableRow(
-                          children: [
-                            _HomeWideSection(
-                              title: '今日の習慣',
-                              icon: Icons.auto_awesome,
-                              minHeight: sectionMinHeight,
-                              child: todayHabitCard.child,
-                            ),
-                            _HomeWideSection(
-                              title: '今日のタスク',
-                              icon: Icons.check_circle_outline,
-                              minHeight: sectionMinHeight,
-                              child: todayTaskCard.child,
-                            ),
-                          ],
+                      const Spacer(),
+                      const Padding(
+                        padding: EdgeInsets.only(top: 46),
+                        child: Icon(
+                          Icons.settings_outlined,
+                          color: Colors.white,
+                          size: 24,
                         ),
-                        TableRow(
-                          children: [
-                            //3番目に習慣の記録を配置
-                            _HomeWideSection(
-                              title: '習慣の積み重ね',
-                              icon: Icons.grid_view_rounded,
-                              minHeight: sectionMinHeight,
-                              child: _HomeHabitGrid(
-                                marks: habitMarks,
-                                isWide: true,
-                              ),
-                            ),
-                            _HomeWideSection(
-                              title: 'メモ',
-                              icon: Icons.edit_note_outlined,
-                              minHeight: sectionMinHeight,
-                              child: memoCard.child,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          );
-        }
-        //スマホ版は今まで通りカード表示
-        return Padding(
-          padding: EdgeInsets.fromLTRB(16, topSpace, 16, 16),
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              todayHabitCard,
-              const SizedBox(height: 12),
-              todayTaskCard,
-              const SizedBox(height: 12),
-              //スマホでも3番目に習慣の記録を配置
-              habitRecordCard,
-              const SizedBox(height: 12),
-              memoCard,
+
+              if (isWide)
+                //スマホ以外は1つの白い領域を2×2に区切る
+                Container(
+                  width: double.infinity,
+                  color: const Color(0xffF7F9FF),
+                  padding: const EdgeInsets.all(16),
+                  child: Table(
+                    border: const TableBorder(
+                      horizontalInside: BorderSide(
+                        color: Color(0xffE6EAF4),
+                      ),
+                      verticalInside: BorderSide(
+                        color: Color(0xffE6EAF4),
+                      ),
+                    ),
+                    columnWidths: const {
+                      0: FlexColumnWidth(),
+                      1: FlexColumnWidth(),
+                    },
+                    children: [
+                      TableRow(
+                        children: [
+                          _HomeWideSection(
+                            title: '今日の習慣',
+                            icon: Icons.auto_awesome,
+                            minHeight: 220,
+                            child: todayHabitCard.child,
+                          ),
+                          _HomeWideSection(
+                            title: 'タスク',
+                            icon: Icons.check_circle_outline,
+                            minHeight: 220,
+                            child: todayTaskCard.child,
+                          ),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          //3番目に習慣の記録を配置
+                          _HomeWideSection(
+                            title: '習慣の積み重ね',
+                            icon: Icons.grid_view_rounded,
+                            minHeight: 220,
+                            child: _HomeHabitGrid(
+                              marks: habitMarks,
+                              isWide: true,
+                            ),
+                          ),
+                          _HomeWideSection(
+                            title: 'メモ',
+                            icon: Icons.edit_note_outlined,
+                            minHeight: 220,
+                            child: memoCard.child,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                )
+              else
+                //スマホは今まで通りカードを縦に並べる
+                Container(
+                  color: const Color(0xffF7F9FF),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      todayHabitCard,
+                      const SizedBox(height: 12),
+                      todayTaskCard,
+                      const SizedBox(height: 12),
+                      habitRecordCard,
+                      const SizedBox(height: 12),
+                      memoCard,
+                    ],
+                  ),
+                ),
             ],
           ),
         );
