@@ -30,6 +30,7 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
   late TimeOfDay _notificationTime;
   List<String> _categories = [];
   late String _selectedCategory;
+  String? _hoveredCategory;
 
   @override
   void initState() {
@@ -322,23 +323,47 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
   //ジャンル選択ボタン
   Widget _buildCategoryChip(String category) {
     final selected = _selectedCategory == category;
+    final hovered = _hoveredCategory == category;
 
-    return ChoiceChip(
-      label: Text(category),
-      selected: selected,
-      showCheckmark: false,
-      selectedColor: const Color(0xff526FC5),
-      backgroundColor: const Color(0xffE8EDFC),
-      side: const BorderSide(color: Color(0xffCDD5F0)),
-      labelStyle: TextStyle(
-        color: selected ? Colors.white : const Color(0xff4763B4),
-        fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-      ),
-      onSelected: (_) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) {
         setState(() {
-          _selectedCategory = category;
+          _hoveredCategory = category;
         });
       },
+      onExit: (_) {
+        setState(() {
+          if (_hoveredCategory == category) {
+            _hoveredCategory = null;
+          }
+        });
+      },
+      child: ChoiceChip(
+        label: Text(category),
+        selected: selected,
+        showCheckmark: false,
+        selectedColor: const Color(0xff526FC5),
+        backgroundColor: hovered
+            ? const Color(0xffCFD9F8)
+            : const Color(0xffE8EDFC),
+        side: BorderSide(
+          color: selected || hovered
+              ? const Color(0xff526FC5)
+              : const Color(0xffCDD5F0),
+          width: selected || hovered ? 1.8 : 1,
+        ),
+        labelStyle: TextStyle(
+          color: selected ? Colors.white : const Color(0xff35415F),
+          fontWeight:
+              selected || hovered ? FontWeight.w600 : FontWeight.normal,
+        ),
+        onSelected: (_) {
+          setState(() {
+            _selectedCategory = category;
+          });
+        },
+      ),
     );
   }
 
