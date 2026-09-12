@@ -83,7 +83,7 @@ class _HomeHabitRecordPageState
   }
 
   Future<void> _drawConstellation() async {
-    if (_starState.fragments < 30) return;
+    if (_starState.fragments < StarStorage.drawCost) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -91,7 +91,7 @@ class _HomeHabitRecordPageState
         return AlertDialog(
           title: const Text('星座ガチャ'),
           content: const Text(
-            '星の欠片を30個使って、星座を探しますか？',
+            '星の欠片を15個使って、星座を探しますか？',
           ),
           actions: [
             TextButton(
@@ -248,7 +248,8 @@ class _HomeHabitRecordPageState
           ),
 
           Padding(
-            padding: const EdgeInsets.all(18),
+            //ヘッダー直下だけ少し詰める
+            padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -351,8 +352,9 @@ class _StarFragmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visibleStars = fragments.clamp(0, 30).toInt();
-    final drawCount = fragments ~/ 30;
+    final visibleStars =
+        fragments.clamp(0, StarStorage.drawCost).toInt();
+    final drawCount = fragments ~/ StarStorage.drawCost;
     final allCollected =
         ownedCount >= StarStorage.constellationNames.length;
 
@@ -411,8 +413,8 @@ class _StarFragmentCard extends StatelessWidget {
           const SizedBox(height: 14),
 
           Text(
-            fragments < 30
-                ? '$fragments / 30'
+            fragments < StarStorage.drawCost
+                ? '$fragments / ${StarStorage.drawCost}'
                 : '星の欠片  $fragments個',
             style: const TextStyle(
               fontSize: 26,
@@ -426,8 +428,8 @@ class _StarFragmentCard extends StatelessWidget {
           Text(
             allCollected
                 ? '30種類の星座をすべて見つけました！'
-                : fragments < 30
-                    ? 'あと${30 - fragments}個でガチャを引けます'
+                : fragments < StarStorage.drawCost
+                    ? 'あと${StarStorage.drawCost - fragments}個でガチャを引けます'
                     : '星座ガチャを$drawCount回引けます',
             style: const TextStyle(
               fontSize: 13,
@@ -438,9 +440,11 @@ class _StarFragmentCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           LinearProgressIndicator(
-            value: (fragments % 30 == 0 && fragments > 0)
+            value: (fragments % StarStorage.drawCost == 0 &&
+                    fragments > 0)
                 ? 1
-                : (fragments % 30) / 30,
+                : (fragments % StarStorage.drawCost) /
+                    StarStorage.drawCost,
             minHeight: 8,
             borderRadius: BorderRadius.circular(10),
             backgroundColor: const Color(0xffDDDDF1),
@@ -460,7 +464,8 @@ class _StarFragmentCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: fragments >= 30 ? onDraw : null,
+                onPressed:
+                    fragments >= StarStorage.drawCost ? onDraw : null,
                 icon: const Icon(Icons.auto_awesome),
                 label: const Text(
                   '星座ガチャを引く',
