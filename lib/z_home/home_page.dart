@@ -313,9 +313,9 @@ class HomePageState extends State<HomePage> {
     await reload();
   }
 
-  //Homeの習慣記録を開く
-  void _openHabitRecord() {
-    Navigator.push(
+  //記録から戻ったらガチャ後の星・図鑑数もHomeへ反映
+  Future<void> _openHabitRecord() async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => HomeHabitRecordPage(
@@ -324,6 +324,8 @@ class HomePageState extends State<HomePage> {
         ),
       ),
     );
+
+    await reload();
   }
 
   @override
