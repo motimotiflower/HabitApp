@@ -922,9 +922,14 @@ class _HomeRecordPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final starSide = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+    final starSide = Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 6,
+        vertical: 4,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
         //瓶をシンプルな仮アイコンで表現
         LayoutBuilder(
           builder: (context, constraints) {
@@ -979,11 +984,12 @@ class _HomeRecordPreview extends StatelessWidget {
             color: Color(0xff697188),
           ),
         ),
-      ],
+        ],
+      ),
     );
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(child: starSide),
         const SizedBox(width: 12),
@@ -1044,9 +1050,14 @@ class _HomeHabitGrid extends StatelessWidget {
         final cellCount =
             marks.length > minimumCells ? marks.length : minimumCells;
 
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 6,
+            vertical: 4,
+          ),
+          child: Wrap(
+            spacing: spacing,
+            runSpacing: spacing,
           children: List.generate(cellCount, (index) {
             final hasRecord = index < marks.length;
 
@@ -1065,7 +1076,8 @@ class _HomeHabitGrid extends StatelessWidget {
                 ),
               ),
             );
-          }),
+            }),
+          ),
         );
       },
     );
