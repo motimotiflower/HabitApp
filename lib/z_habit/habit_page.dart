@@ -268,7 +268,8 @@ class HabitPageState extends State<HabitPage> {
                     ),
                   )
                 : ListView.builder(
-                    padding: EdgeInsets.zero,
+                    //右下の＋ボタンと最後のチェックが重ならないよう下に余白
+                    padding: const EdgeInsets.only(bottom: 88),
                     itemCount: selectedDayHabits.length,
                     itemBuilder: (context, index) {
                       final habit = selectedDayHabits[index];
