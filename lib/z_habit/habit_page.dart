@@ -67,21 +67,15 @@ class HabitPageState extends State<HabitPage> {
 
   //編集画面
   void _showEditSheet(Habit habit) {
-    showModalBottomSheet(
+    showAdaptiveEditor(
       context: context,
-      isScrollControlled: true,
-        //大画面でも追加・編集画面を横幅いっぱいに広げる
-        constraints: const BoxConstraints(maxWidth: double.infinity),
-      backgroundColor: Colors.transparent,
+      mobileHeightFactor: 0.82,
       builder: (context) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.82,
-          child: EditHabitSheet(
-            habit: habit,
-            onSave: (editedHabit) {
-              _editHabit(habit, editedHabit);
-            },
-          ),
+        return EditHabitSheet(
+          habit: habit,
+          onSave: (editedHabit) {
+            _editHabit(habit, editedHabit);
+          },
         );
       },
     ).whenComplete(_reloadCategoryColors);
