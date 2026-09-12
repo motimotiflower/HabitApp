@@ -1000,7 +1000,7 @@ class _HomeRecordPreview extends StatelessWidget {
             horizontal: 6,
             vertical: 8,
           ),
-          color: const Color(0xffE7EAF3),
+          color: const Color(0xffC9CFDD),
         ),
 
         Expanded(
