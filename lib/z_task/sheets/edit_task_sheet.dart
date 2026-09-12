@@ -21,6 +21,9 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
   late final TextEditingController _titleController;
 
   DateTime? _deadline;
+  late bool _isFlagged;
+  late bool _notificationEnabled;
+  late TimeOfDay _notificationTime;
   List<String> _categories = [];
   late String _selectedCategory;
 
@@ -31,6 +34,12 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
     _titleController = TextEditingController(text: widget.task.title);
     _deadline = widget.task.deadline;
     _selectedCategory = widget.task.category;
+    _isFlagged = widget.task.isFlagged;
+    _notificationEnabled = widget.task.notificationEnabled;
+    _notificationTime = TimeOfDay(
+      hour: widget.task.notificationHour ?? 9,
+      minute: widget.task.notificationMinute ?? 0,
+    );
 
     _loadCategories();
   }
@@ -68,6 +77,19 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
     });
   }
 
+  Future<void> _selectNotificationTime() async {
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: _notificationTime,
+    );
+
+    if (selected == null) return;
+
+    setState(() {
+      _notificationTime = selected;
+    });
+  }
+
   //編集内容を保存する
   void _saveTask() {
     final title = _titleController.text.trim();
@@ -80,6 +102,11 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
         title: title,
         deadline: _deadline,
         category: _selectedCategory,
+        isFlagged: _isFlagged,
+        notificationEnabled:
+            _notificationEnabled && _deadline != null,
+        notificationHour: _notificationTime.hour,
+        notificationMinute: _notificationTime.minute,
         isDone: widget.task.isDone,
       ),
     );
@@ -156,6 +183,64 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
                               ),
                         onTap: _selectDeadline,
                       ),
+
+                      const SizedBox(height: 8),
+
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        secondary: const Icon(
+                          Icons.flag_outlined,
+                          color: Color(0xff526FC5),
+                        ),
+                        title: const Text('フラグ'),
+                        subtitle: const Text('Homeに優先表示します'),
+                        value: _isFlagged,
+                        onChanged: (value) {
+                          setState(() {
+                            _isFlagged = value;
+                          });
+                        },
+                      ),
+
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        secondary: const Icon(
+                          Icons.notifications_outlined,
+                          color: Color(0xff526FC5),
+                        ),
+                        title: const Text('通知'),
+                        subtitle: Text(
+                          _deadline == null
+                              ? '締切日を設定すると通知できます'
+                              : '締切日の指定時刻に通知します',
+                        ),
+                        value: _notificationEnabled,
+                        onChanged: _deadline == null
+                            ? null
+                            : (value) {
+                                setState(() {
+                                  _notificationEnabled = value;
+                                });
+                              },
+                      ),
+
+                      if (_notificationEnabled && _deadline != null)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.schedule,
+                            color: Color(0xff526FC5),
+                          ),
+                          title: const Text('通知時刻'),
+                          trailing: Text(
+                            _notificationTime.format(context),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onTap: _selectNotificationTime,
+                        ),
 
                       const SizedBox(height: 16),
 
