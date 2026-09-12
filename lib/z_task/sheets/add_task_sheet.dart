@@ -61,20 +61,7 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
   }
 
   //通知時刻を選ぶ
-  Future<void> _selectNotificationTime() async {
-    final selected = await showTimePicker(
-      context: context,
-      initialTime: _notificationTime,
-    );
-
-    if (selected == null) return;
-
-    setState(() {
-      _notificationTime = selected;
-    });
-  }
-
-  //タスクを追加する
+    //タスクを追加する
   void _addTask() {
     final title = _titleController.text.trim();
 
