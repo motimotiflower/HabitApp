@@ -21,6 +21,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   List<String> _categories = [];
   Map<String, int> _categoryColors = {};
   String _selectedCategory = '未設定';
+  String? _hoveredCategory;
   IconData _selectedIcon = Icons.check;
   bool _notificationEnabled = false;
   List<String> _notificationDays = [];
@@ -461,6 +462,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   //ジャンル選択ボタン
   Widget _categoryChip(String category) {
     final selected = _selectedCategory == category;
+    final hovered = _hoveredCategory == category;
     final categoryColor = category == '未設定'
         ? const Color(0xff526FC5)
         : Color(
@@ -468,20 +470,45 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                 _categoryPalette.first.toARGB32(),
           );
 
-    return ChoiceChip(
-      label: Text(category),
-      selected: selected,
-      showCheckmark: false,
-      selectedColor: categoryColor,
-      backgroundColor: categoryColor.withValues(alpha: 0.12),
-      labelStyle: TextStyle(
-        color: selected ? Colors.white : categoryColor,
-      ),
-      onSelected: (_) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) {
         setState(() {
-          _selectedCategory = category;
+          _hoveredCategory = category;
         });
       },
+      onExit: (_) {
+        setState(() {
+          if (_hoveredCategory == category) {
+            _hoveredCategory = null;
+          }
+        });
+      },
+      child: ChoiceChip(
+        label: Text(category),
+        selected: selected,
+        showCheckmark: false,
+        selectedColor: categoryColor,
+        backgroundColor: hovered
+            ? categoryColor.withValues(alpha: 0.28)
+            : categoryColor.withValues(alpha: 0.12),
+        side: BorderSide(
+          color: selected || hovered
+              ? categoryColor
+              : categoryColor.withValues(alpha: 0.35),
+          width: selected || hovered ? 1.8 : 1,
+        ),
+        labelStyle: TextStyle(
+          color: selected ? Colors.white : const Color(0xff35415F),
+          fontWeight:
+              selected || hovered ? FontWeight.w600 : FontWeight.normal,
+        ),
+        onSelected: (_) {
+          setState(() {
+            _selectedCategory = category;
+          });
+        },
+      ),
     );
   }
 
