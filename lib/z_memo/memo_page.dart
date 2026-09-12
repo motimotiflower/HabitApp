@@ -184,7 +184,7 @@ class MemoPageState extends State<MemoPage> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Positioned(
-      top: screenHeight * MainBackground.headerRatio * 0.50,
+      top: screenHeight * MainBackground.headerRatio * 0.68,
       left: 20,
       right: 20,
       child: TextField(
