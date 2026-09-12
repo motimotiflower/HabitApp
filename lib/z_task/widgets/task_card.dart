@@ -101,6 +101,7 @@ class TaskCard extends StatelessWidget {
                   Text(
                     task.title,
                     style: TextStyle(
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xff35415F),
                       decoration:
