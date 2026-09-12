@@ -11,6 +11,7 @@ import 'package:habitapp/z_memo/sheets/add_memo_room_sheet.dart';
 
 import 'package:habitapp/main/widgets/main_navigation_bar.dart';
 import 'package:habitapp/main/widgets/main_background.dart';
+import 'package:habitapp/main/widgets/adaptive_editor_panel.dart';
 import 'package:habitapp/models/page_info.dart';
 
 class MainPage extends StatefulWidget {
@@ -76,71 +77,48 @@ class _MainPageState extends State<MainPage> {
   void _openAddSheet() {
     //Habitの追加画面
     if (_currentIndex == 1) {
-      showModalBottomSheet(
+      showAdaptiveEditor(
         context: context,
-        isScrollControlled: true,
-        //大画面でも追加・編集画面を横幅いっぱいに広げる
-        constraints: const BoxConstraints(maxWidth: double.infinity),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-
+        mobileHeightFactor: 0.80,
         builder: (context) {
-          return SizedBox(
-            height: MediaQuery.of(context).size.height * 0.80,
-            child: AddHabitSheet(
-              onAddHabit: (habit) {
-                _habitPageKey.currentState?.addHabit(habit);
-              },
-            ),
+          return AddHabitSheet(
+            onAddHabit: (habit) {
+              _habitPageKey.currentState?.addHabit(habit);
+            },
           );
         },
       );
 
       //Taskの追加画面
     } else if (_currentIndex == 2) {
-      showModalBottomSheet(
+      showAdaptiveEditor(
         context: context,
-        isScrollControlled: true,
-        //大画面でも追加・編集画面を横幅いっぱいに広げる
-        constraints: const BoxConstraints(maxWidth: double.infinity),
-        backgroundColor: Colors.transparent,
-
+        mobileHeightFactor: 0.80,
         builder: (context) {
-          return SizedBox(
-            height: MediaQuery.of(context).size.height * 0.80,
-            child: AddTaskSheet(
-              onAddTask: (task) {
-                _taskPageKey.currentState?.addTask(task);
+          return AddTaskSheet(
+            onAddTask: (task) {
+              _taskPageKey.currentState?.addTask(task);
 
-                //Homeの「今日のタスク」にも反映
-                _homePageKey.currentState?.reload();
-              },
-            ),
+              //Homeのタスク表示にも反映
+              _homePageKey.currentState?.reload();
+            },
           );
         },
       );
 
       //Memo部屋の追加画面
     } else if (_currentIndex == 3) {
-      showModalBottomSheet(
+      showAdaptiveEditor(
         context: context,
-        isScrollControlled: true,
-        //大画面でも追加・編集画面を横幅いっぱいに広げる
-        constraints: const BoxConstraints(maxWidth: double.infinity),
-        backgroundColor: Colors.transparent,
-
+        mobileHeightFactor: 0.68,
         builder: (context) {
-          return SizedBox(
-            height: MediaQuery.of(context).size.height * 0.68,
-            child: AddMemoRoomSheet(
-              onAdd: (memo) {
-                _memoPageKey.currentState?.addMemo(memo);
+          return AddMemoRoomSheet(
+            onAdd: (memo) {
+              _memoPageKey.currentState?.addMemo(memo);
 
-                //Homeのピン留めメモ表示も最新化
-                _homePageKey.currentState?.reload();
-              },
-            ),
+              //Homeのピン留めメモ表示も最新化
+              _homePageKey.currentState?.reload();
+            },
           );
         },
       );
