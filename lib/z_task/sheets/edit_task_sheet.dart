@@ -76,6 +76,7 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
 
     widget.onSave(
       Task(
+        id: widget.task.id,
         title: title,
         deadline: _deadline,
         category: _selectedCategory,
