@@ -8,6 +8,7 @@ import 'package:habitapp/z_task/task_storage.dart';
 import 'package:habitapp/z_task/category_storage.dart';
 import 'package:habitapp/z_task/sheets/edit_task_sheet.dart';
 import 'package:habitapp/z_task/sheets/category_manage_sheet.dart';
+import 'package:habitapp/z_star/star_storage.dart';
 
 class TaskPage extends StatefulWidget {
   const TaskPage({super.key});
@@ -434,12 +435,29 @@ class TaskPageState extends State<TaskPage> {
 
                     return TaskCard(
                       task: task,
-                      onChanged: () {
+                      onChanged: () async {
+                        final wasDone = task.isDone;
+
                         setState(() {
-                          task.isDone = !task.isDone;
+                          task.isDone = !wasDone;
                         });
 
-                        TaskStorage.saveTasks(tasks);
+                        await TaskStorage.saveTasks(tasks);
+
+                        //完了で星の欠片+1、ガチャ前なら解除で取り消す
+                        final deadlineKey =
+                            task.deadline?.toIso8601String() ?? 'none';
+                        final actionKey =
+                            'task|${task.title}|$deadlineKey|${task.category}';
+
+                        if (!wasDone) {
+                          await StarStorage.award(
+                            actionKey: actionKey,
+                            source: 'task',
+                          );
+                        } else {
+                          await StarStorage.revoke(actionKey);
+                        }
                       },
                       onEdit: () {
                         showEditSheet(task);
