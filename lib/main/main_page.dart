@@ -249,6 +249,8 @@ class _MainPageState extends State<MainPage> {
               _homePageKey.currentState?.reload();
             } else if (index == 1) {
               _habitPageKey.currentState?.reloadHabits();
+            } else if (index == 2) {
+              _taskPageKey.currentState?.reloadTasks();
             } else if (index == 3) {
               _memoPageKey.currentState?.reloadMemos();
             }
