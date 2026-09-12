@@ -81,6 +81,7 @@ class TaskPageState extends State<TaskPage> {
         if (task.category != oldName) return task;
 
         return Task(
+          id: task.id,
           title: task.title,
           deadline: task.deadline,
           category: newName,
@@ -107,6 +108,7 @@ class TaskPageState extends State<TaskPage> {
         if (task.category != category) return task;
 
         return Task(
+          id: task.id,
           title: task.title,
           deadline: task.deadline,
           category: '未設定',
@@ -445,10 +447,7 @@ class TaskPageState extends State<TaskPage> {
                         await TaskStorage.saveTasks(tasks);
 
                         //完了で星の欠片+1、ガチャ前なら解除で取り消す
-                        final deadlineKey =
-                            task.deadline?.toIso8601String() ?? 'none';
-                        final actionKey =
-                            'task|${task.title}|$deadlineKey|${task.category}';
+                        final actionKey = 'task|${task.id}';
 
                         if (!wasDone) {
                           await StarStorage.award(
