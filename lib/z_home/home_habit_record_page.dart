@@ -193,12 +193,12 @@ class _HomeHabitRecordPageState
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final headerHeight = screenHeight * 0.26;
-    final titlePosition = headerHeight * 0.26;
-    final titlePadding =
-        (screenWidth * 0.07).clamp(0.0, 60.0).toDouble();
+    //記録ページは文字＋余白だけのコンパクトなヘッダー
+    final headerHeight = screenWidth >= 700 ? 104.0 : 88.0;
+    const titlePosition = 18.0;
+    const titlePadding = 8.0;
     final titleFontSize =
-        (screenWidth * 0.08).clamp(0.0, 36.0).toDouble();
+        (screenWidth * 0.07).clamp(28.0, 36.0).toDouble();
 
     return Scaffold(
       backgroundColor: const Color(0xffF7F9FF),
@@ -229,13 +229,13 @@ class _HomeHabitRecordPageState
                         tooltip: '戻る',
                         onPressed: () => Navigator.pop(context),
                         icon: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
+                          Icons.arrow_back,
                           color: Colors.white,
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 2),
                       Text(
-                        '習慣の記録',
+                        '記録',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: titleFontSize,
@@ -267,7 +267,7 @@ class _HomeHabitRecordPageState
                 const SizedBox(height: 26),
 
                 const Text(
-                  '習慣の積み重ね',
+                  '記録',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
