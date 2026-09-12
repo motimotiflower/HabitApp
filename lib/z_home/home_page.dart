@@ -931,10 +931,18 @@ class _HomeRecordPreview extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         //瓶をシンプルな仮アイコンで表現
-        Container(
-          width: isWide ? 86 : 72,
-          height: isWide ? 96 : 82,
-          padding: const EdgeInsets.all(10),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            //左半分の空きをなるべく瓶に使う
+            final bottleWidth = constraints.maxWidth.isFinite
+                ? (constraints.maxWidth * 0.72).clamp(88.0, 180.0)
+                : 110.0;
+            final bottleHeight = bottleWidth * 1.12;
+
+            return Container(
+          width: bottleWidth,
+          height: bottleHeight,
+          padding: EdgeInsets.all(bottleWidth * 0.11),
           decoration: BoxDecoration(
             color: const Color(0xffF3F2FC),
             borderRadius: BorderRadius.circular(24),
@@ -956,6 +964,8 @@ class _HomeRecordPreview extends StatelessWidget {
               ),
             ),
           ),
+            );
+          },
         ),
         const SizedBox(height: 7),
         Text(
