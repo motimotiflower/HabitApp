@@ -61,6 +61,8 @@ class _MemoComposerPageState extends State<MemoComposerPage> {
     return Scaffold(
       backgroundColor: const Color(0xffF7F9FF),
       appBar: AppBar(
+        //各詳細ページで上下の余白をそろえる
+        toolbarHeight: 52,
         backgroundColor: const Color(0xffF7F9FF),
         elevation: 0,
         leading: IconButton(
