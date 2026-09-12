@@ -193,11 +193,10 @@ class _HomeHabitRecordPageState
     final screenWidth = MediaQuery.of(context).size.width;
 
     //記録ページは文字＋余白だけのコンパクトなヘッダー
-    final headerHeight = screenWidth >= 700 ? 104.0 : 88.0;
-    const titlePosition = 18.0;
+    final headerHeight = screenWidth >= 700 ? 82.0 : 74.0;
+    const titlePosition = 10.0;
     const titlePadding = 8.0;
-    final titleFontSize =
-        (screenWidth * 0.07).clamp(28.0, 36.0).toDouble();
+    const titleFontSize = 25.0;
 
     return Scaffold(
       backgroundColor: const Color(0xffF7F9FF),
