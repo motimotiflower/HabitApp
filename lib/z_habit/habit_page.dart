@@ -226,24 +226,34 @@ class HabitPageState extends State<HabitPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton.icon(
-                onPressed: _showRecordSheet,
-                icon: const Icon(
-                  Icons.auto_graph,
-                  size: 18,
-                  color: Color(0xff526FC5),
-                ),
-                label: const Text(
-                  '記録',
-                  style: TextStyle(
-                    color: Color(0xff526FC5),
+              SizedBox(
+                height: 42,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xff526FC5),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                    ),
+                  ),
+                  onPressed: _showRecordSheet,
+                  icon: const Icon(
+                    Icons.auto_graph,
+                    size: 19,
+                  ),
+                  label: const Text(
+                    '記録',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
           //習慣が増えても一覧だけスクロールできる
           Expanded(
