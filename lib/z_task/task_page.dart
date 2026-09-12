@@ -84,6 +84,7 @@ class TaskPageState extends State<TaskPage> {
         return Task(
           id: task.id,
           title: task.title,
+          description: task.description,
           deadline: task.deadline,
           category: newName,
           isFlagged: task.isFlagged,
@@ -115,6 +116,7 @@ class TaskPageState extends State<TaskPage> {
         return Task(
           id: task.id,
           title: task.title,
+          description: task.description,
           deadline: task.deadline,
           category: '未設定',
           isFlagged: task.isFlagged,
