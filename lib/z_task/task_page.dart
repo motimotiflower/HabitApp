@@ -307,10 +307,11 @@ class TaskPageState extends State<TaskPage> {
 
   //青いヘッダー上の絞り込みUI
   Widget _buildHeaderFilters(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    final headerHeight = MainBackground.headerHeight(context);
 
     return Positioned(
-      top: screenHeight * MainBackground.headerRatio * 0.56,
+      //タイトルとの間を詰めつつ、下側にも余白を残す
+      top: headerHeight * 0.52,
       left: 20,
       right: 20,
       child: Column(
