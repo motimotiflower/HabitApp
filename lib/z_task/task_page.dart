@@ -219,6 +219,11 @@ class TaskPageState extends State<TaskPage> {
     _loadData();
   }
 
+  //他ページから戻った時に保存データと同期
+  Future<void> reloadTasks() async {
+    await _loadData();
+  }
+
   //タスクとジャンルを読み込む
   Future<void> _loadData() async {
     final loadedTasks = await TaskStorage.loadTasks();
