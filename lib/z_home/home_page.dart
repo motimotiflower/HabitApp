@@ -9,6 +9,7 @@ import 'package:habitapp/z_habit/habit_storage.dart';
 import 'package:habitapp/z_home/home_habit_record_page.dart';
 import 'package:habitapp/z_memo/memo_storage.dart';
 import 'package:habitapp/z_task/task_storage.dart';
+import 'package:habitapp/z_star/star_storage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -90,16 +91,32 @@ class HomePageState extends State<HomePage> {
   Future<void> _toggleHabit(Habit targetHabit) async {
     final habits = await HabitStorage.loadHabits();
     final dateKey = _todayKey();
+    bool? wasDone;
 
     for (final habit in habits) {
       if (habit.title == targetHabit.title) {
-        habit.completionHistory[dateKey] =
-            !(habit.completionHistory[dateKey] ?? false);
+        wasDone = habit.completionHistory[dateKey] ?? false;
+        habit.completionHistory[dateKey] = !wasDone;
         break;
       }
     }
 
     await HabitStorage.saveHabits(habits);
+
+    if (wasDone != null) {
+      final actionKey =
+          'habit|${targetHabit.title}|$dateKey';
+
+      if (!wasDone!) {
+        await StarStorage.award(
+          actionKey: actionKey,
+          source: 'habit',
+        );
+      } else {
+        await StarStorage.revoke(actionKey);
+      }
+    }
+
     await reload();
   }
 
@@ -113,6 +130,14 @@ class HomePageState extends State<HomePage> {
           task.category == targetTask.category &&
           !task.isDone) {
         task.isDone = true;
+
+        final deadlineKey =
+            task.deadline?.toIso8601String() ?? 'none';
+        await StarStorage.award(
+          actionKey:
+              'task|${task.title}|$deadlineKey|${task.category}',
+          source: 'task',
+        );
         break;
       }
     }
