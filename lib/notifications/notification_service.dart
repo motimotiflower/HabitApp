@@ -114,22 +114,55 @@ class NotificationService {
         continue;
       }
 
-      for (final day in habit.days) {
+      //日にち指定がある場合は1回だけ通知
+      if (habit.notificationDate != null) {
+        final scheduled = tz.TZDateTime(
+          tz.local,
+          habit.notificationDate!.year,
+          habit.notificationDate!.month,
+          habit.notificationDate!.day,
+          habit.notificationHour!,
+          habit.notificationMinute!,
+        );
+
+        if (scheduled.isAfter(tz.TZDateTime.now(tz.local))) {
+          final id = _stableId('habit|${habit.id}|date');
+
+          await _plugin.zonedSchedule(
+            id: id,
+            title: '習慣の時間です',
+            body: habit.title,
+            scheduledDate: scheduled,
+            notificationDetails: _details,
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          );
+
+          scheduledIds.add(id.toString());
+        }
+
+        continue;
+      }
+
+      //曜日指定。古いデータでは習慣自体の曜日をそのまま使う
+      final targetDays = habit.notificationDays.isNotEmpty
+          ? habit.notificationDays
+          : habit.days;
+
+      for (final day in targetDays) {
         final weekday = _weekdayNumber(day);
         final id = _stableId('habit|${habit.id}|$weekday');
 
-        var scheduled = tz.TZDateTime.now(tz.local);
-        scheduled = tz.TZDateTime(
+        var scheduled = tz.TZDateTime(
           tz.local,
-          scheduled.year,
-          scheduled.month,
-          scheduled.day,
+          tz.TZDateTime.now(tz.local).year,
+          tz.TZDateTime.now(tz.local).month,
+          tz.TZDateTime.now(tz.local).day,
           habit.notificationHour!,
           habit.notificationMinute!,
         );
 
         while (scheduled.weekday != weekday ||
-            scheduled.isBefore(tz.TZDateTime.now(tz.local))) {
+            !scheduled.isAfter(tz.TZDateTime.now(tz.local))) {
           scheduled = scheduled.add(const Duration(days: 1));
         }
 
@@ -160,35 +193,71 @@ class NotificationService {
     for (final task in tasks) {
       if (task.isDone ||
           !task.notificationEnabled ||
-          task.deadline == null ||
           task.notificationHour == null ||
           task.notificationMinute == null) {
         continue;
       }
 
-      final scheduled = tz.TZDateTime(
-        tz.local,
-        task.deadline!.year,
-        task.deadline!.month,
-        task.deadline!.day,
-        task.notificationHour!,
-        task.notificationMinute!,
-      );
+      //日にち指定なら締切とは関係なく通知できる
+      if (task.notificationDate != null) {
+        final scheduled = tz.TZDateTime(
+          tz.local,
+          task.notificationDate!.year,
+          task.notificationDate!.month,
+          task.notificationDate!.day,
+          task.notificationHour!,
+          task.notificationMinute!,
+        );
 
-      if (scheduled.isBefore(tz.TZDateTime.now(tz.local))) continue;
+        if (scheduled.isAfter(tz.TZDateTime.now(tz.local))) {
+          final id = _stableId('task|${task.id}|date');
 
-      final id = _stableId('task|${task.id}');
+          await _plugin.zonedSchedule(
+            id: id,
+            title: 'タスクのリマインダー',
+            body: task.title,
+            scheduledDate: scheduled,
+            notificationDetails: _details,
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          );
 
-      await _plugin.zonedSchedule(
-        id: id,
-        title: 'タスクの締切が近づいています',
-        body: task.title,
-        scheduledDate: scheduled,
-        notificationDetails: _details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      );
+          scheduledIds.add(id.toString());
+        }
 
-      scheduledIds.add(id.toString());
+        continue;
+      }
+
+      //曜日指定なら毎週通知
+      for (final day in task.notificationDays) {
+        final weekday = _weekdayNumber(day);
+        final id = _stableId('task|${task.id}|$weekday');
+
+        var scheduled = tz.TZDateTime(
+          tz.local,
+          tz.TZDateTime.now(tz.local).year,
+          tz.TZDateTime.now(tz.local).month,
+          tz.TZDateTime.now(tz.local).day,
+          task.notificationHour!,
+          task.notificationMinute!,
+        );
+
+        while (scheduled.weekday != weekday ||
+            !scheduled.isAfter(tz.TZDateTime.now(tz.local))) {
+          scheduled = scheduled.add(const Duration(days: 1));
+        }
+
+        await _plugin.zonedSchedule(
+          id: id,
+          title: 'タスクのリマインダー',
+          body: task.title,
+          scheduledDate: scheduled,
+          notificationDetails: _details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+        );
+
+        scheduledIds.add(id.toString());
+      }
     }
 
     final prefs = await SharedPreferences.getInstance();
