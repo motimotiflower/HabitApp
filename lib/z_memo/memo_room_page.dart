@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:habitapp/models/memo.dart';
 import 'package:habitapp/z_memo/memo_composer_page.dart';
+import 'package:habitapp/user/user_profile_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
 class MemoRoomPage extends StatefulWidget {
@@ -26,14 +27,27 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
 
   late Memo _memo;
   String? _imageBase64;
+  String _userName = 'ユーザー';
 
   @override
   void initState() {
     super.initState();
     _memo = widget.memo;
+    _loadUserName();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
+    });
+  }
+
+  //保存してある名前を読み込む
+  Future<void> _loadUserName() async {
+    final name = await UserProfileStorage.loadName();
+
+    if (!mounted || name == null) return;
+
+    setState(() {
+      _userName = name;
     });
   }
 
@@ -384,7 +398,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                               child: Padding(
                                 padding: EdgeInsets.only(
                                   //連続投稿なら間隔を小さくする
-                                  bottom: isContinuous ? 4 : 10,
+                                  bottom: isContinuous ? 10 : 16,
                                 ),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,12 +408,12 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                       width: 42,
                                       child: !isContinuous
                                           ? const CircleAvatar(
-                                              radius: 17,
+                                              radius: 18,
                                               backgroundColor:
                                                   Color(0xffE8EDFC),
                                               child: Icon(
-                                                Icons.person_outline,
-                                                size: 20,
+                                                Icons.person_rounded,
+                                                size: 21,
                                                 color: Color(0xff526FC5),
                                               ),
                                             )
@@ -418,9 +432,9 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                           if (!isContinuous) ...[
                                             Row(
                                               children: [
-                                                const Text(
-                                                  'さやか',
-                                                  style: TextStyle(
+                                                Text(
+                                                  _userName,
+                                                  style: const TextStyle(
                                                     fontSize: 14,
                                                     fontWeight:
                                                         FontWeight.w600,
@@ -444,13 +458,16 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                             const SizedBox(height: 3),
                                           ],
 
+                                          if (isContinuous)
+                                            const SizedBox(height: 2),
+
                                           if (message.content.isNotEmpty)
                                             Text(
                                               message.content,
                                               textAlign: TextAlign.left,
                                               style: const TextStyle(
                                                 fontSize: 15,
-                                                height: 1.35,
+                                                height: 1.55,
                                                 color: Color(0xff35415F),
                                               ),
                                             ),
