@@ -332,7 +332,6 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
     final dateKey = _todayKey();
     final habitMarks = _habitMarks();
 
@@ -596,15 +595,6 @@ class HomePageState extends State<HomePage> {
         //Homeはヘッダーも白い内容部分も1つのスクロールにする
         final headerHeight = MainBackground.headerHeight(context);
 
-        //ほかのページと同じ位置・大きさにそろえる
-        final titlePosition = headerHeight * 0.26;
-        final titlePadding =
-            (screenWidth * 0.07).clamp(0.0, 60.0).toDouble();
-        final titleFontSize =
-            (screenWidth * 0.08).clamp(0.0, 36.0).toDouble();
-        final horizontalPadding =
-            screenWidth > 700 ? 60.0 : screenWidth * 0.06;
-
         //中身が空でも4分割がしっかり見える最低高さ
         final sectionMinHeight = isWide
             ? ((screenHeight - headerHeight - 32) / 2)
@@ -629,56 +619,20 @@ class HomePageState extends State<HomePage> {
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
             children: [
-              //Home専用ヘッダー
-              Container(
+              //Homeも他ページと同じ共通ヘッダーを使う
+              SizedBox(
                 height: headerHeight,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xff102d72),
-                      Color(0xff5e78cf),
-                    ],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: titlePosition,
-                      left: titlePadding,
-                      child: Text(
-                        'Home',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.w500,
-                        ),
+                child: MainBackground(
+                  title: 'Home',
+                  showCalendar: false,
+                  onSettings: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SettingsPage(),
                       ),
-                    ),
-                    Positioned(
-                      top: titlePosition,
-                      right: horizontalPadding,
-                      child: SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: IconButton(
-                          tooltip: '設定',
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const SettingsPage(),
-                              ),
-                            );
-                          },
-                          icon: const Icon(
-                            Icons.settings_outlined,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
 
