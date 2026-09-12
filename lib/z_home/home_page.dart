@@ -728,7 +728,7 @@ class HomePageState extends State<HomePage> {
 
                 //タイトルのすぐ下からカードを開始する
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 76, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(16, 92, 16, 16),
                   child: Column(
                     children: [
                       todayHabitCard,
@@ -1017,7 +1017,7 @@ class _HomeHabitGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        //瓶との高さをそろえやすいよう、Homeのマスは少し大きめ
+        //瓶と同じ高さの中に収まる行数からマス数を決める
         final cellSize = isWide ? 30.0 : 26.0;
         final spacing = isWide ? 5.0 : 4.0;
 
@@ -1027,10 +1027,16 @@ class _HomeHabitGrid extends StatelessWidget {
                 .clamp(1, 1000)
             : 1;
 
-        //Homeの記録カードは5行で統一。
-        //以前60マス固定で増えていた一番下の余分な行をなくす
+        //右側の利用可能な高さを使い、固定5行ではなく自動で行数を決める
+        final availableHeight = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : (isWide ? 180.0 : 150.0);
+        final rows = ((availableHeight + spacing) / (cellSize + spacing))
+            .floor()
+            .clamp(1, 1000);
+
         final minimumCells = fillCard
-            ? columns * 5
+            ? columns * rows
             : _minimumCells;
 
         //記録が増えた場合だけ必要な分だけ伸ばす
