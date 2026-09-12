@@ -149,7 +149,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final topSpace = screenHeight * MainBackground.headerRatio * 0.48;
+    final topSpace = screenHeight * MainBackground.headerRatio;
     final dateKey = _todayKey();
     final habitMarks = _habitMarks();
 
@@ -200,7 +200,7 @@ class HomePageState extends State<HomePage> {
                               child: Text(
                                 habit.title,
                                 style: TextStyle(
-                                  fontSize: 15,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                   color: const Color(0xff35415F),
                                   decoration: isDone
@@ -247,7 +247,7 @@ class HomePageState extends State<HomePage> {
                             child: Text(
                               task.title,
                               style: const TextStyle(
-                                fontSize: 15,
+                                fontSize: 16,
                                 color: Color(0xff35415F),
                               ),
                             ),
@@ -310,7 +310,7 @@ class HomePageState extends State<HomePage> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
-                                      fontSize: 15,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xff35415F),
                                     ),
