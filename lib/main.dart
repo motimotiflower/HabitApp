@@ -16,11 +16,9 @@ Future<void> main() async {
   //デバッグ中でデータが空なら確認用データを用意
   await DebugSeedService.seedIfNeeded();
 
-  //保存済みの設定から通知予定を作り直す
-  await NotificationService.syncHabits(
+  //保存済みの全体設定を含めて通知予定を作り直す
+  await NotificationService.syncAll(
     await HabitStorage.loadHabits(),
-  );
-  await NotificationService.syncTasks(
     await TaskStorage.loadTasks(),
   );
 
