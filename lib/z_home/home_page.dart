@@ -15,6 +15,7 @@ import 'package:habitapp/z_task/task_storage.dart';
 import 'package:habitapp/z_task/sheets/add_task_sheet.dart';
 import 'package:habitapp/z_task/sheets/edit_task_sheet.dart';
 import 'package:habitapp/z_star/star_storage.dart';
+import 'package:habitapp/settings/settings_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -55,9 +56,13 @@ class HomePageState extends State<HomePage> {
       return habit.days.contains(todayName);
     }).toList();
 
-    //Homeでは未完了タスクを締切が近い順に表示する
+    //Homeには「締切が1週間以内」または「フラグ付き」の未完了タスクを表示
+    final oneWeekLater = now.add(const Duration(days: 7));
     final todayTasks = tasks.where((task) {
-      return !task.isDone;
+      if (task.isDone) return false;
+      if (task.isFlagged) return true;
+      if (task.deadline == null) return false;
+      return !task.deadline!.isAfter(oneWeekLater);
     }).toList()
       ..sort((a, b) {
         if (a.deadline != null && b.deadline != null) {
@@ -349,7 +354,7 @@ class HomePageState extends State<HomePage> {
         final isWide = constraints.maxWidth >= 600;
 
         final habitRecordCard = _HomeSectionCard(
-          title: '習慣の積み重ね',
+          title: '記録',
           icon: Icons.grid_view_rounded,
           minHeight: 190,
           onTap: _openHabitRecord,
@@ -470,15 +475,6 @@ class HomePageState extends State<HomePage> {
                   children: _todayTasks.map((task) {
                     return Row(
                       children: [
-                        Checkbox(
-                          value: task.isDone,
-                          activeColor: const Color(0xff526FC5),
-                          onChanged: task.isDone
-                              ? null
-                              : (_) {
-                                  _completeTask(task);
-                                },
-                        ),
                         Expanded(
                           child: InkWell(
                             borderRadius: BorderRadius.circular(10),
@@ -503,6 +499,15 @@ class HomePageState extends State<HomePage> {
                                       ),
                                     ),
                                   ),
+                                  if (task.isFlagged)
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 8),
+                                      child: Icon(
+                                        Icons.flag_rounded,
+                                        size: 18,
+                                        color: Color(0xff526FC5),
+                                      ),
+                                    ),
                                   if (task.category != '未設定')
                                     Container(
                                       padding: const EdgeInsets.symmetric(
@@ -537,6 +542,15 @@ class HomePageState extends State<HomePage> {
                               ),
                             ),
                           ),
+                        ),
+                        Checkbox(
+                          value: task.isDone,
+                          activeColor: const Color(0xff526FC5),
+                          onChanged: task.isDone
+                              ? null
+                              : (_) {
+                                  _completeTask(task);
+                                },
                         ),
                       ],
                     );
@@ -671,11 +685,20 @@ class HomePageState extends State<HomePage> {
                     Positioned(
                       top: titlePosition,
                       right: horizontalPadding,
-                      child: const SizedBox(
+                      child: SizedBox(
                         width: 48,
                         height: 48,
-                        child: Center(
-                          child: Icon(
+                        child: IconButton(
+                          tooltip: '設定',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SettingsPage(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(
                             Icons.settings_outlined,
                             color: Colors.white,
                           ),
@@ -728,7 +751,7 @@ class HomePageState extends State<HomePage> {
                         children: [
                           //3番目に習慣の記録を配置
                           _HomeWideSection(
-                            title: '習慣の積み重ね',
+                            title: '記録',
                             icon: Icons.grid_view_rounded,
                             minHeight: sectionMinHeight,
                             onTap: _openHabitRecord,
