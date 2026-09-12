@@ -8,6 +8,7 @@ class Task {
 
   final String id; //同じタイトルでも別のタスクとして判定するID
   final String title; //タスク名
+  final String description; //詳細
   final DateTime? deadline; //締切日
   final String category; //ジャンル
   final bool isFlagged; //Homeに優先表示するフラグ
@@ -19,6 +20,7 @@ class Task {
   Task({
     String? id,
     required this.title,
+    this.description = '',
     this.deadline,
     this.category = '未設定',
     this.isFlagged = false,
@@ -33,6 +35,7 @@ class Task {
     return {
       'id': id,
       'title': title,
+      'description': description,
       'deadline': deadline?.toIso8601String(),
       'category': category,
       'isFlagged': isFlagged,
@@ -48,6 +51,7 @@ class Task {
     return Task(
       id: json['id'],
       title: json['title'],
+      description: json['description'] ?? '',
       deadline: json['deadline'] != null
           ? DateTime.parse(json['deadline'])
           : null,
