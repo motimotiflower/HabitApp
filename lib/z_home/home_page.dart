@@ -6,6 +6,7 @@ import 'package:habitapp/models/memo.dart';
 import 'package:habitapp/models/task.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
+import 'package:habitapp/z_home/home_habit_record_page.dart';
 import 'package:habitapp/z_memo/memo_storage.dart';
 import 'package:habitapp/z_task/task_storage.dart';
 
@@ -147,6 +148,19 @@ class HomePageState extends State<HomePage> {
     return marks;
   }
 
+  //Homeの習慣記録を開く
+  void _openHabitRecord() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => HomeHabitRecordPage(
+          habits: _allHabits,
+          categoryColors: _categoryColors,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -164,6 +178,7 @@ class HomePageState extends State<HomePage> {
           title: '習慣の積み重ね',
           icon: Icons.grid_view_rounded,
           minHeight: 190,
+          onTap: _openHabitRecord,
           child: _HomeHabitGrid(
             marks: habitMarks,
             fillCard: true,
@@ -452,6 +467,7 @@ class HomePageState extends State<HomePage> {
                             title: '習慣の積み重ね',
                             icon: Icons.grid_view_rounded,
                             minHeight: sectionMinHeight,
+                            onTap: _openHabitRecord,
                             child: _HomeHabitGrid(
                               marks: habitMarks,
                               isWide: true,
@@ -500,16 +516,20 @@ class _HomeWideSection extends StatelessWidget {
     required this.icon,
     required this.child,
     required this.minHeight,
+    this.onTap,
   });
 
   final String title;
   final IconData icon;
   final Widget child;
   final double minHeight;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
+    return InkWell(
+      onTap: onTap,
+      child: ConstrainedBox(
       constraints: BoxConstraints(minHeight: minHeight),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -550,16 +570,21 @@ class _HomeSectionCard extends StatelessWidget {
     required this.icon,
     required this.child,
     required this.minHeight,
+    this.onTap,
   });
 
   final String title;
   final IconData icon;
   final Widget child;
   final double minHeight;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return InkWell(
+      borderRadius: BorderRadius.circular(22),
+      onTap: onTap,
+      child: Container(
       constraints: BoxConstraints(minHeight: minHeight),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
