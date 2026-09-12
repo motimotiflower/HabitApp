@@ -308,13 +308,18 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
     return Scaffold(
       backgroundColor: const Color(0xffF7F9FF),
       appBar: AppBar(
-        backgroundColor: const Color(0xffF7F9FF),
+        //部屋名の場所を青くして、本文との境目を分かりやすくする
+        backgroundColor: const Color(0xff526FC5),
+        foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
+        elevation: 0,
         titleSpacing: 0,
         title: Text(
           _memo.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            color: Color(0xff35415F),
+            color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
