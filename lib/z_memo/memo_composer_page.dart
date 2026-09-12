@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:habitapp/main/widgets/main_background.dart';
 import 'package:habitapp/models/memo.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -62,7 +63,7 @@ class _MemoComposerPageState extends State<MemoComposerPage> {
       backgroundColor: const Color(0xffF7F9FF),
       appBar: AppBar(
         //各詳細ページで上下の余白をそろえる
-        toolbarHeight: 52,
+        toolbarHeight: MainBackground.detailToolbarHeight,
         backgroundColor: const Color(0xffF7F9FF),
         elevation: 0,
         leading: IconButton(
