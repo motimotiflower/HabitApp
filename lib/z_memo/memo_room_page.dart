@@ -247,6 +247,48 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
     widget.onChanged(updatedMemo);
   }
 
+  //長押し・右クリックから編集と削除を選ぶ
+  Future<void> _showMessageMenu(int index, Offset position) async {
+    final overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    final value = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(position.dx, position.dy, 0, 0),
+        Offset.zero & overlay.size,
+      ),
+      items: const [
+        PopupMenuItem(
+          value: 'edit',
+          child: Row(
+            children: [
+              Icon(Icons.edit_outlined),
+              SizedBox(width: 8),
+              Text('編集'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline),
+              SizedBox(width: 8),
+              Text('削除'),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (value == 'edit') {
+      _editMessage(index);
+    } else if (value == 'delete') {
+      _deleteMessage(index);
+    }
+  }
+
   //長文用の全画面入力
   Future<void> _openComposer() async {
     await Navigator.push(
@@ -403,9 +445,24 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                               child: Padding(
                                 padding: EdgeInsets.only(
                                   //連続投稿なら間隔を小さくする
-                                  bottom: isContinuous ? 10 : 16,
+                                  bottom: isContinuous ? 2 : 16,
                                 ),
-                                child: Row(
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.translucent,
+                                  //スマホは長押し、Webは右クリックで投稿メニューを開く
+                                  onLongPressStart: (details) {
+                                    _showMessageMenu(
+                                      index,
+                                      details.globalPosition,
+                                    );
+                                  },
+                                  onSecondaryTapDown: (details) {
+                                    _showMessageMenu(
+                                      index,
+                                      details.globalPosition,
+                                    );
+                                  },
+                                  child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     //連続投稿ではアイコンを表示しない
@@ -464,9 +521,6 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                             const SizedBox(height: 8),
                                           ],
 
-                                          if (isContinuous)
-                                            const SizedBox(height: 2),
-
                                           if (message.content.isNotEmpty)
                                             Text(
                                               message.content,
@@ -505,45 +559,9 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                       ),
                                     ),
 
-                                    PopupMenuButton<String>(
-                                      tooltip: 'メニュー',
-                                      padding: EdgeInsets.zero,
-                                      icon: const Icon(
-                                        Icons.more_horiz,
-                                        size: 20,
-                                        color: Color(0xff9AA2B6),
-                                      ),
-                                      onSelected: (value) {
-                                        if (value == 'edit') {
-                                          _editMessage(index);
-                                        } else if (value == 'delete') {
-                                          _deleteMessage(index);
-                                        }
-                                      },
-                                      itemBuilder: (context) => const [
-                                        PopupMenuItem(
-                                          value: 'edit',
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.edit_outlined),
-                                              SizedBox(width: 8),
-                                              Text('編集'),
-                                            ],
-                                          ),
-                                        ),
-                                        PopupMenuItem(
-                                          value: 'delete',
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.delete_outline),
-                                              SizedBox(width: 8),
-                                              Text('削除'),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+
                                   ],
+                                  ),
                                 ),
                               ),
                             ),
