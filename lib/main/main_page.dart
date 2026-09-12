@@ -79,6 +79,8 @@ class _MainPageState extends State<MainPage> {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
+        //大画面でも追加・編集画面を横幅いっぱいに広げる
+        constraints: const BoxConstraints(maxWidth: double.infinity),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         ),
@@ -100,6 +102,8 @@ class _MainPageState extends State<MainPage> {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
+        //大画面でも追加・編集画面を横幅いっぱいに広げる
+        constraints: const BoxConstraints(maxWidth: double.infinity),
         backgroundColor: Colors.transparent,
 
         builder: (context) {
@@ -122,6 +126,8 @@ class _MainPageState extends State<MainPage> {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
+        //大画面でも追加・編集画面を横幅いっぱいに広げる
+        constraints: const BoxConstraints(maxWidth: double.infinity),
         backgroundColor: Colors.transparent,
 
         builder: (context) {
