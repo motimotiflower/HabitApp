@@ -320,7 +320,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 20,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -440,7 +440,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                                 Text(
                                                   _userName,
                                                   style: const TextStyle(
-                                                    fontSize: 14,
+                                                    fontSize: 16,
                                                     fontWeight:
                                                         FontWeight.w600,
                                                     color:
@@ -460,7 +460,8 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                                 ),
                                               ],
                                             ),
-                                            const SizedBox(height: 3),
+                                            //名前・時刻と本文が詰まらないよう少し広めに空ける
+                                            const SizedBox(height: 8),
                                           ],
 
                                           if (isContinuous)
@@ -471,7 +472,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                               message.content,
                                               textAlign: TextAlign.left,
                                               style: const TextStyle(
-                                                fontSize: 15,
+                                                fontSize: 17,
                                                 height: 1.55,
                                                 color: Color(0xff35415F),
                                               ),
