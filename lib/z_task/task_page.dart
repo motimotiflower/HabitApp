@@ -85,6 +85,10 @@ class TaskPageState extends State<TaskPage> {
           title: task.title,
           deadline: task.deadline,
           category: newName,
+          isFlagged: task.isFlagged,
+          notificationEnabled: task.notificationEnabled,
+          notificationHour: task.notificationHour,
+          notificationMinute: task.notificationMinute,
           isDone: task.isDone,
         );
       }).toList();
@@ -112,6 +116,10 @@ class TaskPageState extends State<TaskPage> {
           title: task.title,
           deadline: task.deadline,
           category: '未設定',
+          isFlagged: task.isFlagged,
+          notificationEnabled: task.notificationEnabled,
+          notificationHour: task.notificationHour,
+          notificationMinute: task.notificationMinute,
           isDone: task.isDone,
         );
       }).toList();
