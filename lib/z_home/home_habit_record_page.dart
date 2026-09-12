@@ -597,51 +597,69 @@ class _RecordGrid extends StatelessWidget {
     final cellCount =
         neededCells > minimumCells ? neededCells : minimumCells;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: color,
+    //ジャンル・習慣ごとにカードで分けて見やすくする
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xffE2E7F5),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x10000000),
+            blurRadius: 8,
+            offset: Offset(0, 3),
           ),
-        ),
-        const SizedBox(height: 10),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final spacing = compact ? 4.0 : 5.0;
-            final cellSize = compact
-                ? 18.0
-                : (constraints.maxWidth -
-                        spacing * (_columnCount - 1)) /
-                    _columnCount;
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 10),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final spacing = compact ? 4.0 : 5.0;
+              final cellSize = compact
+                  ? 18.0
+                  : (constraints.maxWidth -
+                          spacing * (_columnCount - 1)) /
+                      _columnCount;
 
-            return Wrap(
-              spacing: spacing,
-              runSpacing: spacing,
-              children: List.generate(cellCount, (index) {
-                final completed = index < completedCount;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: List.generate(cellCount, (index) {
+                  final completed = index < completedCount;
 
-                return Container(
-                  width: cellSize,
-                  height: cellSize,
-                  decoration: BoxDecoration(
-                    color: completed ? color : Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: completed
-                          ? color
-                          : const Color(0xffDCE3F5),
+                  return Container(
+                    width: cellSize,
+                    height: cellSize,
+                    decoration: BoxDecoration(
+                      color: completed ? color : const Color(0xffF8FAFF),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: completed
+                            ? color
+                            : const Color(0xffDCE3F5),
+                      ),
                     ),
-                  ),
-                );
-              }),
-            );
-          },
-        ),
-      ],
+                  );
+                }),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
