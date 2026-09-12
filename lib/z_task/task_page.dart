@@ -130,6 +130,8 @@ class TaskPageState extends State<TaskPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+        //大画面でも追加・編集画面を横幅いっぱいに広げる
+        constraints: const BoxConstraints(maxWidth: double.infinity),
       backgroundColor: Colors.transparent,
       builder: (context) {
         return SizedBox(
@@ -150,6 +152,8 @@ class TaskPageState extends State<TaskPage> {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+        //大画面でも追加・編集画面を横幅いっぱいに広げる
+        constraints: const BoxConstraints(maxWidth: double.infinity),
       backgroundColor: Colors.transparent,
       builder: (context) {
         return SizedBox(
