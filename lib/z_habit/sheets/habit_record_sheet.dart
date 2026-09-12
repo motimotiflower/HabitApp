@@ -73,7 +73,7 @@ class HabitRecordSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                '習慣の記録',
+                '記録',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
