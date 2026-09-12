@@ -219,21 +219,13 @@ class HabitPageState extends State<HabitPage> {
         '${selectedDate.day.toString().padLeft(2, '0')}';
 
     return MainContent(
-      overlap: 10,
+      overlap: 0,
       child: Column(
         children: [
           //記録画面への入口
           Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Text(
-                '習慣',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xff35415F),
-                ),
-              ),
-              const Spacer(),
               TextButton.icon(
                 onPressed: _showRecordSheet,
                 icon: const Icon(
