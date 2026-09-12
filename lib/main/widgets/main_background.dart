@@ -12,6 +12,7 @@ class MainBackground extends StatelessWidget {
     this.onPreviousWeek,
     this.onNextWeek,
     this.onToday,
+    this.onSettings,
   });
 
   final String title;
@@ -30,6 +31,9 @@ class MainBackground extends StatelessWidget {
 
   //今日に戻る処理
   final VoidCallback? onToday;
+
+  //設定画面を開く
+  final VoidCallback? onSettings;
 
   static const double headerRatio = 0.30;
 
@@ -123,11 +127,13 @@ class MainBackground extends StatelessWidget {
                 ),
 
               //どのページでも同じ位置になるよう高さを固定
-              const SizedBox(
+              SizedBox(
                 width: 48,
                 height: 48,
-                child: Center(
-                  child: Icon(
+                child: IconButton(
+                  tooltip: '設定',
+                  onPressed: onSettings,
+                  icon: const Icon(
                     Icons.settings_outlined,
                     color: Colors.white,
                   ),
