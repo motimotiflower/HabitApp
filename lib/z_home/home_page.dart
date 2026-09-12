@@ -1027,19 +1027,20 @@ class _HomeHabitGrid extends StatelessWidget {
                 .clamp(1, 1000)
             : 1;
 
-        //右側の利用可能な高さを使い、固定5行ではなく自動で行数を決める
+        //Homeでは右側の領域を四角で埋め尽くす。
+        //高さに端数が出ても、最後の行まで必ず配置する
         final availableHeight = constraints.maxHeight.isFinite
             ? constraints.maxHeight
             : (isWide ? 180.0 : 150.0);
         final rows = ((availableHeight + spacing) / (cellSize + spacing))
-            .floor()
+            .ceil()
             .clamp(1, 1000);
 
         final minimumCells = fillCard
             ? columns * rows
             : _minimumCells;
 
-        //記録が増えた場合だけ必要な分だけ伸ばす
+        //記録数より表示領域を優先し、空きは未達成マスで埋める
         final cellCount =
             marks.length > minimumCells ? marks.length : minimumCells;
 
