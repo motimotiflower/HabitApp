@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:habitapp/main/widgets/main_background.dart';
 import 'package:flutter/services.dart';
 import 'package:habitapp/models/memo.dart';
 import 'package:habitapp/z_memo/memo_composer_page.dart';
@@ -369,7 +370,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
       backgroundColor: const Color(0xffF7F9FF),
       appBar: AppBar(
         //各詳細ページで上下の余白をそろえる
-        toolbarHeight: 52,
+        toolbarHeight: MainBackground.detailToolbarHeight,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
