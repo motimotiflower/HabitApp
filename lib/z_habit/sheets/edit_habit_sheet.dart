@@ -95,6 +95,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
 
     widget.onSave(
       Habit(
+        id: widget.habit.id,
         title: title,
         icon: _selectedIcon,
         days: _selectedDays,
