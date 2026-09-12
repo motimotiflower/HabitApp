@@ -13,6 +13,9 @@ class Habit {
   final IconData icon;
   final List<String> days; //習慣を行う曜日
   final String category; //ジャンル
+  final bool notificationEnabled; //通知を使うか
+  final int? notificationHour; //通知時刻
+  final int? notificationMinute;
   final Map<String, bool> completionHistory; //日付ごとの達成記録
 
   Habit({
@@ -21,6 +24,9 @@ class Habit {
     required this.icon,
     this.days = const [],
     this.category = '未設定',
+    this.notificationEnabled = false,
+    this.notificationHour,
+    this.notificationMinute,
     Map<String, bool>? completionHistory,
   })  : id = id ?? _createId(),
         completionHistory = completionHistory ?? {};
@@ -33,6 +39,9 @@ class Habit {
       'icon': icon.codePoint,
       'days': days,
       'category': category,
+      'notificationEnabled': notificationEnabled,
+      'notificationHour': notificationHour,
+      'notificationMinute': notificationMinute,
       'completionHistory': completionHistory,
     };
   }
@@ -47,6 +56,9 @@ class Habit {
 
       //以前の保存データにはジャンルが無いので未設定にする
       category: json['category'] ?? '未設定',
+      notificationEnabled: json['notificationEnabled'] ?? false,
+      notificationHour: json['notificationHour'],
+      notificationMinute: json['notificationMinute'],
 
       //Map<dynamic, dynamic>をMap<String, bool>に戻す
       completionHistory: Map<String, bool>.from(
