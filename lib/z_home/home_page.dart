@@ -333,20 +333,82 @@ class HomePageState extends State<HomePage> {
             padding: EdgeInsets.zero,
             children: [
               if (isWide)
-                //Web・フルスクリーンでは2×2に並べる
-                GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 2.1,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    habitRecordCard,
-                    todayHabitCard,
-                    todayTaskCard,
-                    memoCard,
-                  ],
+                //Webでは1つの白い領域を薄い線で2×2に区切る
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.96),
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x22000000),
+                        blurRadius: 14,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    children: [
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              child: _HomeWideSection(
+                                title: '今日の習慣',
+                                icon: Icons.auto_awesome,
+                                child: todayHabitCard.child,
+                              ),
+                            ),
+                            const VerticalDivider(
+                              width: 1,
+                              thickness: 1,
+                              color: Color(0xffE6EAF4),
+                            ),
+                            Expanded(
+                              child: _HomeWideSection(
+                                title: '今日のタスク',
+                                icon: Icons.check_circle_outline,
+                                child: todayTaskCard.child,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: Color(0xffE6EAF4),
+                      ),
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              //3番目に習慣の記録を配置
+                              child: _HomeWideSection(
+                                title: '習慣の積み重ね',
+                                icon: Icons.grid_view_rounded,
+                                child: habitRecordCard.child,
+                              ),
+                            ),
+                            const VerticalDivider(
+                              width: 1,
+                              thickness: 1,
+                              color: Color(0xffE6EAF4),
+                            ),
+                            Expanded(
+                              child: _HomeWideSection(
+                                title: 'メモ',
+                                icon: Icons.edit_note_outlined,
+                                child: memoCard.child,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 )
               else ...[
                 //スマホでは今まで通り縦1列
@@ -365,6 +427,52 @@ class HomePageState extends State<HomePage> {
     );
   }
 }
+
+//Web版の白い領域内に置く区画
+class _HomeWideSection extends StatelessWidget {
+  const _HomeWideSection({
+    required this.title,
+    required this.icon,
+    required this.child,
+  });
+
+  final String title;
+  final IconData icon;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: const Color(0xff526FC5),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xff35415F),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
 
 //Home上の白いカード
 class _HomeSectionCard extends StatelessWidget {
