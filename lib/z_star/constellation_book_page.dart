@@ -19,6 +19,10 @@ class ConstellationBookPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xffEEE4D3),
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back),
+        ),
         backgroundColor: const Color(0xffD8C7AA),
         foregroundColor: const Color(0xff5E4A38),
         title: const Text('星座図鑑'),
