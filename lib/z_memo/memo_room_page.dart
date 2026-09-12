@@ -382,30 +382,66 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                             SizedBox(
                               width: double.infinity,
                               child: Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 0,
-                                  right: 0,
-                                  bottom: 12,
+                                padding: EdgeInsets.only(
+                                  //連続投稿なら間隔を小さくする
+                                  bottom: isContinuous ? 4 : 10,
                                 ),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    //連続投稿ではアイコンを表示しない
+                                    SizedBox(
+                                      width: 42,
+                                      child: !isContinuous
+                                          ? const CircleAvatar(
+                                              radius: 17,
+                                              backgroundColor:
+                                                  Color(0xffE8EDFC),
+                                              child: Icon(
+                                                Icons.person_outline,
+                                                size: 20,
+                                                color: Color(0xff526FC5),
+                                              ),
+                                            )
+                                          : null,
+                                    ),
+
+                                    const SizedBox(width: 8),
+
                                     Expanded(
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
+                                          //まとまりの最初だけ名前と時刻を表示
                                           if (!isContinuous) ...[
-                                            Text(
-                                              _formatTime(message.createdAt),
-                                              textAlign: TextAlign.left,
-                                              style: const TextStyle(
-                                                fontSize: 11,
-                                                color: Color(0xff9AA2B6),
-                                              ),
+                                            Row(
+                                              children: [
+                                                const Text(
+                                                  'さやか',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight:
+                                                        FontWeight.w600,
+                                                    color:
+                                                        Color(0xff35415F),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  _formatTime(
+                                                    message.createdAt,
+                                                  ),
+                                                  style: const TextStyle(
+                                                    fontSize: 11,
+                                                    color:
+                                                        Color(0xff9AA2B6),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            const SizedBox(height: 4),
+                                            const SizedBox(height: 3),
                                           ],
 
                                           if (message.content.isNotEmpty)
@@ -414,7 +450,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                               textAlign: TextAlign.left,
                                               style: const TextStyle(
                                                 fontSize: 15,
-                                                height: 1.45,
+                                                height: 1.35,
                                                 color: Color(0xff35415F),
                                               ),
                                             ),
