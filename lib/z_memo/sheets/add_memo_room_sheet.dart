@@ -64,10 +64,21 @@ class _AddMemoRoomSheetState extends State<AddMemoRoomSheet> {
               TextField(
                 controller: _titleController,
                 autofocus: true,
-                decoration: const InputDecoration(
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                ),
+                decoration: InputDecoration(
                   labelText: 'タイトル',
-                  hintText: '例：HabitApp、ゲーム制作、大学',
-                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 20,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
               ),
 
