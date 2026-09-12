@@ -7,6 +7,7 @@ import 'package:habitapp/z_habit/habit_storage.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/z_habit/sheets/edit_habit_sheet.dart';
 import 'package:habitapp/z_habit/sheets/habit_record_sheet.dart';
+import 'package:habitapp/z_star/star_storage.dart';
 
 class HabitPage extends StatefulWidget {
   const HabitPage({super.key});
@@ -285,13 +286,28 @@ class HabitPageState extends State<HabitPage> {
                         categoryColor: categoryColor,
 
                         //達成状態の変更
-                        onChanged: () {
+                        onChanged: () async {
+                          final wasDone =
+                              habit.completionHistory[dateKey] ?? false;
+
                           setState(() {
-                            habit.completionHistory[dateKey] =
-                                !(habit.completionHistory[dateKey] ?? false);
+                            habit.completionHistory[dateKey] = !wasDone;
                           });
 
-                          HabitStorage.saveHabits(habits);
+                          await HabitStorage.saveHabits(habits);
+
+                          //達成で星の欠片+1、ガチャ前なら解除で取り消す
+                          final actionKey =
+                              'habit|${habit.title}|$dateKey';
+
+                          if (!wasDone) {
+                            await StarStorage.award(
+                              actionKey: actionKey,
+                              source: 'habit',
+                            );
+                          } else {
+                            await StarStorage.revoke(actionKey);
+                          }
                         },
 
                         //編集
