@@ -1,6 +1,5 @@
 //ホーム画面
 import 'package:flutter/material.dart';
-import 'package:habitapp/main/widgets/main_background.dart';
 import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/models/memo.dart';
 import 'package:habitapp/models/task.dart';
@@ -121,7 +120,7 @@ class HomePageState extends State<HomePage> {
       final actionKey =
           'habit|${targetHabit.id}|$dateKey';
 
-      if (!wasDone!) {
+      if (!wasDone) {
         await StarStorage.award(
           actionKey: actionKey,
           source: 'habit',
