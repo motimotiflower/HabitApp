@@ -186,6 +186,8 @@ class HomePageState extends State<HomePage> {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+        //大画面でも追加・編集画面を横幅いっぱいに広げる
+        constraints: const BoxConstraints(maxWidth: double.infinity),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
@@ -210,6 +212,8 @@ class HomePageState extends State<HomePage> {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+        //大画面でも追加・編集画面を横幅いっぱいに広げる
+        constraints: const BoxConstraints(maxWidth: double.infinity),
       backgroundColor: Colors.transparent,
       builder: (context) {
         return SizedBox(
@@ -239,6 +243,8 @@ class HomePageState extends State<HomePage> {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+        //大画面でも追加・編集画面を横幅いっぱいに広げる
+        constraints: const BoxConstraints(maxWidth: double.infinity),
       backgroundColor: Colors.transparent,
       builder: (context) {
         return SizedBox(
@@ -260,6 +266,8 @@ class HomePageState extends State<HomePage> {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+        //大画面でも追加・編集画面を横幅いっぱいに広げる
+        constraints: const BoxConstraints(maxWidth: double.infinity),
       backgroundColor: Colors.transparent,
       builder: (context) {
         return SizedBox(
