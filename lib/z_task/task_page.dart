@@ -430,7 +430,8 @@ class TaskPageState extends State<TaskPage> {
                   ),
                 )
               : ListView.builder(
-                  padding: EdgeInsets.zero,
+                  //右下の＋ボタンと最後のチェックが重ならないよう下に余白
+                  padding: const EdgeInsets.only(bottom: 88),
                   itemCount: visibleTasks.length,
                   itemBuilder: (context, index) {
                     final task = visibleTasks[index];
