@@ -14,6 +14,8 @@ class AddTaskSheet extends StatefulWidget {
 
 class _AddTaskSheetState extends State<AddTaskSheet> {
   final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController =
+      TextEditingController();
 
   DateTime? _deadline;
   bool _isFlagged = false;
@@ -78,6 +80,7 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
     widget.onAddTask(
       Task(
         title: title,
+        description: _descriptionController.text.trim(),
         deadline: _deadline,
         category: _selectedCategory,
         isFlagged: _isFlagged,
@@ -128,9 +131,44 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
                       //タスク名
                       TextField(
                         controller: _titleController,
-                        decoration: const InputDecoration(
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        decoration: InputDecoration(
                           labelText: 'タスク名',
-                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 20,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      //詳細はNotionの本文のように広く書ける
+                      TextField(
+                        controller: _descriptionController,
+                        minLines: 6,
+                        maxLines: 12,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          height: 1.5,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: '詳細',
+                          alignLabelWithHint: true,
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.all(18),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
                       ),
 
@@ -303,6 +341,7 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
   @override
   void dispose() {
     _titleController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 }
