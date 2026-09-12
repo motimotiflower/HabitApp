@@ -328,81 +328,85 @@ class HomePageState extends State<HomePage> {
         );
 
         if (isWide) {
-          //スマホ以外は、ほかのページと同じ白い土台を使う
-          final headerHeight =
-              screenHeight * MainBackground.headerRatio;
+          //Homeの青背景は残しつつ、白い土台の表示領域を必ず確保する
+          final headerHeight = screenHeight * 0.32;
+          final contentHeight =
+              (constraints.maxHeight - headerHeight).clamp(300.0, double.infinity);
 
           return Padding(
             padding: EdgeInsets.only(top: headerHeight),
-            child: Container(
+            child: SizedBox(
+              height: contentHeight,
               width: double.infinity,
-              color: const Color(0xffF7F9FF),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    //習慣・タスクが増えた分だけ上段も自然に伸びる
-                    IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: _HomeWideSection(
-                              title: '今日の習慣',
-                              icon: Icons.auto_awesome,
-                              child: todayHabitCard.child,
-                            ),
-                          ),
-                          const VerticalDivider(
-                            width: 1,
-                            thickness: 1,
-                            color: Color(0xffE6EAF4),
-                          ),
-                          Expanded(
-                            child: _HomeWideSection(
-                              title: '今日のタスク',
-                              icon: Icons.check_circle_outline,
-                              child: todayTaskCard.child,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: Color(0xffE6EAF4),
-                    ),
-                    IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            //3番目に習慣の記録を配置
-                            child: _HomeWideSection(
-                              title: '習慣の積み重ね',
-                              icon: Icons.grid_view_rounded,
-                              child: _HomeHabitGrid(
-                                marks: habitMarks,
+              child: Container(
+                color: const Color(0xffF7F9FF),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      //習慣・タスクが増えた分だけ上段も自然に伸びる
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              child: _HomeWideSection(
+                                title: '今日の習慣',
+                                icon: Icons.auto_awesome,
+                                child: todayHabitCard.child,
                               ),
                             ),
-                          ),
-                          const VerticalDivider(
-                            width: 1,
-                            thickness: 1,
-                            color: Color(0xffE6EAF4),
-                          ),
-                          Expanded(
-                            child: _HomeWideSection(
-                              title: 'メモ',
-                              icon: Icons.edit_note_outlined,
-                              child: memoCard.child,
+                            const VerticalDivider(
+                              width: 1,
+                              thickness: 1,
+                              color: Color(0xffE6EAF4),
                             ),
-                          ),
-                        ],
+                            Expanded(
+                              child: _HomeWideSection(
+                                title: '今日のタスク',
+                                icon: Icons.check_circle_outline,
+                                child: todayTaskCard.child,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                      const Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: Color(0xffE6EAF4),
+                      ),
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              //3番目に習慣の記録を配置
+                              child: _HomeWideSection(
+                                title: '習慣の積み重ね',
+                                icon: Icons.grid_view_rounded,
+                                child: _HomeHabitGrid(
+                                  marks: habitMarks,
+                                ),
+                              ),
+                            ),
+                            const VerticalDivider(
+                              width: 1,
+                              thickness: 1,
+                              color: Color(0xffE6EAF4),
+                            ),
+                            Expanded(
+                              child: _HomeWideSection(
+                                title: 'メモ',
+                                icon: Icons.edit_note_outlined,
+                                child: memoCard.child,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
