@@ -280,7 +280,7 @@ class TaskPageState extends State<TaskPage> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Positioned(
-      top: screenHeight * 0.15,
+      top: screenHeight * MainBackground.headerRatio * 0.56,
       left: 20,
       right: 20,
       child: Column(
