@@ -345,9 +345,36 @@ class HomePageState extends State<HomePage> {
           icon: Icons.grid_view_rounded,
           minHeight: 190,
           onTap: _openHabitRecord,
-          child: _HomeHabitGrid(
-            marks: habitMarks,
-            fillCard: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //Homeからでも星の貯まり具合が分かる
+              Row(
+                children: [
+                  const Icon(
+                    Icons.star_rounded,
+                    size: 20,
+                    color: Color(0xffE7B95A),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _starFragments >= 30
+                        ? '星の欠片  $_starFragments個・ガチャできます'
+                        : '星の欠片  $_starFragments / 30',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xff526FC5),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _HomeHabitGrid(
+                marks: habitMarks,
+                fillCard: true,
+              ),
+            ],
           ),
         );
 
@@ -355,6 +382,7 @@ class HomePageState extends State<HomePage> {
           title: '今日の習慣',
           icon: Icons.auto_awesome,
           minHeight: 128,
+          onAdd: _openAddHabit,
           child: _todayHabits.isEmpty
               ? const _EmptyText('今日の習慣はありません')
               : Column(
@@ -369,25 +397,43 @@ class HomePageState extends State<HomePage> {
                           );
 
                     return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      padding: const EdgeInsets.symmetric(vertical: 3),
                       child: Row(
                         children: [
-                          Icon(
-                            habit.icon,
-                            size: 22,
-                            color: habitColor,
-                          ),
-                          const SizedBox(width: 10),
+                          //本文側だけを押すと編集。チェック欄とは分離する
                           Expanded(
-                            child: Text(
-                              habit.title,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xff35415F),
-                                decoration: isDone
-                                    ? TextDecoration.lineThrough
-                                    : null,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(10),
+                              onTap: () => _openEditHabit(habit),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 8,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      habit.icon,
+                                      size: 24,
+                                      color: habitColor,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        habit.title,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                          color:
+                                              const Color(0xff35415F),
+                                          decoration: isDone
+                                              ? TextDecoration.lineThrough
+                                              : null,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -409,6 +455,7 @@ class HomePageState extends State<HomePage> {
           title: 'タスク',
           icon: Icons.check_circle_outline,
           minHeight: 128,
+          onAdd: _openAddTask,
           child: _todayTasks.isEmpty
               ? const _EmptyText('未完了のタスクはありません')
               : Column(
@@ -416,49 +463,73 @@ class HomePageState extends State<HomePage> {
                     return Row(
                       children: [
                         Checkbox(
-                          value: false,
+                          value: task.isDone,
                           activeColor: const Color(0xff526FC5),
-                          onChanged: (_) {
-                            _completeTask(task);
-                          },
+                          onChanged: task.isDone
+                              ? null
+                              : (_) {
+                                  _completeTask(task);
+                                },
                         ),
                         Expanded(
-                          child: Text(
-                            task.title,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Color(0xff35415F),
-                            ),
-                          ),
-                        ),
-                        if (task.category != '未設定')
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xffE8EDFC),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              task.category,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Color(0xff526FC5),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(10),
+                            onTap: () => _openEditTask(task),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 10,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      task.title,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xff35415F),
+                                        decoration: task.isDone
+                                            ? TextDecoration.lineThrough
+                                            : null,
+                                      ),
+                                    ),
+                                  ),
+                                  if (task.category != '未設定')
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 3,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            const Color(0xffE8EDFC),
+                                        borderRadius:
+                                            BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        task.category,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xff526FC5),
+                                        ),
+                                      ),
+                                    ),
+                                  if (task.deadline != null) ...[
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      '${task.deadline!.month}/${task.deadline!.day}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Color(0xff81889B),
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
                           ),
-                        if (task.deadline != null) ...[
-                          const SizedBox(width: 10),
-                          Text(
-                            '${task.deadline!.month}/${task.deadline!.day}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xff81889B),
-                            ),
-                          ),
-                        ],
+                        ),
                       ],
                     );
                   }).toList(),
@@ -474,55 +545,72 @@ class HomePageState extends State<HomePage> {
               : Column(
                   children: _pinnedMemos.map((memo) {
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (memo.isPinned)
-                            const Padding(
-                              padding: EdgeInsets.only(right: 6, top: 2),
-                              child: Icon(
-                                Icons.push_pin,
-                                size: 15,
-                                color: Color(0xff526FC5),
-                              ),
-                            ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  memo.title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xff35415F),
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () => _openMemoRoom(memo),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                            children: [
+                              if (memo.isPinned)
+                                const Padding(
+                                  padding:
+                                      EdgeInsets.only(right: 6, top: 3),
+                                  child: Icon(
+                                    Icons.push_pin,
+                                    size: 15,
+                                    color: Color(0xff526FC5),
                                   ),
                                 ),
-                                if (memo.preview.isNotEmpty) ...[
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    memo.preview,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: Color(0xff697188),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      memo.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xff35415F),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ],
-                            ),
+                                    if (memo.preview.isNotEmpty) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        memo.preview,
+                                        maxLines: 2,
+                                        overflow:
+                                            TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          color: Color(0xff697188),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              const Icon(
+                                Icons.chevron_right,
+                                color: Color(0xff9AA2B6),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     );
                   }).toList(),
                 ),
         );
-
         //Homeはヘッダーも白い内容部分も1つのスクロールにする
         final headerHeight = screenHeight * 0.30;
 
@@ -616,12 +704,14 @@ class HomePageState extends State<HomePage> {
                             title: '今日の習慣',
                             icon: Icons.auto_awesome,
                             minHeight: sectionMinHeight,
+                            onAdd: _openAddHabit,
                             child: todayHabitCard.child,
                           ),
                           _HomeWideSection(
                             title: 'タスク',
                             icon: Icons.check_circle_outline,
                             minHeight: sectionMinHeight,
+                            onAdd: _openAddTask,
                             child: todayTaskCard.child,
                           ),
                         ],
@@ -634,9 +724,35 @@ class HomePageState extends State<HomePage> {
                             icon: Icons.grid_view_rounded,
                             minHeight: sectionMinHeight,
                             onTap: _openHabitRecord,
-                            child: _HomeHabitGrid(
-                              marks: habitMarks,
-                              isWide: true,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.star_rounded,
+                                      size: 20,
+                                      color: Color(0xffE7B95A),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _starFragments >= 30
+                                          ? '星の欠片  $_starFragments個・ガチャできます'
+                                          : '星の欠片  $_starFragments / 30',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xff526FC5),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                _HomeHabitGrid(
+                                  marks: habitMarks,
+                                  isWide: true,
+                                ),
+                              ],
                             ),
                           ),
                           _HomeWideSection(
@@ -683,6 +799,7 @@ class _HomeWideSection extends StatelessWidget {
     required this.child,
     required this.minHeight,
     this.onTap,
+    this.onAdd,
   });
 
   final String title;
@@ -690,6 +807,7 @@ class _HomeWideSection extends StatelessWidget {
   final Widget child;
   final double minHeight;
   final VoidCallback? onTap;
+  final VoidCallback? onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -720,6 +838,15 @@ class _HomeWideSection extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (onAdd != null)
+                  IconButton(
+                    tooltip: '追加',
+                    onPressed: onAdd,
+                    icon: const Icon(
+                      Icons.add_circle_outline,
+                      color: Color(0xff526FC5),
+                    ),
+                  ),
                 if (onTap != null)
                   const Icon(
                     Icons.chevron_right,
@@ -745,6 +872,7 @@ class _HomeSectionCard extends StatelessWidget {
     required this.child,
     required this.minHeight,
     this.onTap,
+    this.onAdd,
   });
 
   final String title;
@@ -752,6 +880,7 @@ class _HomeSectionCard extends StatelessWidget {
   final Widget child;
   final double minHeight;
   final VoidCallback? onTap;
+  final VoidCallback? onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -793,6 +922,15 @@ class _HomeSectionCard extends StatelessWidget {
                   ),
                 ),
               ),
+              if (onAdd != null)
+                IconButton(
+                  tooltip: '追加',
+                  onPressed: onAdd,
+                  icon: const Icon(
+                    Icons.add_circle_outline,
+                    color: Color(0xff526FC5),
+                  ),
+                ),
               if (onTap != null)
                 const Icon(
                   Icons.chevron_right,
