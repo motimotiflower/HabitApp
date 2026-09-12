@@ -275,6 +275,7 @@ class MemoPageState extends State<MemoPage> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
+                                fontSize: 17,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xff35415F),
                               ),
@@ -296,6 +297,7 @@ class MemoPageState extends State<MemoPage> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
+                            fontSize: 15,
                             color: Color(0xff697188),
                           ),
                         ),
