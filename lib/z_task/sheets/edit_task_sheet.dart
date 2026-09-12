@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:habitapp/models/task.dart';
 import 'package:habitapp/z_task/category_storage.dart';
+import 'package:habitapp/notifications/notification_settings_card.dart';
 
 class EditTaskSheet extends StatefulWidget {
   const EditTaskSheet({
@@ -24,6 +25,8 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
   DateTime? _deadline;
   late bool _isFlagged;
   late bool _notificationEnabled;
+  late List<String> _notificationDays;
+  DateTime? _notificationDate;
   late TimeOfDay _notificationTime;
   List<String> _categories = [];
   late String _selectedCategory;
@@ -39,6 +42,8 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
     _selectedCategory = widget.task.category;
     _isFlagged = widget.task.isFlagged;
     _notificationEnabled = widget.task.notificationEnabled;
+    _notificationDays = [...widget.task.notificationDays];
+    _notificationDate = widget.task.notificationDate;
     _notificationTime = TimeOfDay(
       hour: widget.task.notificationHour ?? 9,
       minute: widget.task.notificationMinute ?? 0,
@@ -99,6 +104,15 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
 
     if (title.isEmpty) return;
 
+    if (_notificationEnabled &&
+        _notificationDate == null &&
+        _notificationDays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('通知する曜日か日にちを選んでください')),
+      );
+      return;
+    }
+
     widget.onSave(
       Task(
         id: widget.task.id,
@@ -107,8 +121,9 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
         deadline: _deadline,
         category: _selectedCategory,
         isFlagged: _isFlagged,
-        notificationEnabled:
-            _notificationEnabled && _deadline != null,
+        notificationEnabled: _notificationEnabled,
+        notificationDays: _notificationDays,
+        notificationDate: _notificationDate,
         notificationHour: _notificationTime.hour,
         notificationMinute: _notificationTime.minute,
         isDone: widget.task.isDone,
@@ -240,45 +255,36 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
                         },
                       ),
 
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        secondary: const Icon(
-                          Icons.notifications_outlined,
-                          color: Color(0xff526FC5),
-                        ),
-                        title: const Text('通知'),
-                        subtitle: Text(
-                          _deadline == null
-                              ? '締切日を設定すると通知できます'
-                              : '締切日の指定時刻に通知します',
-                        ),
-                        value: _notificationEnabled,
-                        onChanged: _deadline == null
-                            ? null
-                            : (value) {
-                                setState(() {
-                                  _notificationEnabled = value;
-                                });
-                              },
+                      NotificationSettingsCard(
+                        enabled: _notificationEnabled,
+                        days: _notificationDays,
+                        date: _notificationDate,
+                        time: _notificationTime,
+                        onEnabledChanged: (value) {
+                          setState(() {
+                            _notificationEnabled = value;
+                          });
+                        },
+                        onDaysChanged: (value) {
+                          setState(() {
+                            _notificationDays = value;
+                            _notificationDate = null;
+                          });
+                        },
+                        onDateChanged: (value) {
+                          setState(() {
+                            _notificationDate = value;
+                            if (value != null) {
+                              _notificationDays = [];
+                            }
+                          });
+                        },
+                        onTimeChanged: (value) {
+                          setState(() {
+                            _notificationTime = value;
+                          });
+                        },
                       ),
-
-                      if (_notificationEnabled && _deadline != null)
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(
-                            Icons.schedule,
-                            color: Color(0xff526FC5),
-                          ),
-                          title: const Text('通知時刻'),
-                          trailing: Text(
-                            _notificationTime.format(context),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          onTap: _selectNotificationTime,
-                        ),
 
                       const SizedBox(height: 16),
 
