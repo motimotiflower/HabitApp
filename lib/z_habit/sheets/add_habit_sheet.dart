@@ -102,8 +102,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final dayButtonSize = (screenWidth - 32 - 48) / 7;
+    //Webでも曜日ボタンが大きくなりすぎないよう固定サイズにする
+    const dayButtonSize = 42.0;
 
     return Container(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
@@ -310,6 +310,16 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                 ),
                 onPressed: () {
                   if (titleController.text.trim().isEmpty) return;
+
+                  //曜日が1つも選ばれていない場合は保存しない
+                  if (selectedDays.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('曜日を1つ以上選んでください'),
+                      ),
+                    );
+                    return;
+                  }
 
                   final habit = Habit(
                     title: titleController.text.trim(),
