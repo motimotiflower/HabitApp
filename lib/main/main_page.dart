@@ -184,42 +184,43 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          //背景========================================
-          MainBackground(
-            title: _pages[_currentIndex].title,
-            showCalendar: _pages[_currentIndex].showCalendar,
-            selectedDayIndex: _selectedDayIndex,
+      body: _currentIndex == 0
+          //Homeはヘッダーも含めてページ全体を一緒にスクロールする
+          ? _pages[_currentIndex].page
+          : Stack(
+              children: [
+                //背景========================================
+                MainBackground(
+                  title: _pages[_currentIndex].title,
+                  showCalendar: _pages[_currentIndex].showCalendar,
+                  selectedDayIndex: _selectedDayIndex,
 
-            //現在表示している週
-            displayedMonday: _displayedMonday,
+                  //現在表示している週
+                  displayedMonday: _displayedMonday,
 
-            //週移動
-            onPreviousWeek: _goToPreviousWeek,
-            onNextWeek: _goToNextWeek,
+                  //週移動
+                  onPreviousWeek: _goToPreviousWeek,
+                  onNextWeek: _goToNextWeek,
 
-            //今日に戻る
-            onToday: _goToToday,
+                  //今日に戻る
+                  onToday: _goToToday,
 
-            onDaySelected: (index) {
-              //Habitページの時だけ曜日変更を伝える
-              if (_currentIndex == 1) {
-                //カレンダーの選択曜日を変更
-                setState(() {
-                  _selectedDayIndex = index;
-                });
+                  onDaySelected: (index) {
+                    //Habitページの時だけ曜日変更を伝える
+                    if (_currentIndex == 1) {
+                      setState(() {
+                        _selectedDayIndex = index;
+                      });
 
-                //HabitPageの表示曜日も変更
-                _habitPageKey.currentState?.selectDay(index);
-              }
-            },
-          ),
+                      _habitPageKey.currentState?.selectDay(index);
+                    }
+                  },
+                ),
 
-          //currentIndexに応じたページを表示============
-          _pages[_currentIndex].page,
-        ],
-      ),
+                //currentIndexに応じたページを表示============
+                _pages[_currentIndex].page,
+              ],
+            ),
 
       //追加ボタン========================================
       floatingActionButton:
