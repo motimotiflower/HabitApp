@@ -31,7 +31,7 @@ class NotificationService {
     const darwin = DarwinInitializationSettings();
 
     await _plugin.initialize(
-      const InitializationSettings(
+      settings: const InitializationSettings(
         android: android,
         iOS: darwin,
         macOS: darwin,
@@ -96,7 +96,7 @@ class NotificationService {
     for (final id in ids) {
       final parsed = int.tryParse(id);
       if (parsed != null) {
-        await _plugin.cancel(parsed);
+        await _plugin.cancel(id: parsed);
       }
     }
   }
@@ -134,11 +134,11 @@ class NotificationService {
         }
 
         await _plugin.zonedSchedule(
-          id,
-          '習慣の時間です',
-          habit.title,
-          scheduled,
-          _details,
+          id: id,
+          title: '習慣の時間です',
+          body: habit.title,
+          scheduledDate: scheduled,
+          notificationDetails: _details,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
         );
@@ -180,11 +180,11 @@ class NotificationService {
       final id = _stableId('task|${task.id}');
 
       await _plugin.zonedSchedule(
-        id,
-        'タスクの締切が近づいています',
-        task.title,
-        scheduled,
-        _details,
+        id: id,
+        title: 'タスクの締切が近づいています',
+        body: task.title,
+        scheduledDate: scheduled,
+        notificationDetails: _details,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
 
