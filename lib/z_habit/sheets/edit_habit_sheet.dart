@@ -69,6 +69,16 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
     final title = _titleController.text.trim();
     if (title.isEmpty) return;
 
+    //曜日が1つも選ばれていない場合は保存しない
+    if (_selectedDays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('曜日を1つ以上選んでください'),
+        ),
+      );
+      return;
+    }
+
     widget.onSave(
       Habit(
         title: title,
@@ -164,26 +174,35 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                         children: days.map((day) {
                           final selected = _selectedDays.contains(day);
 
-                          return ChoiceChip(
-                            label: Text(day),
-                            selected: selected,
-                            showCheckmark: false,
-                            selectedColor: const Color(0xff526FC5),
-                            backgroundColor: Colors.white,
-                            labelStyle: TextStyle(
-                              color: selected
-                                  ? Colors.white
-                                  : const Color(0xff36498C),
+                          return SizedBox(
+                            width: 42,
+                            height: 42,
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                  color: Color(0xffC8D0E8),
+                                ),
+                                backgroundColor: selected
+                                    ? const Color(0xff526FC5)
+                                    : Colors.white,
+                                foregroundColor: selected
+                                    ? Colors.white
+                                    : const Color(0xff36498C),
+                                shape: const CircleBorder(),
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedDays.remove(day);
+                                  } else {
+                                    _selectedDays.add(day);
+                                  }
+                                });
+                              },
+                              child: Text(day),
                             ),
-                            onSelected: (_) {
-                              setState(() {
-                                if (selected) {
-                                  _selectedDays.remove(day);
-                                } else {
-                                  _selectedDays.add(day);
-                                }
-                              });
-                            },
                           );
                         }).toList(),
                       ),
