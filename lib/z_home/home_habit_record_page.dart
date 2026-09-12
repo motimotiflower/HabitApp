@@ -190,7 +190,6 @@ class _HomeHabitRecordPageState
   @override
   Widget build(BuildContext context) {
     final groups = _groupHabits();
-    final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     //記録ページは文字＋余白だけのコンパクトなヘッダー
