@@ -21,7 +21,9 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _loading = true;
   GlobalNotificationMode _notificationMode =
       GlobalNotificationMode.normal;
-  TimeOfDay _batchTime = const TimeOfDay(hour: 21, minute: 0);
+  List<TimeOfDay> _batchTimes = const [
+    TimeOfDay(hour: 21, minute: 0),
+  ];
 
   @override
   void initState() {
@@ -39,10 +41,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
     setState(() {
       _notificationMode = notification.mode;
-      _batchTime = TimeOfDay(
-        hour: notification.batchHour,
-        minute: notification.batchMinute,
-      );
+      _batchTimes = notification.batchTimes.map((value) {
+        final parts = value.split(':');
+        return TimeOfDay(
+          hour: int.tryParse(parts.first) ?? 21,
+          minute: int.tryParse(parts.length > 1 ? parts[1] : '') ?? 0,
+        );
+      }).toList();
       _loading = false;
     });
   }
@@ -60,24 +65,57 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Future<void> _pickBatchTime() async {
+  Future<void> _addBatchTime() async {
     final selected = await showTimePicker(
       context: context,
-      initialTime: _batchTime,
+      initialTime: _batchTimes.isEmpty
+          ? const TimeOfDay(hour: 21, minute: 0)
+          : _batchTimes.last,
     );
 
     if (selected == null) return;
 
+    final alreadyExists = _batchTimes.any(
+      (time) =>
+          time.hour == selected.hour &&
+          time.minute == selected.minute,
+    );
+
+    if (alreadyExists) return;
+
     setState(() {
-      _batchTime = selected;
+      _batchTimes = [..._batchTimes, selected]
+        ..sort((a, b) =>
+            (a.hour * 60 + a.minute).compareTo(
+              b.hour * 60 + b.minute,
+            ));
+    });
+  }
+
+  void _removeBatchTime(int index) {
+    setState(() {
+      _batchTimes = [..._batchTimes]..removeAt(index);
     });
   }
 
   Future<void> _saveNotificationSettings() async {
+    if (_notificationMode == GlobalNotificationMode.batch &&
+        _batchTimes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('まとめ通知の時刻を1つ以上設定してください'),
+        ),
+      );
+      return;
+    }
+
     final settings = GlobalNotificationSettings(
       mode: _notificationMode,
-      batchHour: _batchTime.hour,
-      batchMinute: _batchTime.minute,
+      batchTimes: _batchTimes.map((time) {
+        final hour = time.hour.toString().padLeft(2, '0');
+        final minute = time.minute.toString().padLeft(2, '0');
+        return '$hour:$minute';
+      }).toList(),
     );
 
     await NotificationPreferenceStorage.save(settings);
@@ -191,25 +229,65 @@ class _SettingsPageState extends State<SettingsPage> {
 
                       if (_notificationMode ==
                           GlobalNotificationMode.batch) ...[
-                        const SizedBox(height: 8),
-                        ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
+                        const SizedBox(height: 10),
+
+                        ...List.generate(
+                          _batchTimes.length,
+                          (index) {
+                            final time = _batchTimes[index];
+
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xffF3F6FF),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: const Color(0xffDCE3F5),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.schedule,
+                                    color: Color(0xff526FC5),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      time.format(context),
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xff35415F),
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    tooltip: '削除',
+                                    onPressed: () =>
+                                        _removeBatchTime(index),
+                                    icon: const Icon(
+                                      Icons.close,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: _addBatchTime,
+                            icon: const Icon(Icons.add),
+                            label: const Text('時刻を追加'),
                           ),
-                          leading: const Icon(
-                            Icons.schedule,
-                            color: Color(0xff526FC5),
-                          ),
-                          title: const Text('まとめて送る時刻'),
-                          trailing: Text(
-                            _batchTime.format(context),
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xff35415F),
-                            ),
-                          ),
-                          onTap: _pickBatchTime,
                         ),
                       ],
 
