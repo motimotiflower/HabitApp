@@ -229,7 +229,7 @@ class MemoPageState extends State<MemoPage> {
         _buildHeaderSearch(context),
 
         MainContent(
-          overlap: 10,
+          overlap: 0,
           child: visibleMemos.isEmpty
               ? Center(
                   child: Text(
