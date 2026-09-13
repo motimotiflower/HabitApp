@@ -182,10 +182,11 @@ class _BookCard extends StatelessWidget {
               ),
               child: Center(
                 child: unlocked
-                    ? const Icon(
-                        Icons.auto_awesome,
-                        size: 72,
-                        color: Color(0xffFFE6A3),
+                    ? Image.asset(
+                        'assets/images/constellations.png',
+                        width: 110,
+                        height: 110,
+                        fit: BoxFit.contain,
                       )
                     : const Icon(
                         Icons.lock_outline,
