@@ -375,11 +375,19 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
-        //部屋名の場所を青くして、本文との境目を分かりやすくする
-        backgroundColor: const Color(0xff526FC5),
+        //部屋名の上部だけ星空背景にする
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
+        flexibleSpace: const DecoratedBox(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/background.png'),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
         titleSpacing: 0,
         title: Text(
           _memo.title,
