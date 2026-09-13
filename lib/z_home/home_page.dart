@@ -689,16 +689,12 @@ class HomePageState extends State<HomePage> {
           );
         }
 
-        //スマホ版は青背景のまま、タイトル直下までカードを持ち上げる
+        //スマホ版は背景画像の上にカードを重ねる
         return Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.topRight,
-              colors: [
-                Color(0xff102d72),
-                Color(0xff5e78cf),
-              ],
+            image: DecorationImage(
+              image: AssetImage('assets/images/background.png'),
+              fit: BoxFit.cover,
             ),
           ),
           child: SingleChildScrollView(
