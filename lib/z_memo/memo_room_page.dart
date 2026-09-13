@@ -520,10 +520,8 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                               radius: 18,
                                               backgroundColor:
                                                   Color(0xffE8EDFC),
-                                              child: Icon(
-                                                Icons.person_rounded,
-                                                size: 21,
-                                                color: Color(0xff526FC5),
+                                              backgroundImage: AssetImage(
+                                                'assets/images/user_icon.png',
                                               ),
                                             )
                                           : null,
