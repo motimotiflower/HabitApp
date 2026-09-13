@@ -278,9 +278,8 @@ class MemoPageState extends State<MemoPage> {
                       leading: const CircleAvatar(
                         radius: 24,
                         backgroundColor: Color(0xffE8EDFC),
-                        child: Icon(
-                          Icons.chat_bubble_outline,
-                          color: Color(0xff526FC5),
+                        backgroundImage: AssetImage(
+                          'assets/images/memo_icon.png',
                         ),
                       ),
                       title: Row(
