@@ -30,9 +30,22 @@ class ConstellationBookPage extends StatelessWidget {
         foregroundColor: const Color(0xff5E4A38),
         title: const Text('星座図鑑'),
       ),
-      body: isWide
-          ? _WebBook(records: records)
-          : _MobileBook(records: records),
+      body: Stack(
+        children: [
+          // 図鑑の本背景
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/background_book.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: isWide
+                ? _WebBook(records: records)
+                : _MobileBook(records: records),
+          ),
+        ],
+      ),
     );
   }
 }
