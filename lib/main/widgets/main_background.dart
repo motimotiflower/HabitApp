@@ -64,7 +64,7 @@ class MainBackground extends StatelessWidget {
       decoration: const BoxDecoration(
         // 共通ヘッダーに幻想的な背景画像を使う
         image: DecorationImage(
-          image: AssetImage('assets/images/background.png'),
+          image: AssetImage('assets/images/background_sky.png'),
           fit: BoxFit.cover,
         ),
       ),
