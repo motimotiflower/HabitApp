@@ -62,10 +62,11 @@ class StarSkyPage extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
-                              Icons.auto_awesome,
-                              color: Color(0xffFFE6A3),
-                              size: 30,
+                            Image.asset(
+                              'assets/images/constellations.png',
+                              width: 42,
+                              height: 42,
+                              fit: BoxFit.contain,
                             ),
                             const SizedBox(height: 4),
                             Text(
