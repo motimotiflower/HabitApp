@@ -380,13 +380,16 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
         foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        flexibleSpace: const DecoratedBox(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/background.png'),
+        //AppBar自体の前面まで画像を敷く
+        flexibleSpace: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              'assets/images/background.png',
               fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
             ),
-          ),
+          ],
         ),
         titleSpacing: 0,
         title: Text(
