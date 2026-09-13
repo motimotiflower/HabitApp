@@ -689,7 +689,7 @@ class HomePageState extends State<HomePage> {
           );
         }
 
-        //スマホ版は背景画像の上にカードを重ねる
+        //背景画像は固定し、タイトルとカードだけをスクロールさせる
         return Container(
           decoration: const BoxDecoration(
             image: DecorationImage(
@@ -699,18 +699,29 @@ class HomePageState extends State<HomePage> {
           ),
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            child: Stack(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              MediaQuery.of(context).padding.top + 14,
+              16,
+              16,
+            ),
+            child: Column(
               children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: SizedBox(
-                    height: headerHeight,
-                    child: MainBackground(
-                      title: 'Home',
-                      showCalendar: false,
-                      onSettings: () {
+                //Homeは独立したヘッダーを置かず、文字だけ背景上に表示
+                Row(
+                  children: [
+                    const Text(
+                      'Home',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 36,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      tooltip: '設定',
+                      onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -718,25 +729,21 @@ class HomePageState extends State<HomePage> {
                           ),
                         );
                       },
+                      icon: const Icon(
+                        Icons.settings_outlined,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-
-                //タイトルのすぐ下からカードを開始する
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 92, 16, 16),
-                  child: Column(
-                    children: [
-                      todayHabitCard,
-                      const SizedBox(height: 12),
-                      todayTaskCard,
-                      const SizedBox(height: 12),
-                      habitRecordCard,
-                      const SizedBox(height: 12),
-                      memoCard,
-                    ],
-                  ),
-                ),
+                const SizedBox(height: 14),
+                todayHabitCard,
+                const SizedBox(height: 12),
+                todayTaskCard,
+                const SizedBox(height: 12),
+                habitRecordCard,
+                const SizedBox(height: 12),
+                memoCard,
               ],
             ),
           ),
