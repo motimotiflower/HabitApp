@@ -62,11 +62,10 @@ class MainBackground extends StatelessWidget {
       height: height,
       width: double.infinity,
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color(0xff102d72),
-            Color(0xff5e78cf),
-          ],
+        // 共通ヘッダーに幻想的な背景画像を使う
+        image: DecorationImage(
+          image: AssetImage('assets/images/background.png'),
+          fit: BoxFit.cover,
         ),
       ),
       child: Padding(
