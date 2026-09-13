@@ -215,10 +215,19 @@ class _HomeHabitRecordPageState
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
-        backgroundColor: const Color(0xff526FC5),
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
+        //上部だけ星空背景にする
+        flexibleSpace: const DecoratedBox(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/background.png'),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
         titleSpacing: 0,
         title: const Text(
           '記録',
