@@ -325,9 +325,17 @@ class _StarFragmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visibleStars =
-        fragments.clamp(0, StarStorage.drawCost).toInt();
     final drawCount = fragments ~/ StarStorage.drawCost;
+
+    // 星の欠片の量に合わせて瓶画像を切り替える
+    final ratio = StarStorage.drawCost == 0
+        ? 0.0
+        : fragments / StarStorage.drawCost;
+    final bottleAsset = ratio <= 0
+        ? 'assets/images/bottle_blank.png'
+        : ratio < 1
+            ? 'assets/images/bottle_half.png'
+            : 'assets/images/bottle_fill.png';
     final allCollected =
         ownedCount >= StarStorage.constellationNames.length;
 
@@ -352,34 +360,13 @@ class _StarFragmentCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          //瓶の中に欠片がたまっていくイメージ
-          Container(
-            width: 170,
-            height: 180,
-            padding: const EdgeInsets.fromLTRB(14, 32, 14, 14),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.55),
-              borderRadius: BorderRadius.circular(38),
-              border: Border.all(
-                color: const Color(0xffA9B8E5),
-                width: 2,
-              ),
-            ),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 2,
-                runSpacing: 2,
-                children: List.generate(
-                  visibleStars,
-                  (_) => const Icon(
-                    Icons.star_rounded,
-                    size: 20,
-                    color: Color(0xffF1C66C),
-                  ),
-                ),
-              ),
+          // 星の欠片の量に応じた瓶画像
+          SizedBox(
+            width: 190,
+            height: 200,
+            child: Image.asset(
+              bottleAsset,
+              fit: BoxFit.contain,
             ),
           ),
 
