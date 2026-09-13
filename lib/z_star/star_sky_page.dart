@@ -28,19 +28,11 @@ class StarSkyPage extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          const Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xff102D72),
-                    Color(0xff394E9B),
-                    Color(0xff6278C7),
-                  ],
-                ),
-              ),
+          // 星空の背景画像
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/background_sky.png',
+              fit: BoxFit.cover,
             ),
           ),
           if (records.isEmpty)
