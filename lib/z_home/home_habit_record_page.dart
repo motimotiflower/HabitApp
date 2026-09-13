@@ -225,7 +225,7 @@ class _HomeHabitRecordPageState
           fit: StackFit.expand,
           children: [
             Image.asset(
-              'assets/images/background.png',
+              'assets/images/background_sky.png',
               fit: BoxFit.cover,
               alignment: Alignment.topCenter,
             ),
