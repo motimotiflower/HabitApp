@@ -930,40 +930,30 @@ class _HomeRecordPreview extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-        //瓶をシンプルな仮アイコンで表現
+        //星の欠片の量に合わせて瓶画像を切り替える
         LayoutBuilder(
           builder: (context, constraints) {
-            //左半分の空きをなるべく瓶に使う
             final bottleWidth = constraints.maxWidth.isFinite
                 ? (constraints.maxWidth * 0.72).clamp(88.0, 180.0)
                 : 110.0;
-            final bottleHeight = bottleWidth * 1.12;
 
-            return Container(
-          width: bottleWidth,
-          height: bottleHeight,
-          padding: EdgeInsets.all(bottleWidth * 0.11),
-          decoration: BoxDecoration(
-            color: const Color(0xffF3F2FC),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xffA9B8E5)),
-          ),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 1,
-              runSpacing: 1,
-              children: List.generate(
-                fragments.clamp(0, StarStorage.drawCost).toInt(),
-                (_) => const Icon(
-                  Icons.star_rounded,
-                  size: 12,
-                  color: Color(0xffE7B95A),
-                ),
+            final ratio = StarStorage.drawCost == 0
+                ? 0.0
+                : fragments / StarStorage.drawCost;
+
+            final bottleAsset = ratio <= 0
+                ? 'assets/images/bottle_blank.png'
+                : ratio < 1
+                    ? 'assets/images/bottle_half.png'
+                    : 'assets/images/bottle_fill.png';
+
+            return SizedBox(
+              width: bottleWidth,
+              height: bottleWidth * 1.12,
+              child: Image.asset(
+                bottleAsset,
+                fit: BoxFit.contain,
               ),
-            ),
-          ),
             );
           },
         ),
