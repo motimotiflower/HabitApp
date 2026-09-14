@@ -15,20 +15,20 @@ class ConstellationData {
     'うお座': '二匹の魚を結んだ姿で描かれる秋の星座。',
   };
 
-  //生成画像の実際の並びに合わせて紐付ける
+  //星座名と画像ファイルを名前で明確に対応させる
   static const Map<String, String> imagePaths = {
-    'おひつじ座': 'assets/images/constellations2.png',
-    'おうし座': 'assets/images/constellations3.png',
-    'ふたご座': 'assets/images/constellations4.png',
-    'かに座': 'assets/images/constellations5.png',
-    'しし座': 'assets/images/constellations6.png',
-    'おとめ座': 'assets/images/constellations7.png',
-    'てんびん座': 'assets/images/constellations8.png',
-    'さそり座': 'assets/images/constellations9.png',
-    'いて座': 'assets/images/constellations10.png',
-    'やぎ座': 'assets/images/constellations11.png',
-    'みずがめ座': 'assets/images/constellations12.png',
-    'うお座': 'assets/images/constellations1.png',
+    'おひつじ座': 'assets/images/constellations2_ohituzi.png',
+    'おうし座': 'assets/images/constellations1_ousi.png',
+    'ふたご座': 'assets/images/constellations12_hutago.png',
+    'かに座': 'assets/images/constellations11_kani.png',
+    'しし座': 'assets/images/constellations10_sisi.png',
+    'おとめ座': 'assets/images/constellations9_otome.png',
+    'てんびん座': 'assets/images/constellations8_tenbin.png',
+    'さそり座': 'assets/images/constellations7_sasori.png',
+    'いて座': 'assets/images/constellations6_ite.png',
+    'やぎ座': 'assets/images/constellations4_yagi.png',
+    'みずがめ座': 'assets/images/constellations5_mizugame.png',
+    'うお座': 'assets/images/constellations3_uo.png',
   };
 
   static String description(String name) {
