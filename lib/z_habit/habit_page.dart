@@ -103,6 +103,7 @@ class HabitPageState extends State<HabitPage> {
           id: habit.id,
           title: habit.title,
           icon: habit.icon,
+          iconAsset: habit.iconAsset,
           days: habit.days,
           category: newName,
           notificationEnabled: habit.notificationEnabled,
