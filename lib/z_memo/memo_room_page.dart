@@ -11,11 +11,7 @@ import 'package:habitapp/user/user_profile_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
 class MemoRoomPage extends StatefulWidget {
-  const MemoRoomPage({
-    super.key,
-    required this.memo,
-    required this.onChanged,
-  });
+  const MemoRoomPage({super.key, required this.memo, required this.onChanged});
 
   final Memo memo;
   final void Function(Memo memo) onChanged;
@@ -152,10 +148,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                 backgroundColor: const Color(0xff526FC5),
               ),
               onPressed: () {
-                Navigator.pop(
-                  dialogContext,
-                  controller.text.trim(),
-                );
+                Navigator.pop(dialogContext, controller.text.trim());
               },
               child: const Text('保存'),
             ),
@@ -258,8 +251,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
 
   //長押し・右クリックから編集と削除を選ぶ
   Future<void> _showMessageMenu(int index, Offset position) async {
-    final overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
 
     setState(() {
       _selectedMessageIndex = index;
@@ -314,9 +306,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
       context,
       MaterialPageRoute(
         builder: (_) {
-          return MemoComposerPage(
-            onSubmit: _addMessage,
-          );
+          return MemoComposerPage(onSubmit: _addMessage);
         },
       ),
     );
@@ -412,9 +402,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                   ? const Center(
                       child: Text(
                         '思いついたことをここに残してみよう',
-                        style: TextStyle(
-                          color: Color(0xff81889B),
-                        ),
+                        style: TextStyle(color: Color(0xff81889B)),
                       ),
                     )
                   : ListView.builder(
@@ -424,14 +412,14 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                       itemBuilder: (context, index) {
                         final message = _memo.messages[index];
 
-                        final showDate = index == 0 ||
-                            _formatDate(
-                                  _memo.messages[index - 1].createdAt,
-                                ) !=
+                        final showDate =
+                            index == 0 ||
+                            _formatDate(_memo.messages[index - 1].createdAt) !=
                                 _formatDate(message.createdAt);
 
                         //前の投稿から5分以内なら同じ投稿のまとまりとして扱う
-                        final isContinuous = index > 0 &&
+                        final isContinuous =
+                            index > 0 &&
                             !showDate &&
                             message.createdAt
                                     .difference(
@@ -443,9 +431,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                         //次も連投なら、この投稿の下余白も詰める
                         final nextIsContinuous =
                             index < _memo.messages.length - 1 &&
-                            _formatDate(
-                                  _memo.messages[index + 1].createdAt,
-                                ) ==
+                            _formatDate(_memo.messages[index + 1].createdAt) ==
                                 _formatDate(message.createdAt) &&
                             _memo.messages[index + 1].createdAt
                                     .difference(message.createdAt)
@@ -462,9 +448,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                 child: Row(
                                   children: [
                                     const Expanded(
-                                      child: Divider(
-                                        color: Color(0xffDCE3F5),
-                                      ),
+                                      child: Divider(color: Color(0xffDCE3F5)),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
@@ -479,9 +463,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                       ),
                                     ),
                                     const Expanded(
-                                      child: Divider(
-                                        color: Color(0xffDCE3F5),
-                                      ),
+                                      child: Divider(color: Color(0xffDCE3F5)),
                                     ),
                                   ],
                                 ),
@@ -521,102 +503,109 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                    //連続投稿ではアイコンを表示しない
-                                    SizedBox(
-                                      width: 42,
-                                      child: !isContinuous
-                                          ? const CircleAvatar(
-                                              radius: 18,
-                                              backgroundColor:
-                                                  Color(0xffE8EDFC),
-                                              backgroundImage: AssetImage(
-                                                'assets/images/user_icon.png',
-                                              ),
-                                            )
-                                          : null,
-                                    ),
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        //連続投稿ではアイコンを表示しない
+                                        SizedBox(
+                                          width: 42,
+                                          child: !isContinuous
+                                              ? const CircleAvatar(
+                                                  radius: 18,
+                                                  backgroundColor: Color(
+                                                    0xffE8EDFC,
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.person_rounded,
+                                                    size: 22,
+                                                    color: Color(0xff526FC5),
+                                                  ),
+                                                )
+                                              : null,
+                                        ),
 
-                                    const SizedBox(width: 8),
+                                        const SizedBox(width: 8),
 
-                                    Expanded(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          //まとまりの最初だけ名前と時刻を表示
-                                          if (!isContinuous) ...[
-                                            Row(
-                                              children: [
+                                        Expanded(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              //まとまりの最初だけ名前と時刻を表示
+                                              if (!isContinuous) ...[
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      _userName,
+                                                      style: const TextStyle(
+                                                        fontSize: 17,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Color(
+                                                          0xff35415F,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 6),
+                                                    Text(
+                                                      _formatTime(
+                                                        message.createdAt,
+                                                      ),
+                                                      style: const TextStyle(
+                                                        fontSize: 11,
+                                                        color: Color(
+                                                          0xff9AA2B6,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                //名前・時刻と本文が詰まらないよう少し広めに空ける
+                                                const SizedBox(height: 8),
+                                              ],
+
+                                              if (message.content.isNotEmpty)
                                                 Text(
-                                                  _userName,
+                                                  message.content,
+                                                  textAlign: TextAlign.left,
                                                   style: const TextStyle(
-                                                    fontSize: 17,
-                                                    fontWeight:
-                                                        FontWeight.w600,
-                                                    color:
-                                                        Color(0xff35415F),
+                                                    fontSize: 18,
+                                                    height: 1.55,
+                                                    color: Color(0xff35415F),
                                                   ),
                                                 ),
-                                                const SizedBox(width: 6),
-                                                Text(
-                                                  _formatTime(
-                                                    message.createdAt,
-                                                  ),
-                                                  style: const TextStyle(
-                                                    fontSize: 11,
-                                                    color:
-                                                        Color(0xff9AA2B6),
+
+                                              if (message.imageBase64 !=
+                                                  null) ...[
+                                                if (message.content.isNotEmpty)
+                                                  const SizedBox(height: 8),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    _showImage(
+                                                      message.imageBase64!,
+                                                    );
+                                                  },
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
+                                                    child: Image.memory(
+                                                      base64Decode(
+                                                        message.imageBase64!,
+                                                      ),
+                                                      width: 280,
+                                                      height: 210,
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   ),
                                                 ),
                                               ],
-                                            ),
-                                            //名前・時刻と本文が詰まらないよう少し広めに空ける
-                                            const SizedBox(height: 8),
-                                          ],
-
-                                          if (message.content.isNotEmpty)
-                                            Text(
-                                              message.content,
-                                              textAlign: TextAlign.left,
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                                height: 1.55,
-                                                color: Color(0xff35415F),
-                                              ),
-                                            ),
-
-                                          if (message.imageBase64 != null) ...[
-                                            if (message.content.isNotEmpty)
-                                              const SizedBox(height: 8),
-                                            GestureDetector(
-                                              onTap: () {
-                                                _showImage(
-                                                  message.imageBase64!,
-                                                );
-                                              },
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                child: Image.memory(
-                                                  base64Decode(
-                                                    message.imageBase64!,
-                                                  ),
-                                                  width: 280,
-                                                  height: 210,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-
-
-                                  ],
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
@@ -663,11 +652,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
               padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                border: Border(
-                  top: BorderSide(
-                    color: Color(0xffE0E6F5),
-                  ),
-                ),
+                border: Border(top: BorderSide(color: Color(0xffE0E6F5))),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -717,10 +702,7 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
                       backgroundColor: const Color(0xff526FC5),
                     ),
                     onPressed: _sendInline,
-                    icon: const Icon(
-                      Icons.arrow_upward,
-                      color: Colors.white,
-                    ),
+                    icon: const Icon(Icons.arrow_upward, color: Colors.white),
                   ),
                 ],
               ),
