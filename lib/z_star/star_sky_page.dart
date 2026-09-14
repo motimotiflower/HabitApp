@@ -1,4 +1,6 @@
 //獲得した星座を夜空に並べるページ
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:habitapp/main/widgets/main_background.dart';
 import 'package:habitapp/z_star/constellation_data.dart';
@@ -49,40 +51,73 @@ class StarSkyPage extends StatelessWidget {
           else
             LayoutBuilder(
               builder: (context, constraints) {
+                final centerX = constraints.maxWidth / 2;
+                final centerY = constraints.maxHeight * 0.50;
+
+                //スマホの縦長画面に合わせて少し縦長の円にする
+                final radiusX = constraints.maxWidth * 0.34;
+                final radiusY = constraints.maxHeight * 0.31;
+
+                const itemWidth = 86.0;
+                const itemHeight = 104.0;
+
                 return Stack(
-                  children: List.generate(records.length, (index) {
-                    final record = records[index];
-                    final x = ((index * 137) % 78) / 100;
-                    final y = ((index * 89) % 68) / 100;
+                  children: records.map((record) {
+                    final constellationIndex =
+                        StarStorage.constellationNames.indexOf(record.name);
+
+                    //12星座の決まった位置に置く
+                    final index =
+                        constellationIndex < 0 ? 0 : constellationIndex;
+                    final angle = -pi / 2 + (2 * pi * index / 12);
+
+                    final left = centerX +
+                        cos(angle) * radiusX -
+                        itemWidth / 2;
+                    final top = centerY +
+                        sin(angle) * radiusY -
+                        itemHeight / 2;
 
                     return Positioned(
-                      left: constraints.maxWidth * x,
-                      top: constraints.maxHeight * y,
+                      left: left,
+                      top: top,
+                      width: itemWidth,
+                      height: itemHeight,
                       child: Tooltip(
                         message: record.name,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            //獲得した星座ごとに個別画像を表示
-                            Image.asset(
-                              ConstellationData.imagePath(record.name),
-                              width: 72,
-                              height: 72,
-                              fit: BoxFit.contain,
+                            //画像を潰さず大きめに表示する
+                            Expanded(
+                              child: Image.asset(
+                                ConstellationData.imagePath(record.name),
+                                fit: BoxFit.contain,
+                              ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 3),
                             Text(
                               record.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.fade,
+                              softWrap: false,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 5,
+                                    color: Colors.black87,
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
                     );
-                  }),
+                  }).toList(),
                 );
               },
             ),
