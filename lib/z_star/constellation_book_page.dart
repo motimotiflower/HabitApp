@@ -68,7 +68,14 @@ class _WebBook extends StatelessWidget {
       itemCount: StarStorage.constellationNames.length,
       itemBuilder: (context, index) {
         final name = StarStorage.constellationNames[index];
-        final record = records.where((item) => item.name == name).firstOrNull;
+        ConstellationRecord? record;
+
+        for (final item in records) {
+          if (item.name == name) {
+            record = item;
+            break;
+          }
+        }
 
         return _BookPageContent(name: name, record: record);
       },
