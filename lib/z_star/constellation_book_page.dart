@@ -127,8 +127,7 @@ class _MobileBook extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
+      );
   }
 }
 
@@ -157,39 +156,19 @@ class _BookCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final unlocked = record != null;
 
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: const Color(0xffF7EEDC).withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xffD8C7AA),
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x22000000),
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+    //カード枠を作らず、本の紙面へ直接レイアウトする
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
       child: Column(
         children: [
           Expanded(
             child: unlocked
                 ? _ConstellationArtwork(name: name)
-                : Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: const Color(0xff111A35),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.lock_outline,
-                        size: 54,
-                        color: Colors.white38,
-                      ),
+                : const Center(
+                    child: Icon(
+                      Icons.lock_outline,
+                      size: 54,
+                      color: Color(0xff8B765F),
                     ),
                   ),
           ),
@@ -245,21 +224,8 @@ class _ConstellationArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        gradient: const RadialGradient(
-          center: Alignment.center,
-          radius: 0.95,
-          colors: [
-            Color(0xff172650),
-            Color(0xff0A1022),
-          ],
-        ),
-      ),
-      child: LayoutBuilder(
+    //画像だけを紙面に貼り、外周をぼかしてなじませる
+    return LayoutBuilder(
         builder: (context, constraints) {
           final size = constraints.biggest.shortestSide * 0.82;
 
