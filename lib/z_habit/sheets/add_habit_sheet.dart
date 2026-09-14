@@ -22,7 +22,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   Map<String, int> _categoryColors = {};
   String _selectedCategory = '未設定';
   String? _hoveredCategory;
-  IconData _selectedIcon = Icons.check;
+  String _selectedIconAsset = 'assets/images/icon_item1.png';
   bool _notificationEnabled = false;
   List<String> _notificationDays = [];
   DateTime? _notificationDate;
@@ -39,16 +39,10 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
     Color(0xffF3E4DC),
   ];
 
-  final List<IconData> _icons = const [
-    Icons.menu_book,
-    Icons.water_drop,
-    Icons.fitness_center,
-    Icons.self_improvement,
-    Icons.favorite,
-    Icons.star,
-    Icons.music_note,
-    Icons.nightlight_round,
-  ];
+  final List<String> _iconAssets = List.generate(
+    10,
+    (index) => 'assets/images/icon_item${index + 1}.png',
+  );
 
   @override
   void initState() {
@@ -372,25 +366,35 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
-                      children: _icons.map((icon) {
-                        final selected = _selectedIcon == icon;
+                      children: _iconAssets.map((asset) {
+                        final selected = _selectedIconAsset == asset;
 
                         return InkWell(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(14),
                           onTap: () {
                             setState(() {
-                              _selectedIcon = icon;
+                              _selectedIconAsset = asset;
                             });
                           },
-                          child: CircleAvatar(
-                            backgroundColor: selected
-                                ? const Color(0xff526FC5)
-                                : const Color(0xffE8EDFC),
-                            child: Icon(
-                              icon,
+                          child: Container(
+                            width: 58,
+                            height: 58,
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
                               color: selected
-                                  ? Colors.white
-                                  : const Color(0xff526FC5),
+                                  ? const Color(0xffDCE5FF)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: selected
+                                    ? const Color(0xff526FC5)
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
+                            ),
+                            child: Image.asset(
+                              asset,
+                              fit: BoxFit.contain, //画像を潰さず表示
                             ),
                           ),
                         );
@@ -437,7 +441,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
                   final habit = Habit(
                     title: titleController.text.trim(),
-                    icon: _selectedIcon,
+                    iconAsset: _selectedIconAsset,
                     days: List.from(selectedDays),
                     category: _selectedCategory,
                     notificationEnabled: _notificationEnabled,
