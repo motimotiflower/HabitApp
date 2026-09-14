@@ -75,7 +75,7 @@ class StarStorage {
   //星座ガチャ1回に必要な欠片数
   static const int drawCost = 15;
 
-  //最初に用意する30種類。ガチャでは被らない
+  //黄道十二星座。ガチャでは被らない
   static const List<String> constellationNames = [
     'おひつじ座',
     'おうし座',
@@ -89,24 +89,6 @@ class StarStorage {
     'やぎ座',
     'みずがめ座',
     'うお座',
-    'こぐま座',
-    'おおぐま座',
-    'カシオペヤ座',
-    'ケフェウス座',
-    'アンドロメダ座',
-    'ペガスス座',
-    'オリオン座',
-    'おおいぬ座',
-    'こいぬ座',
-    'こと座',
-    'わし座',
-    'はくちょう座',
-    'いるか座',
-    'ヘルクレス座',
-    'りゅう座',
-    'ペルセウス座',
-    'ぎょしゃ座',
-    'かんむり座',
   ];
 
   static Future<StarState> load() async {
@@ -138,7 +120,7 @@ class StarStorage {
         .map((item) => StarAward.fromJson(Map<String, dynamic>.from(item)))
         .toList();
 
-    final constellations =
+    final savedConstellations =
         (json['constellations'] as List<dynamic>? ?? [])
             .map(
               (item) => ConstellationRecord.fromJson(
@@ -146,6 +128,11 @@ class StarStorage {
               ),
             )
             .toList();
+
+    //30星座版の古い保存データがあっても12星座だけを使う
+    final constellations = savedConstellations
+        .where((record) => constellationNames.contains(record.name))
+        .toList();
 
     return StarState(
       awards: awards,
@@ -211,6 +198,7 @@ class StarStorage {
         .where((name) => !owned.contains(name))
         .toList();
 
+    //12星座コンプリート後はガチャを行わない
     if (available.isEmpty) return null;
 
     for (final award in unspent.take(drawCost)) {
