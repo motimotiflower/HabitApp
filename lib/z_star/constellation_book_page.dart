@@ -20,7 +20,6 @@ class ConstellationBookPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xffEEE4D3),
       appBar: AppBar(
-        //各詳細ページで上下の余白をそろえる
         toolbarHeight: MainBackground.detailToolbarHeight,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
@@ -32,7 +31,6 @@ class ConstellationBookPage extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          //スマホは1ページ用、Webは見開き用の本背景
           Positioned.fill(
             child: Image.asset(
               isWide
@@ -53,9 +51,7 @@ class ConstellationBookPage extends StatelessWidget {
 }
 
 class _WebBook extends StatelessWidget {
-  const _WebBook({
-    required this.records,
-  });
+  const _WebBook({required this.records});
 
   final List<ConstellationRecord> records;
 
@@ -72,28 +68,16 @@ class _WebBook extends StatelessWidget {
       itemCount: StarStorage.constellationNames.length,
       itemBuilder: (context, index) {
         final name = StarStorage.constellationNames[index];
-        ConstellationRecord? record;
+        final record = records.where((item) => item.name == name).firstOrNull;
 
-        for (final item in records) {
-          if (item.name == name) {
-            record = item;
-            break;
-          }
-        }
-
-        return _BookCard(
-          name: name,
-          record: record,
-        );
+        return _BookPageContent(name: name, record: record);
       },
     );
   }
 }
 
 class _MobileBook extends StatelessWidget {
-  const _MobileBook({
-    required this.records,
-  });
+  const _MobileBook({required this.records});
 
   final List<ConstellationRecord> records;
 
@@ -102,7 +86,7 @@ class _MobileBook extends StatelessWidget {
     return ScrollConfiguration(
       behavior: const _BookScrollBehavior(),
       child: PageView.builder(
-        controller: PageController(viewportFraction: 0.9),
+        controller: PageController(viewportFraction: 0.92),
         physics: const PageScrollPhysics(),
         itemCount: StarStorage.constellationNames.length,
         itemBuilder: (context, index) {
@@ -117,17 +101,12 @@ class _MobileBook extends StatelessWidget {
           }
 
           return Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 20,
-            ),
-            child: _BookCard(
-              name: name,
-              record: record,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 18),
+            child: _BookPageContent(name: name, record: record),
           );
         },
-      );
+      ),
+    );
   }
 }
 
@@ -143,8 +122,8 @@ class _BookScrollBehavior extends MaterialScrollBehavior {
       };
 }
 
-class _BookCard extends StatelessWidget {
-  const _BookCard({
+class _BookPageContent extends StatelessWidget {
+  const _BookPageContent({
     required this.name,
     required this.record,
   });
@@ -156,9 +135,9 @@ class _BookCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final unlocked = record != null;
 
-    //カード枠を作らず、本の紙面へ直接レイアウトする
+    //カードを置かず、本の紙面へ直接レイアウト
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+      padding: const EdgeInsets.fromLTRB(28, 28, 28, 24),
       child: Column(
         children: [
           Expanded(
@@ -167,16 +146,16 @@ class _BookCard extends StatelessWidget {
                 : const Center(
                     child: Icon(
                       Icons.lock_outline,
-                      size: 54,
+                      size: 56,
                       color: Color(0xff8B765F),
                     ),
                   ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           Text(
             unlocked ? name : '？？？',
             style: const TextStyle(
-              fontSize: 20,
+              fontSize: 21,
               fontWeight: FontWeight.bold,
               color: Color(0xff5E4A38),
             ),
@@ -214,49 +193,44 @@ class _BookCard extends StatelessWidget {
   }
 }
 
-//画像の四角い端をぼかし、星空背景へ溶け込ませる
 class _ConstellationArtwork extends StatelessWidget {
-  const _ConstellationArtwork({
-    required this.name,
-  });
+  const _ConstellationArtwork({required this.name});
 
   final String name;
 
   @override
   Widget build(BuildContext context) {
-    //画像だけを紙面に貼り、外周をぼかしてなじませる
     return LayoutBuilder(
-        builder: (context, constraints) {
-          final size = constraints.biggest.shortestSide * 0.82;
+      builder: (context, constraints) {
+        final size = constraints.biggest.shortestSide * 0.90;
 
-          return Center(
-            child: SizedBox(
-              width: size,
-              height: size,
-              child: ShaderMask(
-                //外周を透明にして画像の四角を目立たなくする
-                shaderCallback: (bounds) {
-                  return const RadialGradient(
-                    center: Alignment.center,
-                    radius: 0.78,
-                    colors: [
-                      Colors.white,
-                      Colors.white,
-                      Colors.transparent,
-                    ],
-                    stops: [0.0, 0.68, 1.0],
-                  ).createShader(bounds);
-                },
-                blendMode: BlendMode.dstIn,
-                child: Image.asset(
-                  ConstellationData.imagePath(name),
-                  fit: BoxFit.cover,
-                ),
+        return Center(
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: ShaderMask(
+              //画像の四角い端だけをぼかして紙になじませる
+              shaderCallback: (bounds) {
+                return const RadialGradient(
+                  center: Alignment.center,
+                  radius: 0.86,
+                  colors: [
+                    Colors.white,
+                    Colors.white,
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.72, 1.0],
+                ).createShader(bounds);
+              },
+              blendMode: BlendMode.dstIn,
+              child: Image.asset(
+                ConstellationData.imagePath(name),
+                fit: BoxFit.cover,
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
