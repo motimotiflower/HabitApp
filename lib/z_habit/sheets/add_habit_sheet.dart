@@ -392,9 +392,17 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                                 width: 2,
                               ),
                             ),
-                            child: Image.asset(
-                              asset,
-                              fit: BoxFit.contain, //画像を潰さず表示
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Transform.scale(
+                                scale: 1.18,
+                                child: Image.asset(
+                                  asset,
+                                  fit: BoxFit.contain,
+                                  filterQuality: FilterQuality.high,
+                                  isAntiAlias: true,
+                                ),
+                              ),
                             ),
                           ),
                         );
