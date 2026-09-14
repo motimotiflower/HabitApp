@@ -1,6 +1,7 @@
 //獲得した星座を夜空に並べるページ
 import 'package:flutter/material.dart';
 import 'package:habitapp/main/widgets/main_background.dart';
+import 'package:habitapp/z_star/constellation_data.dart';
 import 'package:habitapp/z_star/star_storage.dart';
 
 class StarSkyPage extends StatelessWidget {
@@ -28,10 +29,10 @@ class StarSkyPage extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // 星空の背景画像
+          //星空用に追加した背景を表示
           Positioned.fill(
             child: Image.asset(
-              'assets/images/background_sky.png',
+              'assets/images/background_sky1.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -51,8 +52,8 @@ class StarSkyPage extends StatelessWidget {
                 return Stack(
                   children: List.generate(records.length, (index) {
                     final record = records[index];
-                    final x = ((index * 137) % 83) / 100;
-                    final y = ((index * 89) % 72) / 100;
+                    final x = ((index * 137) % 78) / 100;
+                    final y = ((index * 89) % 68) / 100;
 
                     return Positioned(
                       left: constraints.maxWidth * x,
@@ -62,10 +63,11 @@ class StarSkyPage extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            //獲得した星座ごとに個別画像を表示
                             Image.asset(
-                              'assets/images/constellations.png',
-                              width: 42,
-                              height: 42,
+                              ConstellationData.imagePath(record.name),
+                              width: 72,
+                              height: 72,
                               fit: BoxFit.contain,
                             ),
                             const SizedBox(height: 4),
