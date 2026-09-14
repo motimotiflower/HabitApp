@@ -10,7 +10,8 @@ class Habit {
 
   final String id; //同じタイトルでも別の習慣として判定するID
   final String title;
-  final IconData icon;
+  final IconData icon; //古い保存データとの互換用
+  final String? iconAsset; //画像アイコン
   final List<String> days; //習慣を行う曜日
   final String category; //ジャンル
   final bool notificationEnabled; //通知を使うか
@@ -23,7 +24,8 @@ class Habit {
   Habit({
     String? id,
     required this.title,
-    required this.icon,
+    this.icon = Icons.check,
+    this.iconAsset,
     this.days = const [],
     this.category = '未設定',
     this.notificationEnabled = false,
@@ -41,6 +43,7 @@ class Habit {
       'id': id,
       'title': title,
       'icon': icon.codePoint,
+      'iconAsset': iconAsset,
       'days': days,
       'category': category,
       'notificationEnabled': notificationEnabled,
@@ -57,10 +60,12 @@ class Habit {
     return Habit(
       id: json['id'],
       title: json['title'],
-      icon: IconData(json['icon'], fontFamily: 'MaterialIcons'),
+      icon: IconData(
+        json['icon'] ?? Icons.check.codePoint,
+        fontFamily: 'MaterialIcons',
+      ),
+      iconAsset: json['iconAsset'],
       days: List<String>.from(json['days'] ?? []),
-
-      //以前の保存データにはジャンルが無いので未設定にする
       category: json['category'] ?? '未設定',
       notificationEnabled: json['notificationEnabled'] ?? false,
       notificationDays: List<String>.from(json['notificationDays'] ?? []),
@@ -69,8 +74,6 @@ class Habit {
           : null,
       notificationHour: json['notificationHour'],
       notificationMinute: json['notificationMinute'],
-
-      //Map<dynamic, dynamic>をMap<String, bool>に戻す
       completionHistory: Map<String, bool>.from(
         json['completionHistory'] ?? {},
       ),
