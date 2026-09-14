@@ -386,10 +386,19 @@ class HomePageState extends State<HomePage> {
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(
-                                      habit.icon,
-                                      size: 24,
-                                      color: habitColor,
+                                    SizedBox(
+                                      width: 36,
+                                      height: 36,
+                                      child: habit.iconAsset != null
+                                          ? Image.asset(
+                                              habit.iconAsset!,
+                                              fit: BoxFit.contain,
+                                            )
+                                          : Icon(
+                                              habit.icon,
+                                              size: 24,
+                                              color: habitColor,
+                                            ),
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
