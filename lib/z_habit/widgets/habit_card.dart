@@ -42,10 +42,19 @@ class HabitCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            habit.icon,
-            size: 24,
-            color: accentColor,
+          SizedBox(
+            width: 40,
+            height: 40,
+            child: habit.iconAsset != null
+                ? Image.asset(
+                    habit.iconAsset!,
+                    fit: BoxFit.contain, //画像を潰さず表示
+                  )
+                : Icon(
+                    habit.icon,
+                    size: 24,
+                    color: accentColor,
+                  ),
           ),
 
           const SizedBox(width: 14),
