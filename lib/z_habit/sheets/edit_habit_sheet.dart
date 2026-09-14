@@ -25,7 +25,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
   late List<String> _selectedDays;
   late String _selectedCategory;
   String? _hoveredCategory;
-  late IconData _selectedIcon;
+  late String _selectedIconAsset;
   late bool _notificationEnabled;
   late List<String> _notificationDays;
   DateTime? _notificationDate;
@@ -45,16 +45,10 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
     Color(0xffF3E4DC),
   ];
 
-  final List<IconData> _icons = const [
-    Icons.menu_book,
-    Icons.water_drop,
-    Icons.fitness_center,
-    Icons.self_improvement,
-    Icons.favorite,
-    Icons.star,
-    Icons.music_note,
-    Icons.nightlight_round,
-  ];
+  final List<String> _iconAssets = List.generate(
+    10,
+    (index) => 'assets/images/icon_item${index + 1}.png',
+  );
 
   @override
   void initState() {
@@ -63,7 +57,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
     _titleController = TextEditingController(text: widget.habit.title);
     _selectedDays = [...widget.habit.days];
     _selectedCategory = widget.habit.category;
-    _selectedIcon = widget.habit.icon;
+    _selectedIconAsset = widget.habit.iconAsset ?? 'assets/images/icon_item1.png';
     _notificationEnabled = widget.habit.notificationEnabled;
     _notificationDays = [...widget.habit.notificationDays];
     _notificationDate = widget.habit.notificationDate;
@@ -121,7 +115,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
       Habit(
         id: widget.habit.id,
         title: title,
-        icon: _selectedIcon,
+        iconAsset: _selectedIconAsset,
         days: _selectedDays,
         category: _selectedCategory,
         notificationEnabled: _notificationEnabled,
@@ -318,25 +312,35 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                       Wrap(
                         spacing: 10,
                         runSpacing: 10,
-                        children: _icons.map((icon) {
-                          final selected = _selectedIcon == icon;
+                        children: _iconAssets.map((asset) {
+                          final selected = _selectedIconAsset == asset;
 
                           return InkWell(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(14),
                             onTap: () {
                               setState(() {
-                                _selectedIcon = icon;
+                                _selectedIconAsset = asset;
                               });
                             },
-                            child: CircleAvatar(
-                              backgroundColor: selected
-                                  ? const Color(0xff526FC5)
-                                  : const Color(0xffE8EDFC),
-                              child: Icon(
-                                icon,
+                            child: Container(
+                              width: 58,
+                              height: 58,
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
                                 color: selected
-                                    ? Colors.white
-                                    : const Color(0xff526FC5),
+                                    ? const Color(0xffDCE5FF)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: selected
+                                      ? const Color(0xff526FC5)
+                                      : Colors.transparent,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Image.asset(
+                                asset,
+                                fit: BoxFit.contain, //画像を潰さず表示
                               ),
                             ),
                           );
