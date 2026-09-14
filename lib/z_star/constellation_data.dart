@@ -1,4 +1,4 @@
-//星座の簡単な説明データ
+//星座の説明と画像データ
 class ConstellationData {
   static const Map<String, String> descriptions = {
     'おひつじ座': '春の夜空に見つけられる黄道十二星座のひとつ。',
@@ -13,27 +13,29 @@ class ConstellationData {
     'やぎ座': '夏から秋の夜空に見える黄道十二星座。',
     'みずがめ座': '秋の夜空に広がる大きな星座。',
     'うお座': '二匹の魚を結んだ姿で描かれる秋の星座。',
-    'こぐま座': '北極星を含み、北の空で一年中見られる星座。',
-    'おおぐま座': '北斗七星を含む、とても大きな星座。',
-    'カシオペヤ座': 'W字の並びが特徴的な北の星座。',
-    'ケフェウス座': '五角形のような形をした北の星座。',
-    'アンドロメダ座': 'アンドロメダ銀河の方向にある秋の星座。',
-    'ペガスス座': '秋の四辺形で知られる大きな星座。',
-    'オリオン座': '三つ星が目印になる冬の代表的な星座。',
-    'おおいぬ座': '全天で最も明るい恒星シリウスを含む星座。',
-    'こいぬ座': '一等星プロキオンを含む冬の星座。',
-    'こと座': '一等星ベガが輝く夏の小さな星座。',
-    'わし座': '一等星アルタイルを含む夏の星座。',
-    'はくちょう座': '十字形に星が並ぶ夏の星座。',
-    'いるか座': '小さなひし形が目印になる夏の星座。',
-    'ヘルクレス座': '英雄ヘルクレスを表す春から夏の星座。',
-    'りゅう座': '北の空を長く曲がりながら伸びる星座。',
-    'ペルセウス座': '秋から冬に見やすい英雄の星座。',
-    'ぎょしゃ座': '一等星カペラが輝く冬の星座。',
-    'かんむり座': '半円状に星が並ぶ春から夏の星座。',
+  };
+
+  //星座名から対応する個別画像を取得する
+  static const Map<String, String> imagePaths = {
+    'おひつじ座': 'assets/images/constellations1.png',
+    'おうし座': 'assets/images/constellations2.png',
+    'ふたご座': 'assets/images/constellations3.png',
+    'かに座': 'assets/images/constellations4.png',
+    'しし座': 'assets/images/constellations5.png',
+    'おとめ座': 'assets/images/constellations6.png',
+    'てんびん座': 'assets/images/constellations7.png',
+    'さそり座': 'assets/images/constellations8.png',
+    'いて座': 'assets/images/constellations9.png',
+    'やぎ座': 'assets/images/constellations10.png',
+    'みずがめ座': 'assets/images/constellations11.png',
+    'うお座': 'assets/images/constellations12.png',
   };
 
   static String description(String name) {
     return descriptions[name] ?? '夜空に輝く星座です。';
+  }
+
+  static String imagePath(String name) {
+    return imagePaths[name] ?? 'assets/images/constellations.png';
   }
 }
