@@ -46,9 +46,14 @@ class HabitCard extends StatelessWidget {
             width: 40,
             height: 40,
             child: habit.iconAsset != null
-                ? Image.asset(
-                    habit.iconAsset!,
-                    fit: BoxFit.contain, //画像を潰さず表示
+                ? Transform.scale(
+                    scale: 1.12,
+                    child: Image.asset(
+                      habit.iconAsset!,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                      isAntiAlias: true,
+                    ),
                   )
                 : Icon(
                     habit.icon,
