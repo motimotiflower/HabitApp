@@ -22,7 +22,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   Map<String, int> _categoryColors = {};
   String _selectedCategory = '未設定';
   String? _hoveredCategory;
-  String _selectedIconAsset = 'assets/images/icon_item1.png';
+  IconData _selectedIcon = Icons.check;
   bool _notificationEnabled = false;
   List<String> _notificationDays = [];
   DateTime? _notificationDate;
@@ -39,10 +39,16 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
     Color(0xffF3E4DC),
   ];
 
-  final List<String> _iconAssets = List.generate(
-    10,
-    (index) => 'assets/images/icon_item${index + 1}.png',
-  );
+  final List<IconData> _icons = const [
+    Icons.menu_book_rounded,
+    Icons.water_drop_rounded,
+    Icons.fitness_center_rounded,
+    Icons.self_improvement_rounded,
+    Icons.favorite_rounded,
+    Icons.star_rounded,
+    Icons.music_note_rounded,
+    Icons.dark_mode_rounded,
+  ];
 
   @override
   void initState() {
@@ -366,43 +372,21 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
-                      children: _iconAssets.map((asset) {
-                        final selected = _selectedIconAsset == asset;
+                      children: _icons.map((icon) {
+                        final selected = _selectedIcon == icon;
 
                         return InkWell(
-                          borderRadius: BorderRadius.circular(14),
-                          onTap: () {
-                            setState(() {
-                              _selectedIconAsset = asset;
-                            });
-                          },
-                          child: Container(
-                            width: 58,
-                            height: 58,
-                            padding: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          onTap: () => setState(() => _selectedIcon = icon),
+                          child: CircleAvatar(
+                            backgroundColor: selected
+                                ? const Color(0xff526FC5)
+                                : const Color(0xffE8EDFC),
+                            child: Icon(
+                              icon,
                               color: selected
-                                  ? const Color(0xffDCE5FF)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: selected
-                                    ? const Color(0xff526FC5)
-                                    : Colors.transparent,
-                                width: 2,
-                              ),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Transform.scale(
-                                scale: 1.18,
-                                child: Image.asset(
-                                  asset,
-                                  fit: BoxFit.contain,
-                                  filterQuality: FilterQuality.high,
-                                  isAntiAlias: true,
-                                ),
-                              ),
+                                  ? Colors.white
+                                  : const Color(0xff526FC5),
                             ),
                           ),
                         );
@@ -449,7 +433,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
                   final habit = Habit(
                     title: titleController.text.trim(),
-                    iconAsset: _selectedIconAsset,
+                    icon: _selectedIcon,
                     days: List.from(selectedDays),
                     category: _selectedCategory,
                     notificationEnabled: _notificationEnabled,
