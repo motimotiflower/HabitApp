@@ -390,9 +390,15 @@ class HomePageState extends State<HomePage> {
                                       width: 36,
                                       height: 36,
                                       child: habit.iconAsset != null
-                                          ? Image.asset(
-                                              habit.iconAsset!,
-                                              fit: BoxFit.contain,
+                                          ? Transform.scale(
+                                              scale: 1.12,
+                                              child: Image.asset(
+                                                habit.iconAsset!,
+                                                fit: BoxFit.contain,
+                                                filterQuality:
+                                                    FilterQuality.high,
+                                                isAntiAlias: true,
+                                              ),
                                             )
                                           : Icon(
                                               habit.icon,
