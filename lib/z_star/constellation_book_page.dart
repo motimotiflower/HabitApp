@@ -176,27 +176,22 @@ class _BookCard extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xff253C82),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Center(
-                child: unlocked
-                    ? Image.asset(
-                        ConstellationData.imagePath(name),
-                        width: 150,
-                        height: 150,
-                        fit: BoxFit.contain,
-                      )
-                    : const Icon(
+            child: unlocked
+                ? _ConstellationArtwork(name: name)
+                : Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: const Color(0xff111A35),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Center(
+                      child: Icon(
                         Icons.lock_outline,
                         size: 54,
                         color: Colors.white38,
                       ),
-              ),
-            ),
+                    ),
+                  ),
           ),
           const SizedBox(height: 18),
           Text(
@@ -235,6 +230,66 @@ class _BookCard extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+//画像の四角い端をぼかし、星空背景へ溶け込ませる
+class _ConstellationArtwork extends StatelessWidget {
+  const _ConstellationArtwork({
+    required this.name,
+  });
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        gradient: const RadialGradient(
+          center: Alignment.center,
+          radius: 0.95,
+          colors: [
+            Color(0xff172650),
+            Color(0xff0A1022),
+          ],
+        ),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final size = constraints.biggest.shortestSide * 0.82;
+
+          return Center(
+            child: SizedBox(
+              width: size,
+              height: size,
+              child: ShaderMask(
+                //外周を透明にして画像の四角を目立たなくする
+                shaderCallback: (bounds) {
+                  return const RadialGradient(
+                    center: Alignment.center,
+                    radius: 0.78,
+                    colors: [
+                      Colors.white,
+                      Colors.white,
+                      Colors.transparent,
+                    ],
+                    stops: [0.0, 0.68, 1.0],
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.dstIn,
+                child: Image.asset(
+                  ConstellationData.imagePath(name),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
