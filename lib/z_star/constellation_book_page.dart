@@ -32,10 +32,12 @@ class ConstellationBookPage extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // 図鑑の本背景
+          //スマホは1ページ用、Webは見開き用の本背景
           Positioned.fill(
             child: Image.asset(
-              'assets/images/background_book.png',
+              isWide
+                  ? 'assets/images/background_book.png'
+                  : 'assets/images/background_book2.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -104,15 +106,15 @@ class _MobileBook extends StatelessWidget {
         physics: const PageScrollPhysics(),
         itemCount: StarStorage.constellationNames.length,
         itemBuilder: (context, index) {
-        final name = StarStorage.constellationNames[index];
-        ConstellationRecord? record;
+          final name = StarStorage.constellationNames[index];
+          ConstellationRecord? record;
 
-        for (final item in records) {
-          if (item.name == name) {
-            record = item;
-            break;
+          for (final item in records) {
+            if (item.name == name) {
+              record = item;
+              break;
+            }
           }
-        }
 
           return Padding(
             padding: const EdgeInsets.symmetric(
@@ -158,7 +160,7 @@ class _BookCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: const Color(0xffF7EEDC),
+        color: const Color(0xffF7EEDC).withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: const Color(0xffD8C7AA),
@@ -183,9 +185,9 @@ class _BookCard extends StatelessWidget {
               child: Center(
                 child: unlocked
                     ? Image.asset(
-                        'assets/images/constellations.png',
-                        width: 110,
-                        height: 110,
+                        ConstellationData.imagePath(name),
+                        width: 150,
+                        height: 150,
                         fit: BoxFit.contain,
                       )
                     : const Icon(
