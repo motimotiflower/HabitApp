@@ -1,11 +1,14 @@
 //アプリを起動する場所
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart'; //flutterの基本的なライブラリ
 
 //Firebaseを使うためのライブラリ
 import 'package:firebase_core/firebase_core.dart';
 import 'package:habitapp/firebase_options.dart';
 
+import 'package:habitapp/auth/auth_page.dart';
+import 'package:habitapp/auth/auth_service.dart';
 import 'package:habitapp/main/main_page.dart'; //habit_pageをつかえるように
 import 'package:habitapp/user/user_profile_storage.dart';
 import 'package:habitapp/user/user_setup_page.dart';
@@ -53,8 +56,35 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      //最初の画面。初回だけ名前設定を表示
-      home: const _ProfileGate(),
+      //ログイン状態に応じて最初の画面を切り替える
+      home: const _AuthGate(),
+    );
+  }
+}
+
+//Firebaseのログイン状態を監視する入口
+class _AuthGate extends StatelessWidget {
+  const _AuthGate();
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: AuthService.authStateChanges,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        //未ログインなら認証画面へ
+        if (snapshot.data == null) {
+          return const AuthPage();
+        }
+
+        //ログイン後は今まで通り名前設定を確認
+        return const _ProfileGate();
+      },
     );
   }
 }
