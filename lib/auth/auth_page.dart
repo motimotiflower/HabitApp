@@ -27,22 +27,38 @@ class _AuthPageState extends State<AuthPage> {
       return;
     }
 
+    await _runAuth(() async {
+      if (_isSignUp) {
+        await AuthService.signUp(email: email, password: password);
+      } else {
+        await AuthService.signIn(email: email, password: password);
+      }
+    });
+  }
+
+  //Googleアカウントでログイン
+  Future<void> _signInWithGoogle() async {
+    await _runAuth(AuthService.signInWithGoogle);
+  }
+
+  //認証中のローディングとエラー表示を共通化
+  Future<void> _runAuth(Future<void> Function() action) async {
     setState(() {
       _loading = true;
       _errorMessage = null;
     });
 
     try {
-      if (_isSignUp) {
-        await AuthService.signUp(email: email, password: password);
-      } else {
-        await AuthService.signIn(email: email, password: password);
-      }
+      await action();
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       setState(() => _errorMessage = _messageFor(e.code));
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
+
+      //Googleのアカウント選択を閉じた場合はエラー扱いにしない
+      if (e.toString().toLowerCase().contains('cancel')) return;
+
       setState(() => _errorMessage = '認証に失敗しました。もう一度お試しください');
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -62,9 +78,12 @@ class _AuthPageState extends State<AuthPage> {
       case 'invalid-credential':
         return 'メールアドレスまたはパスワードが違います';
       case 'operation-not-allowed':
-        return 'Firebase Consoleでメール認証を有効にしてください';
+        return 'Firebase Consoleでログイン方法を確認してください';
       case 'network-request-failed':
         return 'ネットワーク接続を確認してください';
+      case 'popup-closed-by-user':
+      case 'cancelled-popup-request':
+        return 'Googleログインがキャンセルされました';
       default:
         return '認証に失敗しました（$code）';
     }
@@ -126,7 +145,9 @@ class _AuthPageState extends State<AuthPage> {
                         ? const [AutofillHints.newPassword]
                         : const [AutofillHints.password],
                     textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => _loading ? null : _submit(),
+                    onSubmitted: (_) {
+                      if (!_loading) _submit();
+                    },
                     decoration: InputDecoration(
                       labelText: 'パスワード',
                       helperText: _isSignUp ? '6文字以上' : null,
@@ -164,6 +185,37 @@ class _AuthPageState extends State<AuthPage> {
                               ),
                             )
                           : Text(_isSignUp ? '新規登録' : 'ログイン'),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  const Row(
+                    children: [
+                      Expanded(child: Divider()),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          'または',
+                          style: TextStyle(color: Color(0xff81889B)),
+                        ),
+                      ),
+                      Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: OutlinedButton.icon(
+                      onPressed: _loading ? null : _signInWithGoogle,
+                      icon: const Text(
+                        'G',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff4285F4),
+                        ),
+                      ),
+                      label: const Text('Googleでログイン'),
                     ),
                   ),
                   const SizedBox(height: 10),
