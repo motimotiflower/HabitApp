@@ -1,6 +1,11 @@
 //アプリを起動する場所
 
 import 'package:flutter/material.dart'; //flutterの基本的なライブラリ
+
+//Firebaseを使うためのライブラリ
+import 'package:firebase_core/firebase_core.dart';
+import 'package:habitapp/firebase_options.dart';
+
 import 'package:habitapp/main/main_page.dart'; //habit_pageをつかえるように
 import 'package:habitapp/user/user_profile_storage.dart';
 import 'package:habitapp/user/user_setup_page.dart';
@@ -10,7 +15,12 @@ import 'package:habitapp/z_task/task_storage.dart';
 import 'package:habitapp/debug/debug_seed_service.dart';
 
 Future<void> main() async {
+  //非同期の初期化処理を行う前にFlutterを準備
   WidgetsFlutterBinding.ensureInitialized();
+
+  //Firebaseを初期化
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   await NotificationService.initialize();
 
   //デバッグ中でデータが空なら確認用データを用意
@@ -49,7 +59,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
 class _ProfileGate extends StatefulWidget {
   const _ProfileGate();
 
@@ -81,15 +90,9 @@ class _ProfileGateState extends State<_ProfileGate> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return _name == null
-        ? const UserSetupPage()
-        : const MainPage();
+    return _name == null ? const UserSetupPage() : const MainPage();
   }
 }
