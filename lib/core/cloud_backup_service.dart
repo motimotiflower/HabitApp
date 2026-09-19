@@ -25,6 +25,21 @@ class CloudBackupService {
         .doc('main');
   }
 
+  // 端末内にHabitAppの保存データがあるか確認
+  static Future<bool> hasLocalData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    for (final key in _localKeys) {
+      final value = prefs.get(key);
+      if (value == null) continue;
+
+      if (value is String && value.trim().isEmpty) continue;
+      return true;
+    }
+
+    return false;
+  }
+
   // 端末内のSharedPreferencesをFirestoreへバックアップ
   static Future<void> backup() async {
     final document = _backupDocument;
