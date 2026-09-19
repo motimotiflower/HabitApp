@@ -19,10 +19,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-
     defaultConfig {
         multiDexEnabled = true
 
@@ -47,6 +43,13 @@ android {
 
 flutter {
     source = "../.."
+}
+
+// Kotlin 2.3以降はcompilerOptions DSLでJVMバージョンを指定
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
 }
 
 
