@@ -6,6 +6,7 @@ import 'package:habitapp/main/main_page.dart';
 import 'package:habitapp/user/login_page.dart';
 import 'package:habitapp/user/user_profile_storage.dart';
 import 'package:habitapp/user/user_setup_page.dart';
+import 'package:habitapp/widgets/home_widget_bridge.dart';
 
 // Firebaseのログイン状態に合わせて最初の画面を切り替える
 class AuthGate extends StatelessWidget {
@@ -56,6 +57,7 @@ class _ProfileGateState extends State<_ProfileGate> {
     try {
       // 端末とクラウドの更新時刻を比較して新しい方を採用
       await CloudBackupService.syncLatest();
+      await HomeWidgetBridge.update();
 
       final name = await UserProfileStorage.loadName();
 
