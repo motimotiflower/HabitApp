@@ -1,6 +1,7 @@
 //保存処理
 import 'dart:convert';
 
+import 'package:habitapp/core/cloud_backup_service.dart';
 import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/notifications/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,6 +20,9 @@ class HabitStorage {
 
     await prefs.setString(_key, jsonString);
     await NotificationService.syncHabits(habits);
+
+    //端末保存のあとにクラウドへバックアップ
+    await CloudBackupService.backup();
   }
 
   //読み込み===========================
