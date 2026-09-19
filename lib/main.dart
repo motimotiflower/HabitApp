@@ -10,7 +10,6 @@ import 'package:habitapp/user/auth_gate.dart';
 import 'package:habitapp/notifications/notification_service.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
 import 'package:habitapp/z_task/task_storage.dart';
-import 'package:habitapp/debug/debug_seed_service.dart';
 
 Future<void> main() async {
   //非同期の初期化処理を行う前にFlutterを準備
@@ -20,9 +19,6 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await NotificationService.initialize();
-
-  //デバッグ中でデータが空なら確認用データを用意
-  await DebugSeedService.seedIfNeeded();
 
   //保存済みの全体設定を含めて通知予定を作り直す
   await NotificationService.syncAll(
