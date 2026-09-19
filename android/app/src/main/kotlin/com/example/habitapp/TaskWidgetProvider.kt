@@ -43,7 +43,14 @@ class TaskWidgetProvider : AppWidgetProvider() {
             }
 
             // 期限が近いものを上に表示
-            tasks.sortWith(compareBy(nullsLast()) { it.second })
+            tasks.sortWith(Comparator { a, b ->
+                when {
+                    a.second == null && b.second == null -> 0
+                    a.second == null -> 1
+                    b.second == null -> -1
+                    else -> a.second!!.compareTo(b.second!!)
+                }
+            })
             val input = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.JAPAN)
             val output = SimpleDateFormat("M/d", Locale.JAPAN)
             val lines = tasks.take(5).map { (title, deadline) ->
