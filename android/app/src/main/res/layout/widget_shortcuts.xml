@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:padding="6dp"
+    android:background="@drawable/widget_background">
+
+    <TextView
+        android:id="@+id/shortcut_habit"
+        style="@style/HabitShortcut"
+        android:text="✓&#10;習慣" />
+    <TextView
+        android:id="@+id/shortcut_task"
+        style="@style/HabitShortcut"
+        android:text="☑&#10;タスク" />
+    <TextView
+        android:id="@+id/shortcut_memo"
+        style="@style/HabitShortcut"
+        android:text="✎&#10;メモ" />
+</LinearLayout>
