@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -69,12 +70,24 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      // WebはFirebase AuthだけでGoogleのポップアップ認証ができる
+      // WebはFirebase Authのポップアップ認証を使う
       if (kIsWeb) {
         await FirebaseAuth.instance.signInWithPopup(GoogleAuthProvider());
       } else {
-        // Android/iOSなどではFirebaseのGoogleプロバイダを使用
-        await FirebaseAuth.instance.signInWithProvider(GoogleAuthProvider());
+        // Android/iOSはネイティブのGoogleログインを使う
+        final googleSignIn = GoogleSignIn.instance;
+        await googleSignIn.initialize();
+
+        // Googleアカウントを選択
+        final googleUser = await googleSignIn.authenticate();
+        final googleAuth = googleUser.authentication;
+
+        // GoogleのIDトークンをFirebase用の認証情報に変換
+        final credential = GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+        );
+
+        await FirebaseAuth.instance.signInWithCredential(credential);
       }
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
