@@ -54,16 +54,8 @@ class _ProfileGateState extends State<_ProfileGate> {
 
   Future<void> _load() async {
     try {
-      // 端末データがある場合は、初回ログインでも上書きされないよう先に確認
-      final hasLocalData = await CloudBackupService.hasLocalData();
-
-      if (hasLocalData) {
-        // 今の端末データを優先してクラウドへ保存
-        await CloudBackupService.backup();
-      } else {
-        // 新しい端末など、ローカルが空ならクラウドから復元
-        await CloudBackupService.restore();
-      }
+      // 端末とクラウドの更新時刻を比較して新しい方を採用
+      await CloudBackupService.syncLatest();
 
       final name = await UserProfileStorage.loadName();
 
