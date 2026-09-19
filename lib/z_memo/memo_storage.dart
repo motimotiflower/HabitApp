@@ -18,7 +18,8 @@ class MemoStorage {
 
     await prefs.setString(_key, jsonString);
 
-    //端末保存のあとにクラウドへバックアップ
+    //ローカル更新時刻を残してからクラウドへバックアップ
+    await CloudBackupService.markLocalUpdated();
     await CloudBackupService.backup();
   }
 
