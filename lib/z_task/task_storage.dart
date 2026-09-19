@@ -20,7 +20,8 @@ class TaskStorage {
     await prefs.setString(_key, jsonString);
     await NotificationService.syncTasks(tasks);
 
-    //端末保存のあとにクラウドへバックアップ
+    //ローカル更新時刻を残してからクラウドへバックアップ
+    await CloudBackupService.markLocalUpdated();
     await CloudBackupService.backup();
   }
 
