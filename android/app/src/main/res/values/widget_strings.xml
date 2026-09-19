@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="habit_widget_description">今日の習慣を表示します</string>
+    <string name="task_widget_description">未完了のタスクを表示します</string>
+    <string name="shortcut_widget_description">習慣・タスク・メモをすぐ開きます</string>
+</resources>
