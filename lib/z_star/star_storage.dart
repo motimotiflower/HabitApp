@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:habitapp/core/cloud_backup_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StarAward {
@@ -151,6 +152,9 @@ class StarStorage {
             state.constellations.map((item) => item.toJson()).toList(),
       }),
     );
+
+    //欠片や星座の変化もクラウドへバックアップ
+    await CloudBackupService.backup();
   }
 
   //同じ達成で二重に欠片を増やさない
