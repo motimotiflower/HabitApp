@@ -5,6 +5,7 @@ import 'package:habitapp/core/cloud_backup_service.dart';
 import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/notifications/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:habitapp/widgets/home_widget_bridge.dart';
 
 class HabitStorage {
   static const String _key = 'habits';
@@ -19,6 +20,7 @@ class HabitStorage {
     final jsonString = jsonEncode(habitList);
 
     await prefs.setString(_key, jsonString);
+    await HomeWidgetBridge.update();
     await NotificationService.syncHabits(habits);
 
     //ローカル更新時刻を残してからクラウドへバックアップ
