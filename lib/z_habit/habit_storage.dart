@@ -21,7 +21,8 @@ class HabitStorage {
     await prefs.setString(_key, jsonString);
     await NotificationService.syncHabits(habits);
 
-    //端末保存のあとにクラウドへバックアップ
+    //ローカル更新時刻を残してからクラウドへバックアップ
+    await CloudBackupService.markLocalUpdated();
     await CloudBackupService.backup();
   }
 
