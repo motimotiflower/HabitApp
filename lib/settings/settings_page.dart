@@ -1,6 +1,8 @@
 //アプリ設定画面
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:habitapp/core/cloud_backup_service.dart';
 import 'package:habitapp/main/widgets/main_background.dart';
 import 'package:habitapp/debug/debug_seed_service.dart';
 import 'package:habitapp/notifications/notification_preference_storage.dart';
@@ -20,6 +22,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final TextEditingController _nameController = TextEditingController();
 
   bool _loading = true;
+  CloudBackupStatus? _backupStatus;
   GlobalNotificationMode _notificationMode =
       GlobalNotificationMode.normal;
   List<TimeOfDay> _batchTimes = const [
@@ -35,6 +38,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _loadSettings() async {
     final name = await UserProfileStorage.loadName();
     final notification = await NotificationPreferenceStorage.load();
+    final backupStatus = await CloudBackupService.getStatus();
 
     _nameController.text = name ?? '';
 
@@ -49,6 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
           minute: int.tryParse(parts.length > 1 ? parts[1] : '') ?? 0,
         );
       }).toList();
+      _backupStatus = backupStatus;
       _loading = false;
     });
   }
@@ -64,6 +69,45 @@ class _SettingsPageState extends State<SettingsPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('プロフィールを保存しました')),
     );
+  }
+
+
+  Future<void> _refreshBackupStatus() async {
+    final status = await CloudBackupService.getStatus();
+
+    if (!mounted) return;
+    setState(() => _backupStatus = status);
+  }
+
+  Future<void> _backupNow() async {
+    await CloudBackupService.backup();
+    await _refreshBackupStatus();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('バックアップしました')),
+    );
+  }
+
+  Future<void> _signOut() async {
+    await FirebaseAuth.instance.signOut();
+    if (!mounted) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
+  String _backupText() {
+    final status = _backupStatus;
+    if (status == null || !status.exists) return 'まだバックアップがありません';
+
+    final value = status.updatedAt?.toLocal();
+    if (value == null) return 'バックアップ済み';
+
+    final y = value.year.toString();
+    final m = value.month.toString().padLeft(2, '0');
+    final d = value.day.toString().padLeft(2, '0');
+    final h = value.hour.toString().padLeft(2, '0');
+    final min = value.minute.toString().padLeft(2, '0');
+    return '最終バックアップ $y/$m/$d $h:$min';
   }
 
   Future<void> _addBatchTime() async {
@@ -181,7 +225,41 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
 
+
                 const SizedBox(height: 24),
+
+                _SettingsSection(
+                  title: 'アカウント',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        FirebaseAuth.instance.currentUser?.email ?? 'Googleアカウントでログイン中',
+                        style: const TextStyle(
+                          color: Color(0xff35415F),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _backupText(),
+                        style: const TextStyle(color: Color(0xff81889B)),
+                      ),
+                      const SizedBox(height: 14),
+                      OutlinedButton.icon(
+                        onPressed: _backupNow,
+                        icon: const Icon(Icons.cloud_upload_outlined),
+                        label: const Text('今すぐバックアップ'),
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: _signOut,
+                        icon: const Icon(Icons.logout),
+                        label: const Text('ログアウト'),
+                      ),
+                    ],
+                  ),
+                ),
 
                 _SettingsSection(
                   title: '通知',
