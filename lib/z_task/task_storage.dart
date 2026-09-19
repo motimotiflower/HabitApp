@@ -5,6 +5,7 @@ import 'package:habitapp/core/cloud_backup_service.dart';
 import 'package:habitapp/models/task.dart';
 import 'package:habitapp/notifications/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:habitapp/widgets/home_widget_bridge.dart';
 
 class TaskStorage {
   //保存時に使うキー
@@ -18,6 +19,7 @@ class TaskStorage {
     final jsonString = jsonEncode(tasks.map((task) => task.toJson()).toList());
 
     await prefs.setString(_key, jsonString);
+    await HomeWidgetBridge.update();
     await NotificationService.syncTasks(tasks);
 
     //ローカル更新時刻を残してからクラウドへバックアップ
