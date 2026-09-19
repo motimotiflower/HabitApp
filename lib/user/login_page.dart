@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -61,6 +62,33 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // WebはFirebase AuthだけでGoogleのポップアップ認証ができる
+      if (kIsWeb) {
+        await FirebaseAuth.instance.signInWithPopup(GoogleAuthProvider());
+      } else {
+        // Android/iOSなどではFirebaseのGoogleプロバイダを使用
+        await FirebaseAuth.instance.signInWithProvider(GoogleAuthProvider());
+      }
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = _messageFor(e.code));
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _errorMessage = 'Googleログインに失敗しました');
+    } finally {
+      if (mounted) {
+        setState(() => _loading = false);
+      }
+    }
+  }
+
   String _messageFor(String code) {
     switch (code) {
       case 'invalid-email':
@@ -73,6 +101,12 @@ class _LoginPageState extends State<LoginPage> {
         return 'このメールアドレスはすでに登録されています';
       case 'weak-password':
         return 'パスワードは6文字以上にしてください';
+      case 'operation-not-allowed':
+        return 'Firebase側でこのログイン方法を有効にしてください';
+      case 'account-exists-with-different-credential':
+        return '同じメールアドレスの別のログイン方法が登録されています';
+      case 'popup-closed-by-user':
+        return 'Googleログインがキャンセルされました';
       default:
         return '認証に失敗しました。もう一度お試しください';
     }
@@ -157,6 +191,27 @@ class _LoginPageState extends State<LoginPage> {
                           _isLogin
                               ? '初めての方はこちら'
                               : 'アカウントをお持ちの方はこちら',
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            Expanded(child: Divider()),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: Text('または'),
+                            ),
+                            Expanded(child: Divider()),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _loading ? null : _signInWithGoogle,
+                          icon: const Icon(Icons.account_circle_outlined),
+                          label: const Text('Googleでログイン'),
                         ),
                       ),
                     ],
