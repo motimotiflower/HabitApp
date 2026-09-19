@@ -10,7 +10,8 @@ class UserProfileStorage {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_nameKey, name.trim());
 
-    //名前もクラウドへ保存して、別端末でも初回設定を繰り返さない
+    //プロフィール変更も更新日時つきでクラウドへ保存
+    await CloudBackupService.markLocalUpdated();
     await CloudBackupService.backup();
   }
 
