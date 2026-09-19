@@ -153,7 +153,8 @@ class StarStorage {
       }),
     );
 
-    //欠片や星座の変化もクラウドへバックアップ
+    //欠片や星座の変化も更新日時つきでクラウドへバックアップ
+    await CloudBackupService.markLocalUpdated();
     await CloudBackupService.backup();
   }
 
