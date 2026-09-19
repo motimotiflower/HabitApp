@@ -1,6 +1,7 @@
 //各ページの土台
 //背景や各ページ、ナビゲーションバーをもっている
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:habitapp/z_habit/sheets/add_habit_sheet.dart';
 import 'package:habitapp/z_task/sheets/add_task_sheet.dart';
 import 'package:habitapp/z_home/home_page.dart';
@@ -23,6 +24,8 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  static const MethodChannel _widgetChannel = MethodChannel('habitapp/widget');
+
   //変数===================================
 
   //ページ関係----------------------
@@ -72,6 +75,42 @@ class _MainPageState extends State<MainPage> {
       ),
       PageInfo(title: "Memo", page: MemoPage(key: _memoPageKey)),
     ];
+
+    //起動中・停止中どちらからでもウィジェットのタップを受け取る
+    _widgetChannel.setMethodCallHandler((call) async {
+      if (call.method == 'openAction') {
+        _handleWidgetAction(call.arguments as String?);
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadWidgetAction());
+  }
+
+  Future<void> _loadWidgetAction() async {
+    try {
+      final action = await _widgetChannel.invokeMethod<String>('getLaunchAction');
+      _handleWidgetAction(action);
+    } on PlatformException {
+      // Android以外では何もしない
+    }
+  }
+
+  void _handleWidgetAction(String? action) {
+    if (!mounted || action == null) return;
+
+    final index = switch (action) {
+      'habit' || 'habit_add' => 1,
+      'task' || 'task_add' => 2,
+      'memo' => 3,
+      _ => 0,
+    };
+
+    setState(() => _currentIndex = index);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (action == 'habit_add' || action == 'task_add') {
+        _openAddSheet();
+      }
+    });
   }
 
   //追加画面===============================
