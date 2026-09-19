@@ -1,4 +1,5 @@
 //ユーザー名などの簡単なプロフィール保存
+import 'package:habitapp/core/cloud_backup_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfileStorage {
@@ -8,6 +9,9 @@ class UserProfileStorage {
   static Future<void> saveName(String name) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_nameKey, name.trim());
+
+    //名前もクラウドへ保存して、別端末でも初回設定を繰り返さない
+    await CloudBackupService.backup();
   }
 
   //名前を読み込む
