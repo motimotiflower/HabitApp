@@ -6,9 +6,7 @@ import 'package:flutter/material.dart'; //flutterの基本的なライブラリ
 import 'package:firebase_core/firebase_core.dart';
 import 'package:habitapp/firebase_options.dart';
 
-import 'package:habitapp/main/main_page.dart'; //habit_pageをつかえるように
-import 'package:habitapp/user/user_profile_storage.dart';
-import 'package:habitapp/user/user_setup_page.dart';
+import 'package:habitapp/user/auth_gate.dart';
 import 'package:habitapp/notifications/notification_service.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
 import 'package:habitapp/z_task/task_storage.dart';
@@ -53,46 +51,8 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      //最初の画面。初回だけ名前設定を表示
-      home: const _ProfileGate(),
+      //Firebaseのログイン状態から最初の画面を決める
+      home: const AuthGate(),
     );
-  }
-}
-
-class _ProfileGate extends StatefulWidget {
-  const _ProfileGate();
-
-  @override
-  State<_ProfileGate> createState() => _ProfileGateState();
-}
-
-class _ProfileGateState extends State<_ProfileGate> {
-  String? _name;
-  bool _loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    final name = await UserProfileStorage.loadName();
-
-    if (!mounted) return;
-
-    setState(() {
-      _name = name;
-      _loading = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    return _name == null ? const UserSetupPage() : const MainPage();
   }
 }
