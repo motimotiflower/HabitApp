@@ -1,6 +1,7 @@
 //メモの保存と読み込み
 import 'dart:convert';
 
+import 'package:habitapp/core/cloud_backup_service.dart';
 import 'package:habitapp/models/memo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,6 +17,9 @@ class MemoStorage {
     );
 
     await prefs.setString(_key, jsonString);
+
+    //端末保存のあとにクラウドへバックアップ
+    await CloudBackupService.backup();
   }
 
   //保存されているメモ一覧を読み込む
