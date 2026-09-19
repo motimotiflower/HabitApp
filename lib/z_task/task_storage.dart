@@ -1,6 +1,7 @@
 //タスクの保存と読み込み
 import 'dart:convert';
 
+import 'package:habitapp/core/cloud_backup_service.dart';
 import 'package:habitapp/models/task.dart';
 import 'package:habitapp/notifications/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,6 +19,9 @@ class TaskStorage {
 
     await prefs.setString(_key, jsonString);
     await NotificationService.syncTasks(tasks);
+
+    //端末保存のあとにクラウドへバックアップ
+    await CloudBackupService.backup();
   }
 
   //保存されているタスク一覧を読み込む=================
