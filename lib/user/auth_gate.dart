@@ -54,12 +54,15 @@ class _ProfileGateState extends State<_ProfileGate> {
 
   Future<void> _load() async {
     try {
-      // クラウドに既存データがあれば端末へ復元する
-      final restored = await CloudBackupService.restore();
+      // 端末データがある場合は、初回ログインでも上書きされないよう先に確認
+      final hasLocalData = await CloudBackupService.hasLocalData();
 
-      // 初回利用でクラウドが空なら、今の端末データを最初のバックアップにする
-      if (!restored) {
+      if (hasLocalData) {
+        // 今の端末データを優先してクラウドへ保存
         await CloudBackupService.backup();
+      } else {
+        // 新しい端末など、ローカルが空ならクラウドから復元
+        await CloudBackupService.restore();
       }
 
       final name = await UserProfileStorage.loadName();
@@ -70,7 +73,7 @@ class _ProfileGateState extends State<_ProfileGate> {
         _loading = false;
       });
     } catch (e) {
-      // Firestore設定前でもアプリ自体は使えるようにする
+      // Firestore側で失敗しても端末データはそのまま使える
       final name = await UserProfileStorage.loadName();
 
       if (!mounted) return;
