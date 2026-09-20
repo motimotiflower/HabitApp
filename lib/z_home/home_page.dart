@@ -380,9 +380,16 @@ class HomePageState extends State<HomePage> {
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 600;
 
-        final recordHabits = _recordTarget == '全部'
-            ? _allHabits
-            : _allHabits.where((habit) => habit.title == _recordTarget).toList();
+        Habit? selectedHabit;
+        if (_recordTarget != '全部') {
+          for (final habit in _allHabits) {
+            if (habit.id == _recordTarget) {
+              selectedHabit = habit;
+              break;
+            }
+          }
+        }
+        final recordHabits = selectedHabit == null ? _allHabits : [selectedHabit];
         final recordMarks = _habitMarksFor(recordHabits);
 
         final habitRecordCard = _HomeSectionCard(
@@ -394,12 +401,15 @@ class HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DropdownButton<String>(
-                value: _recordTarget,
+                value: _recordTarget == '全部' ||
+                        _allHabits.any((habit) => habit.id == _recordTarget)
+                    ? _recordTarget
+                    : '全部',
                 isExpanded: true,
                 items: [
                   const DropdownMenuItem(value: '全部', child: Text('全部')),
                   ..._allHabits.map((habit) => DropdownMenuItem(
-                        value: habit.title,
+                        value: habit.id,
                         child: Text(habit.title),
                       )),
                 ],
