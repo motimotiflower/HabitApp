@@ -543,7 +543,9 @@ class HabitPageState extends State<HabitPage> {
                       await HabitStorage.saveHabits(habits);
                     },
                     itemBuilder: (context, index) {
-                      if (selectedDayHabits.isEmpty) {
+                      if (selectedDayHabits.isEmpty &&
+                          !showCarryOverHeader &&
+                          !showTodayHeader) {
                         return const SizedBox(
                           key: ValueKey('empty'),
                           height: 320,
