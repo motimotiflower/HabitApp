@@ -33,6 +33,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
   DateTime? _notificationDate;
   late TimeOfDay _notificationTime;
   late bool _shareCompletion;
+  late bool _carryOverIfIncomplete;
   late List<Subtask> _subtasks;
 
   List<String> _categories = [];
@@ -70,6 +71,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
     _selectedIcon = widget.habit.icon;
     _notificationEnabled = widget.habit.notificationEnabled;
     _shareCompletion = widget.habit.shareCompletion;
+    _carryOverIfIncomplete = widget.habit.carryOverIfIncomplete;
     _subtasks = List<Subtask>.from(widget.habit.subtasks);
     _notificationDays = [...widget.habit.notificationDays];
     _notificationDate = widget.habit.notificationDate;
@@ -142,6 +144,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
           widget.habit.completionHistory,
         ),
         shareCompletion: _shareCompletion,
+        carryOverIfIncomplete: _carryOverIfIncomplete,
         subtasks: _subtasks,
       ),
     );
