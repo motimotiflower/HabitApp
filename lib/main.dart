@@ -1,6 +1,7 @@
 //アプリを起動する場所
 
 import 'package:flutter/material.dart'; //flutterの基本的なライブラリ
+import 'package:google_fonts/google_fonts.dart';
 
 //Firebaseを使うためのライブラリ
 import 'package:firebase_core/firebase_core.dart';
@@ -45,6 +46,8 @@ class MyApp extends StatelessWidget {
           //アプリ全体の基準色を青に統一
           seedColor: const Color(0xff526FC5),
         ),
+        //日本語も崩れにくいNoto Sans JPをアプリ全体に適用
+        textTheme: GoogleFonts.notoSansJpTextTheme(),
       ),
 
       //Firebaseのログイン状態から最初の画面を決める
