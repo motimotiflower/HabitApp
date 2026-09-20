@@ -67,6 +67,10 @@ DateTime? habitDisplaySourceDate(Habit habit, DateTime date) {
   final source = habitLatestScheduledDate(habit, target);
   if (source == null || source == target) return null;
 
+  //まだ実際に来ていない設定日は、未来のやり残しにしない
+  final today = habitDateOnly(DateTime.now());
+  if (source.isAfter(today)) return null;
+
   final key = habitCompletionKeyForDate(habit, source);
 
   //達成した翌日からは繰り越し表示を終了する
