@@ -14,6 +14,7 @@ import 'package:habitapp/z_task/task_storage.dart';
 import 'package:habitapp/z_task/sheets/add_task_sheet.dart';
 import 'package:habitapp/z_task/sheets/edit_task_sheet.dart';
 import 'package:habitapp/z_star/star_storage.dart';
+import 'package:habitapp/z_star/star_gacha_page.dart';
 import 'package:habitapp/settings/settings_page.dart';
 import 'package:habitapp/main/widgets/adaptive_editor_panel.dart';
 import 'package:habitapp/main/widgets/main_background.dart';
@@ -349,6 +350,23 @@ class HomePageState extends State<HomePage> {
             marks: habitMarks,
             fragments: _starFragments,
             ownedConstellations: _ownedConstellations,
+          ),
+        );
+
+        final starGachaCard = _HomeSectionCard(
+          title: '星座ガチャ',
+          icon: Icons.auto_awesome,
+          minHeight: 96,
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const StarGachaPage()),
+            );
+            await reload();
+          },
+          child: Text(
+            '星の欠片 $_starFragments / ${StarStorage.drawCost}　図鑑 $_ownedConstellations / ${StarStorage.constellationNames.length}',
+            style: const TextStyle(fontSize: 14, color: Color(0xff697188)),
           ),
         );
 
@@ -764,6 +782,8 @@ class HomePageState extends State<HomePage> {
                 todayTaskCard,
                 const SizedBox(height: 12),
                 habitRecordCard,
+                const SizedBox(height: 12),
+                starGachaCard,
                 const SizedBox(height: 12),
                 memoCard,
               ],
