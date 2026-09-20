@@ -89,6 +89,24 @@ class _HomeHabitRecordPageState
     );
     setState(() => widget.habits[index] = restored);
     await widget.onHabitsChanged?.call(widget.habits);
+    if (!mounted) return;
+
+    //復元も数秒間だけ取り消せるようにする
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: const Text('アーカイブから戻しました'),
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: '元に戻す',
+            onPressed: () async {
+              setState(() => widget.habits[index] = habit);
+              await widget.onHabitsChanged?.call(widget.habits);
+            },
+          ),
+        ),
+      );
   }
 
   @override
@@ -97,13 +115,20 @@ class _HomeHabitRecordPageState
     final archivedHabits = widget.habits
         .where((habit) => habit.archivedAt != null)
         .toList();
+    final activeHabits = widget.habits
+        .where((habit) => habit.archivedAt == null)
+        .toList();
+
+    //一番上の「全部」は、現在の全グループの達成をまとめる
+    final allCompletedCount = _completedCount(activeHabits);
 
     //並んだカード同士で縦のマス数もそろえる
     final maxCompleted = groups.values.isEmpty
-        ? 0
-        : groups.values
-            .map(_completedCount)
-            .reduce((a, b) => a > b ? a : b);
+        ? allCompletedCount
+        : [
+            allCompletedCount,
+            ...groups.values.map(_completedCount),
+          ].reduce((a, b) => a > b ? a : b);
     const columns = 11;
     const minimumCells = columns * 3;
     final roundedCells =
@@ -182,7 +207,15 @@ class _HomeHabitRecordPageState
                 ),
               ),
             )
-          else
+          else ...[
+            //最上部はすべての習慣記録を合計したカード
+            _RecordGrid(
+              title: '全部',
+              completedCount: allCompletedCount,
+              color: const Color(0xff526FC5),
+              cellCount: commonCellCount,
+            ),
+            const SizedBox(height: 22),
             LayoutBuilder(
               builder: (context, constraints) {
                 final isWide = constraints.maxWidth >= 700;
@@ -216,6 +249,7 @@ class _HomeHabitRecordPageState
                 );
               },
             ),
+          ],
         ],
       ),
     );
