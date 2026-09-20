@@ -485,6 +485,8 @@ class HabitPageState extends State<HabitPage> {
                       final listIndex =
                           index - (showCarryOverHeader ? 1 : 0);
                       final habit = selectedDayHabits[listIndex];
+                      final canReorder = !showCarryOverHeader &&
+                          carryOverHabits.isEmpty;
 
                       final categoryColor = habit.category == '未設定'
                           ? null
@@ -499,10 +501,8 @@ class HabitPageState extends State<HabitPage> {
                       final completionKey =
                           habitCompletionKeyForDate(habit, sourceDate);
 
-                      return ReorderableDelayedDragStartListener(
+                      final card = HabitCard(
                         key: ValueKey(habit.id),
-                        index: index,
-                        child: HabitCard(
                         habit: habit,
                         isDone:
                             habit.completionHistory[completionKey] ?? false,
@@ -568,7 +568,16 @@ class HabitPageState extends State<HabitPage> {
                         onDelete: () {
                           _showDeleteDialog(habit);
                         },
-                        ),
+                      );
+
+                      if (!canReorder) {
+                        return card;
+                      }
+
+                      return ReorderableDelayedDragStartListener(
+                        key: ValueKey(habit.id),
+                        index: index,
+                        child: card,
                       );
                     },
                   ),
