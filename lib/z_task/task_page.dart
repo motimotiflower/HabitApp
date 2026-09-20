@@ -309,9 +309,13 @@ class TaskPageState extends State<TaskPage> {
   Widget _buildHeaderFilters(BuildContext context) {
     final headerHeight = MainBackground.headerHeight(context);
 
+    const controlsHeight = 79.0;
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    final visualHeight = headerHeight - statusBarHeight;
+
     return Positioned(
-      //タイトルとの間を詰めつつ、下側にも余白を残す
-      top: MediaQuery.of(context).padding.top + 14,
+      //通知バーを除いたヘッダー領域の中央に配置
+      top: statusBarHeight + (visualHeight - controlsHeight) / 2,
       left: 20,
       right: 20,
       child: Column(
