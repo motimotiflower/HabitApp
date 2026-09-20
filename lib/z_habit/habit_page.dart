@@ -421,7 +421,9 @@ class HabitPageState extends State<HabitPage> {
                         ? 1
                         : selectedDayHabits.length + (showCarryOverHeader ? 1 : 0),
                     onReorder: (oldIndex, newIndex) async {
-                      if (selectedDayHabits.isEmpty) return;
+                      if (selectedDayHabits.isEmpty || showCarryOverHeader) {
+                        return;
+                      }
                       if (newIndex > oldIndex) newIndex--;
 
                       final moved = selectedDayHabits.removeAt(oldIndex);
