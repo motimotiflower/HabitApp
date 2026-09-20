@@ -738,7 +738,6 @@ class HomePageState extends State<HomePage> {
                 SizedBox(
                   height: headerHeight,
                   child: MainBackground(
-                    title: 'Home',
                     showCalendar: false,
                     onSettings: () {
                       Navigator.push(
