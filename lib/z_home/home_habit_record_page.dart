@@ -8,10 +8,12 @@ class HomeHabitRecordPage extends StatefulWidget {
     super.key,
     required this.habits,
     required this.categoryColors,
+    this.onHabitsChanged,
   });
 
   final List<Habit> habits;
   final Map<String, int> categoryColors;
+  final Future<void> Function(List<Habit> habits)? onHabitsChanged;
 
   @override
   State<HomeHabitRecordPage> createState() =>
@@ -59,9 +61,41 @@ class _HomeHabitRecordPageState
     );
   }
 
+  Future<void> _restoreHabit(Habit habit) async {
+    final index = widget.habits.indexOf(habit);
+    if (index == -1) return;
+
+    //復元した日より前に新しく表示しない
+    final restored = Habit(
+      id: habit.id,
+      title: habit.title,
+      icon: habit.icon,
+      iconAsset: habit.iconAsset,
+      days: habit.days,
+      category: habit.category,
+      notificationEnabled: habit.notificationEnabled,
+      notificationDays: habit.notificationDays,
+      notificationDate: habit.notificationDate,
+      notificationHour: habit.notificationHour,
+      notificationMinute: habit.notificationMinute,
+      completionHistory: Map<String, bool>.from(habit.completionHistory),
+      completionDates: Map<String, String>.from(habit.completionDates),
+      shareCompletion: habit.shareCompletion,
+      carryOverIfIncomplete: habit.carryOverIfIncomplete,
+      startedAt: DateTime.now(),
+      archivedAt: null,
+      subtasks: habit.subtasks,
+    );
+    setState(() => widget.habits[index] = restored);
+    await widget.onHabitsChanged?.call(widget.habits);
+  }
+
   @override
   Widget build(BuildContext context) {
     final groups = _groupHabits();
+    final archivedHabits = widget.habits
+        .where((habit) => habit.archivedAt != null)
+        .toList();
 
     //並んだカード同士で縦のマス数もそろえる
     final maxCompleted = groups.values.isEmpty
@@ -115,6 +149,25 @@ class _HomeHabitRecordPageState
       body: ListView(
         padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
         children: [
+          if (archivedHabits.isNotEmpty) ...[
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              leading: const Icon(Icons.archive_outlined),
+              title: Text('アーカイブ  ${archivedHabits.length}件'),
+              children: archivedHabits.map((habit) {
+                return ListTile(
+                  contentPadding: const EdgeInsets.only(left: 12),
+                  title: Text(habit.title),
+                  trailing: TextButton.icon(
+                    onPressed: () => _restoreHabit(habit),
+                    icon: const Icon(Icons.unarchive_outlined),
+                    label: const Text('戻す'),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 12),
+          ],
           if (groups.isEmpty)
             const Center(
               child: Padding(
