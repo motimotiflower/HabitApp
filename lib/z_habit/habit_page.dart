@@ -130,7 +130,13 @@ class HabitPageState extends State<HabitPage> {
   Future<void> _deleteHabit(Habit habit) async {
     final index = habits.indexOf(habit);
     if (index == -1) return;
-    setState(() => habits.removeAt(index));
+    setState(() {
+      habits.removeAt(index);
+      //削除した習慣を画面内のやり残し情報にも残さない
+      _sessionCarryOverIds.remove(habit.id);
+    });
+
+    //削除は達成記録ごと完全削除。獲得済みの星の欠片は残す
     await HabitStorage.saveHabits(habits);
     if (!mounted) return;
     _showUndoSnackBar('削除しました', () async {
