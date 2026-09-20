@@ -200,7 +200,7 @@ class MemoPageState extends State<MemoPage> {
 
     return Positioned(
       //タイトルとの間を少し詰める
-      top: headerHeight * 0.62,
+      top: MediaQuery.of(context).padding.top + 18,
       left: 20,
       right: 20,
       child: TextField(
