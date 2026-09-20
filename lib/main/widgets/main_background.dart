@@ -82,7 +82,7 @@ class MainBackground extends StatelessWidget {
                 children: [
                   //タイトルは少し下げ、下の部品はタイトル寄りにまとめる
                   Padding(
-                    padding: const EdgeInsets.only(top: 10),
+                    padding: const EdgeInsets.only(top: 20),
                     child: Row(
                       children: [
                         Text(
@@ -202,7 +202,7 @@ class MainBackground extends StatelessWidget {
             : Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 10),
+                  padding: const EdgeInsets.only(top: 20),
                   child: Row(
                     children: [
                       Text(
