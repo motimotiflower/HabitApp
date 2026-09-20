@@ -131,29 +131,33 @@ class _HabitCardState extends State<HabitCard> {
             ],
           ),
           if (_expanded && habit.subtasks.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(left: 44, top: 4),
-              child: Column(
-                children: [
-                  for (var i = 0; i < habit.subtasks.length; i++)
-                    CheckboxListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      controlAffinity: ListTileControlAffinity.leading,
-                      value: widget.subtaskIsDone(i),
-                      activeColor: accentColor,
-                      title: Text(
-                        habit.subtasks[i].title,
-                        style: TextStyle(
-                          decoration: widget.subtaskIsDone(i)
-                              ? TextDecoration.lineThrough
-                              : null,
+            Column(
+              children: [
+                for (var i = 0; i < habit.subtasks.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 54),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            habit.subtasks[i].title,
+                            style: TextStyle(
+                              decoration: widget.subtaskIsDone(i)
+                                  ? TextDecoration.lineThrough
+                                  : null,
+                            ),
+                          ),
                         ),
-                      ),
-                      onChanged: (_) => widget.onSubtaskChanged(i),
+                        //親と同じ右端にチェック位置をそろえる
+                        Checkbox(
+                          value: widget.subtaskIsDone(i),
+                          activeColor: accentColor,
+                          onChanged: (_) => widget.onSubtaskChanged(i),
+                        ),
+                      ],
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
         ],
       ),
