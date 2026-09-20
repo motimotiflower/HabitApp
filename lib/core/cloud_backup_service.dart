@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -194,15 +192,22 @@ class CloudBackupService {
     }
   }
 
-  // デバッグ確認用。Firestoreに保存する内容をJSONで確認できる
-  static Future<String> previewLocalData() async {
+  //端末とFirestoreのアプリデータをまとめて削除
+  static Future<void> deleteAllData() async {
     final prefs = await SharedPreferences.getInstance();
-    final data = <String, dynamic>{};
 
-    for (final key in _localKeys) {
-      data[key] = prefs.get(key);
+    const localOnlyKeys = [
+      'habit_categories',
+      'habit_category_colors',
+      'task_categories',
+    ];
+
+    for (final key in [..._localKeys, ...localOnlyKeys]) {
+      await prefs.remove(key);
     }
+    await prefs.remove(_localUpdatedAtKey);
 
-    return jsonEncode(data);
+    //クラウド側も消して、次回同期で古いデータが戻らないようにする
+    await _backupDocument?.delete();
   }
 }
