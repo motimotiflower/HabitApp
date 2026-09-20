@@ -35,6 +35,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   DateTime? _notificationDate;
   TimeOfDay _notificationTime = const TimeOfDay(hour: 9, minute: 0);
   bool _shareCompletion = false;
+  bool _carryOverIfIncomplete = false;
   List<Subtask> _subtasks = [];
 
   //青系UIになじむジャンルカラー
@@ -346,6 +347,16 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                       },
                     ),
 
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('未達成なら次の設定曜日まで表示'),
+                      subtitle: const Text('達成した日は表示し、翌日から繰り越しを終了します'),
+                      value: _carryOverIfIncomplete,
+                      onChanged: (value) {
+                        setState(() => _carryOverIfIncomplete = value);
+                      },
+                    ),
+
                     const SizedBox(height: 12),
 
                     NotificationSettingsCard(
@@ -478,6 +489,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     notificationHour: _notificationTime.hour,
                     notificationMinute: _notificationTime.minute,
                     shareCompletion: _shareCompletion,
+                    carryOverIfIncomplete: _carryOverIfIncomplete,
                     subtasks: _subtasks,
                   );
 
