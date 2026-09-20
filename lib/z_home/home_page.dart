@@ -415,16 +415,22 @@ class HomePageState extends State<HomePage> {
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 600;
 
-        Habit? selectedHabit;
-        if (_recordTarget != '全部') {
-          for (final habit in _allHabits) {
-            if (habit.id == _recordTarget) {
-              selectedHabit = habit;
-              break;
-            }
-          }
+        //ジャンルありはジャンル単位、未設定は習慣単体で記録を選ぶ
+        final recordGroups = <String, List<Habit>>{};
+        for (final habit in _allHabits.where((habit) => habit.archivedAt == null)) {
+          final key = habit.category == '未設定'
+              ? 'habit:${habit.id}'
+              : 'category:${habit.category}';
+          recordGroups.putIfAbsent(key, () => []).add(habit);
         }
-        final recordHabits = selectedHabit == null ? _allHabits : [selectedHabit];
+
+        final validTarget =
+            _recordTarget == '全部' || recordGroups.containsKey(_recordTarget)
+                ? _recordTarget
+                : '全部';
+        final recordHabits = validTarget == '全部'
+            ? _allHabits.where((habit) => habit.archivedAt == null).toList()
+            : recordGroups[validTarget]!;
         final recordMarks = _habitMarksFor(recordHabits);
 
         final habitRecordCard = _HomeSectionCard(
@@ -436,17 +442,20 @@ class HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DropdownButton<String>(
-                value: _recordTarget == '全部' ||
-                        _allHabits.any((habit) => habit.id == _recordTarget)
-                    ? _recordTarget
-                    : '全部',
+                value: validTarget,
                 isExpanded: true,
                 items: [
                   const DropdownMenuItem(value: '全部', child: Text('全部')),
-                  ..._allHabits.map((habit) => DropdownMenuItem(
-                        value: habit.id,
-                        child: Text(habit.title),
-                      )),
+                  ...recordGroups.entries.map((entry) {
+                    final first = entry.value.first;
+                    final label = first.category == '未設定'
+                        ? first.title
+                        : first.category;
+                    return DropdownMenuItem(
+                      value: entry.key,
+                      child: Text(label),
+                    );
+                  }),
                 ],
                 onChanged: (value) async {
                   if (value == null) return;
