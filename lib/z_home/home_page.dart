@@ -591,35 +591,52 @@ class HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (_carryOverHabits.isNotEmpty) ...[
+                //見出しと件数だけ赤くし、習慣項目は通常の色を使う
+                Row(
+                  children: [
+                    const Text(
+                      'やり残し',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xffD95C5C),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Divider(
+                        color: Color(0xffE5B7B7),
+                        thickness: 0.7,
+                      ),
+                    ),
+                  ],
+                ),
                 InkWell(
                   onTap: () {
                     setState(() => _carryOverExpanded = !_carryOverExpanded);
                   },
-                  child: Row(
-                    children: [
-                      Text(
-                        'やり残し  ${_carryOverHabits.length}件',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xff526FC5),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${_carryOverHabits.first.title} など${_carryOverHabits.length}件',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xffD95C5C),
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Divider(
-                          color: Color(0xffCDD5F0),
-                          thickness: 0.7,
+                        Icon(
+                          _carryOverExpanded
+                              ? Icons.expand_less_rounded
+                              : Icons.expand_more_rounded,
+                          color: const Color(0xffD95C5C),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      Icon(
-                        _carryOverExpanded
-                            ? Icons.expand_less_rounded
-                            : Icons.expand_more_rounded,
-                        color: const Color(0xff526FC5),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 //閉じている時は1件だけ見せ、開くと残りも表示
