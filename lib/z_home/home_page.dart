@@ -1,5 +1,6 @@
 //ホーム画面
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:habitapp/models/habit.dart';
 import 'package:habitapp/models/memo.dart';
 import 'package:habitapp/models/task.dart';
@@ -34,11 +35,35 @@ class HomePageState extends State<HomePage> {
   Map<String, int> _categoryColors = {};
   int _starFragments = 0;
   int _ownedConstellations = 0;
+  List<String> _cardOrder = ['habit', 'task', 'record', 'gacha', 'memo'];
+  String _recordTarget = '全部';
 
   @override
   void initState() {
     super.initState();
+    _loadHomeSettings();
     reload();
+  }
+
+  //Homeカードの順番・記録表示を保存しておく
+  Future<void> _loadHomeSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedOrder = prefs.getStringList('home_card_order');
+    final savedTarget = prefs.getString('home_record_target');
+
+    if (!mounted) return;
+    setState(() {
+      if (savedOrder != null && savedOrder.length == 5) {
+        _cardOrder = savedOrder;
+      }
+      if (savedTarget != null) _recordTarget = savedTarget;
+    });
+  }
+
+  Future<void> _saveHomeSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('home_card_order', _cardOrder);
+    await prefs.setString('home_record_target', _recordTarget);
   }
 
   //Homeで使うデータをまとめて読み込む
@@ -202,6 +227,20 @@ class HomePageState extends State<HomePage> {
     return marks;
   }
 
+  List<_HabitMark> _habitMarksFor(List<Habit> habits) {
+    final marks = <_HabitMark>[];
+    for (final habit in habits) {
+      final color = habit.category == '未設定'
+          ? const Color(0xff526FC5)
+          : Color(_categoryColors[habit.category] ?? 0xff526FC5);
+      for (final entry in habit.completionHistory.entries) {
+        if (entry.value) marks.add(_HabitMark(dateKey: entry.key, color: color));
+      }
+    }
+    marks.sort((a, b) => a.dateKey.compareTo(b.dateKey));
+    return marks;
+  }
+
   //Home上から習慣を追加
   Future<void> _openAddHabit() async {
     await showAdaptiveEditor(
@@ -341,15 +380,38 @@ class HomePageState extends State<HomePage> {
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 600;
 
+        final recordHabits = _recordTarget == '全部'
+            ? _allHabits
+            : _allHabits.where((habit) => habit.title == _recordTarget).toList();
+        final recordMarks = _habitMarksFor(recordHabits);
+
         final habitRecordCard = _HomeSectionCard(
           title: '記録',
           icon: Icons.grid_view_rounded,
           minHeight: 190,
           onTap: _openHabitRecord,
-          child: _HomeRecordPreview(
-            marks: habitMarks,
-            fragments: _starFragments,
-            ownedConstellations: _ownedConstellations,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DropdownButton<String>(
+                value: _recordTarget,
+                isExpanded: true,
+                items: [
+                  const DropdownMenuItem(value: '全部', child: Text('全部')),
+                  ..._allHabits.map((habit) => DropdownMenuItem(
+                        value: habit.title,
+                        child: Text(habit.title),
+                      )),
+                ],
+                onChanged: (value) async {
+                  if (value == null) return;
+                  setState(() => _recordTarget = value);
+                  await _saveHomeSettings();
+                },
+              ),
+              const SizedBox(height: 10),
+              _HomeHabitGrid(marks: recordMarks, fillCard: true),
+            ],
           ),
         );
 
@@ -364,9 +426,28 @@ class HomePageState extends State<HomePage> {
             );
             await reload();
           },
-          child: Text(
-            '星の欠片 $_starFragments / ${StarStorage.drawCost}　図鑑 $_ownedConstellations / ${StarStorage.constellationNames.length}',
-            style: const TextStyle(fontSize: 14, color: Color(0xff697188)),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 72,
+                height: 82,
+                child: Image.asset(
+                  _starFragments <= 0
+                      ? 'assets/images/bottle_blank.png'
+                      : _starFragments < StarStorage.drawCost
+                          ? 'assets/images/bottle_half.png'
+                          : 'assets/images/bottle_fill.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '星の欠片 $_starFragments / ${StarStorage.drawCost}\n図鑑 $_ownedConstellations / ${StarStorage.constellationNames.length}',
+                  style: const TextStyle(fontSize: 14, color: Color(0xff697188)),
+                ),
+              ),
+            ],
           ),
         );
 
@@ -777,15 +858,34 @@ class HomePageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 14),
-                todayHabitCard,
-                const SizedBox(height: 12),
-                todayTaskCard,
-                const SizedBox(height: 12),
-                habitRecordCard,
-                const SizedBox(height: 12),
-                starGachaCard,
-                const SizedBox(height: 12),
-                memoCard,
+                ReorderableListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  buildDefaultDragHandles: true,
+                  onReorder: (oldIndex, newIndex) async {
+                    if (newIndex > oldIndex) newIndex--;
+                    setState(() {
+                      final item = _cardOrder.removeAt(oldIndex);
+                      _cardOrder.insert(newIndex, item);
+                    });
+                    await _saveHomeSettings();
+                  },
+                  children: _cardOrder.map((id) {
+                    final card = switch (id) {
+                      'habit' => todayHabitCard,
+                      'task' => todayTaskCard,
+                      'record' => habitRecordCard,
+                      'gacha' => starGachaCard,
+                      'memo' => memoCard,
+                      _ => const SizedBox.shrink(),
+                    };
+                    return Padding(
+                      key: ValueKey(id),
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: card,
+                    );
+                  }).toList(),
+                ),
               ],
             ),
             ),
