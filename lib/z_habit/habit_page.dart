@@ -389,6 +389,32 @@ class HabitPageState extends State<HabitPage> {
     });
   }
 
+  Widget _sectionTitle(String title, {Key? key}) {
+    return Padding(
+      key: key,
+      padding: const EdgeInsets.fromLTRB(4, 10, 4, 6),
+      child: Row(
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xff526FC5),
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Divider(
+              thickness: 0.7,
+              color: Color(0xffCDD5F0),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const days = ["月", "火", "水", "木", "金", "土", "日"];
@@ -400,19 +426,23 @@ class HabitPageState extends State<HabitPage> {
       Duration(days: selectedDayIndex),
     );
 
-    //本来の習慣と「やり残し」を分け、やり残しを上に表示する
+    //本来の習慣と「やり残し」を分ける
     final scheduledHabits = habits.where((habit) {
-      return habit.archivedAt == null && habitIsScheduledOn(habit, selectedDate);
+      return habit.archivedAt == null &&
+          habitIsScheduledOn(habit, selectedDate);
     }).toList();
     final carryOverHabits = habits.where((habit) {
-      return habit.archivedAt == null && !habitIsScheduledOn(habit, selectedDate) &&
+      return habit.archivedAt == null &&
+          !habitIsScheduledOn(habit, selectedDate) &&
           habitShouldDisplayOn(habit, selectedDate);
     }).toList();
-    final visibleCarryOvers = carryOverHabits.length <= 1 || _carryOverExpanded
-        ? carryOverHabits
-        : <Habit>[];
+
+    //やり残しは件数行で折りたたみ、通常習慣はその下に表示
+    final visibleCarryOvers =
+        _carryOverExpanded ? carryOverHabits : <Habit>[];
     final selectedDayHabits = [...visibleCarryOvers, ...scheduledHabits];
-    final showCarryOverHeader = carryOverHabits.length > 1;
+    final showCarryOverHeader = carryOverHabits.isNotEmpty;
+    final showTodayHeader = scheduledHabits.isNotEmpty;
 
     //達成履歴で使用する日付キー
     final dateKey =
@@ -487,7 +517,9 @@ class HabitPageState extends State<HabitPage> {
                     padding: const EdgeInsets.only(bottom: 88),
                     itemCount: selectedDayHabits.isEmpty
                         ? 1
-                        : selectedDayHabits.length + (showCarryOverHeader ? 1 : 0),
+                        : selectedDayHabits.length +
+                            (showCarryOverHeader ? 1 : 0) +
+                            (showTodayHeader ? 1 : 0),
                     onReorder: (oldIndex, newIndex) async {
                       if (selectedDayHabits.isEmpty || showCarryOverHeader) {
                         return;
@@ -523,38 +555,48 @@ class HabitPageState extends State<HabitPage> {
                           ),
                         );
                       }
-                      if (showCarryOverHeader && index == 0) {
-                        return ListTile(
+                      var dataIndex = index;
+
+                      if (showCarryOverHeader && dataIndex == 0) {
+                        return Column(
                           key: const ValueKey('carry-over-header'),
-                          dense: true,
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 12),
-                          title: Text(
-                            'やり残し ${carryOverHabits.length}件',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xff526FC5),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _sectionTitle('やり残し'),
+                            ListTile(
+                              dense: true,
+                              contentPadding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              title: Text('${carryOverHabits.length}件'),
+                              trailing: Icon(
+                                _carryOverExpanded
+                                    ? Icons.expand_less_rounded
+                                    : Icons.expand_more_rounded,
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  _carryOverExpanded = !_carryOverExpanded;
+                                });
+                              },
                             ),
-                          ),
-                          trailing: Icon(
-                            _carryOverExpanded
-                                ? Icons.expand_less_rounded
-                                : Icons.expand_more_rounded,
-                            color: const Color(0xff526FC5),
-                          ),
-                          onTap: () {
-                            setState(() {
-                              _carryOverExpanded = !_carryOverExpanded;
-                            });
-                          },
+                          ],
                         );
                       }
+                      if (showCarryOverHeader) dataIndex--;
 
-                      final listIndex =
-                          index - (showCarryOverHeader ? 1 : 0);
-                      final habit = selectedDayHabits[listIndex];
-                      final canReorder = !showCarryOverHeader &&
-                          carryOverHabits.isEmpty;
+                      final carryCount = visibleCarryOvers.length;
+                      if (showTodayHeader && dataIndex == carryCount) {
+                        return _sectionTitle(
+                          '今日の習慣',
+                          key: const ValueKey('today-habit-header'),
+                        );
+                      }
+                      if (showTodayHeader && dataIndex > carryCount) {
+                        dataIndex--;
+                      }
+
+                      final habit = selectedDayHabits[dataIndex];
+                      final canReorder = carryOverHabits.isEmpty;
 
                       final categoryColor = habit.category == '未設定'
                           ? null
