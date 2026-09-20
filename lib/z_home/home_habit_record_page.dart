@@ -50,6 +50,20 @@ class _HomeHabitRecordPageState
     return count;
   }
 
+  //全部カードでは達成1件ごとのジャンル色をそのまま使う
+  List<Color> _allCompletedColors(List<Habit> habits) {
+    final colors = <Color>[];
+    for (final habit in habits) {
+      final color = habit.category == '未設定'
+          ? const Color(0xff526FC5)
+          : Color(widget.categoryColors[habit.category] ?? 0xff526FC5);
+      for (final completed in habit.completionHistory.values) {
+        if (completed) colors.add(color);
+      }
+    }
+    return colors;
+  }
+
   Color _groupColor(List<Habit> groupHabits) {
     final firstHabit = groupHabits.first;
 
@@ -121,6 +135,7 @@ class _HomeHabitRecordPageState
 
     //一番上の「全部」は、現在の全グループの達成をまとめる
     final allCompletedCount = _completedCount(activeHabits);
+    final allCompletedColors = _allCompletedColors(activeHabits);
 
     //並んだカード同士で縦のマス数もそろえる
     final maxCompleted = groups.values.isEmpty
@@ -214,6 +229,7 @@ class _HomeHabitRecordPageState
               completedCount: allCompletedCount,
               color: const Color(0xff526FC5),
               cellCount: commonCellCount,
+              completedColors: allCompletedColors,
             ),
             const SizedBox(height: 22),
             LayoutBuilder(
@@ -263,6 +279,7 @@ class _RecordGrid extends StatelessWidget {
     required this.color,
     required this.cellCount,
     this.compact = false,
+    this.completedColors,
   });
 
   final String title;
@@ -270,6 +287,7 @@ class _RecordGrid extends StatelessWidget {
   final Color color;
   final int cellCount;
   final bool compact;
+  final List<Color>? completedColors;
 
   static const int _columnCount = 11;
 
@@ -319,16 +337,22 @@ class _RecordGrid extends StatelessWidget {
                 runSpacing: spacing,
                 children: List.generate(cellCount, (index) {
                   final completed = index < completedCount;
+                  //全部カードだけは各達成元のジャンル色を使う
+                  final cellColor = completed &&
+                          completedColors != null &&
+                          index < completedColors!.length
+                      ? completedColors![index]
+                      : color;
 
                   return Container(
                     width: cellSize,
                     height: cellSize,
                     decoration: BoxDecoration(
-                      color: completed ? color : const Color(0xffF8FAFF),
+                      color: completed ? cellColor : const Color(0xffF8FAFF),
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
                         color: completed
-                            ? color
+                            ? cellColor
                             : const Color(0xffDCE3F5),
                       ),
                     ),
