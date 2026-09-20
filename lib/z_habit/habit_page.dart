@@ -573,6 +573,11 @@ class HabitPageState extends State<HabitPage> {
                                   const Text('やり残し', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xffD95C5C))),
                                   const SizedBox(width: 8),
                                   const Expanded(child: Divider(thickness: 0.7, color: Color(0xffE5B7B7))),
+                              const SizedBox(width: 6),
+                              Icon(
+                                _carryOverExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                                color: const Color(0xffD95C5C),
+                              ),
                                 ],
                               ),
                             ),
@@ -580,16 +585,9 @@ class HabitPageState extends State<HabitPage> {
                               onTap: () => setState(() => _carryOverExpanded = !_carryOverExpanded),
                               child: Padding(
                                 padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        '${carryOverHabits.first.title} など${carryOverHabits.length}件',
-                                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xffD95C5C)),
-                                      ),
-                                    ),
-                                    Icon(_carryOverExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded, color: const Color(0xffD95C5C)),
-                                  ],
+                                child: Text(
+                                  '${carryOverHabits.first.title} など${carryOverHabits.length}件',
+                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xffD95C5C)),
                                 ),
                               ),
                             ),

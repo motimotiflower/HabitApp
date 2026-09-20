@@ -609,6 +609,13 @@ class HomePageState extends State<HomePage> {
                         thickness: 0.7,
                       ),
                     ),
+                    const SizedBox(width: 6),
+                    Icon(
+                      _carryOverExpanded
+                          ? Icons.expand_less_rounded
+                          : Icons.expand_more_rounded,
+                      color: const Color(0xffD95C5C),
+                    ),
                   ],
                 ),
                 InkWell(
@@ -617,25 +624,13 @@ class HomePageState extends State<HomePage> {
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${_carryOverHabits.first.title} など${_carryOverHabits.length}件',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xffD95C5C),
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          _carryOverExpanded
-                              ? Icons.expand_less_rounded
-                              : Icons.expand_more_rounded,
-                          color: const Color(0xffD95C5C),
-                        ),
-                      ],
+                    child: Text(
+                      '${_carryOverHabits.first.title} など${_carryOverHabits.length}件',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xffD95C5C),
+                      ),
                     ),
                   ),
                 ),
