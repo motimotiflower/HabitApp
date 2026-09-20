@@ -46,16 +46,16 @@ class MyApp extends StatelessWidget {
           //アプリ全体の基準色を青に統一
           seedColor: const Color(0xff526FC5),
         ),
-        //本文は読みやすいNoto Sans JPを使う
-        textTheme: GoogleFonts.notoSansJpTextTheme().copyWith(
-          //見出しだけ解星デコールにして世界観を出す
-          displayLarge: GoogleFonts.kaiseiDecol(),
-          displayMedium: GoogleFonts.kaiseiDecol(),
-          displaySmall: GoogleFonts.kaiseiDecol(),
-          headlineLarge: GoogleFonts.kaiseiDecol(),
-          headlineMedium: GoogleFonts.kaiseiDecol(),
-          headlineSmall: GoogleFonts.kaiseiDecol(),
-          titleLarge: GoogleFonts.kaiseiDecol(),
+        //本文はゆるい手書き感のあるYomogiを使う
+        textTheme: GoogleFonts.yomogiTextTheme().copyWith(
+          //見出しはHachi Maru Popで少し印象を強くする
+          displayLarge: GoogleFonts.hachiMaruPop(),
+          displayMedium: GoogleFonts.hachiMaruPop(),
+          displaySmall: GoogleFonts.hachiMaruPop(),
+          headlineLarge: GoogleFonts.hachiMaruPop(),
+          headlineMedium: GoogleFonts.hachiMaruPop(),
+          headlineSmall: GoogleFonts.hachiMaruPop(),
+          titleLarge: GoogleFonts.hachiMaruPop(),
         ),
       ),
 
