@@ -565,19 +565,25 @@ class HabitPageState extends State<HabitPage> {
                           key: const ValueKey('carry-over-header'),
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(4, 10, 4, 4),
-                              child: Row(
-                                children: [
-                                  const Text('やり残し', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xffD95C5C))),
-                                  const SizedBox(width: 8),
-                                  const Expanded(child: Divider(thickness: 0.7, color: Color(0xffE5B7B7))),
-                              const SizedBox(width: 6),
-                              Icon(
-                                _carryOverExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
-                                color: const Color(0xffD95C5C),
+                            //見出し全体をタップして開閉できるようにする
+                            InkWell(
+                              onTap: () => setState(
+                                () => _carryOverExpanded = !_carryOverExpanded,
                               ),
-                                ],
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(4, 10, 4, 4),
+                                child: Row(
+                                  children: [
+                                    const Text('やり残し', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xffD95C5C))),
+                                    const SizedBox(width: 8),
+                                    const Expanded(child: Divider(thickness: 0.7, color: Color(0xffE5B7B7))),
+                                    const SizedBox(width: 6),
+                                    Icon(
+                                      _carryOverExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                                      color: const Color(0xffD95C5C),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                             //閉じている時だけ内容の要約を表示する
