@@ -1,5 +1,6 @@
 //習慣のデータの型
 import 'package:flutter/material.dart';
+import 'package:habitapp/models/subtask.dart';
 
 class Habit {
   static int _idCounter = 0;
@@ -19,7 +20,9 @@ class Habit {
   final DateTime? notificationDate; //日にち指定
   final int? notificationHour; //通知時刻
   final int? notificationMinute;
-  final Map<String, bool> completionHistory; //日付ごとの達成記録
+  final Map<String, bool> completionHistory; //日付・週ごとの達成記録
+  final bool shareCompletion; //選択曜日で達成状態を共有するか
+  final List<Subtask> subtasks; //親の下に表示するサブタスク
 
   Habit({
     String? id,
@@ -34,6 +37,8 @@ class Habit {
     this.notificationHour,
     this.notificationMinute,
     Map<String, bool>? completionHistory,
+    this.shareCompletion = false,
+    this.subtasks = const [],
   })  : id = id ?? _createId(),
         completionHistory = completionHistory ?? {};
 
@@ -52,6 +57,8 @@ class Habit {
       'notificationHour': notificationHour,
       'notificationMinute': notificationMinute,
       'completionHistory': completionHistory,
+      'shareCompletion': shareCompletion,
+      'subtasks': subtasks.map((subtask) => subtask.toJson()).toList(),
     };
   }
 
@@ -77,6 +84,10 @@ class Habit {
       completionHistory: Map<String, bool>.from(
         json['completionHistory'] ?? {},
       ),
+      shareCompletion: json['shareCompletion'] ?? false,
+      subtasks: (json['subtasks'] as List<dynamic>? ?? [])
+          .map((item) => Subtask.fromJson(Map<String, dynamic>.from(item)))
+          .toList(),
     );
   }
 }
