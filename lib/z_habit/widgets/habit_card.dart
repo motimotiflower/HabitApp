@@ -133,6 +133,12 @@ class _HabitCardState extends State<HabitCard> {
           if (_expanded && habit.subtasks.isNotEmpty)
             Column(
               children: [
+                //親の習慣とサブタスクの境目を薄く区切る
+                const Divider(
+                  height: 12,
+                  thickness: 0.6,
+                  color: Color(0xffCDD5F0),
+                ),
                 for (var i = 0; i < habit.subtasks.length; i++)
                   Padding(
                     padding: const EdgeInsets.only(left: 54),
