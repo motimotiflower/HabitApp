@@ -23,10 +23,11 @@ class MainBackground extends StatelessWidget {
   static const double headerRatio = 0.23;
 
   static double headerHeight(BuildContext context) {
-    //Habitページの内容量を基準に、上下の余白が近くなる高さへ統一
-    return (MediaQuery.of(context).size.height * headerRatio)
+    //通知バーを除いた見た目の高さを各ページでそろえる
+    final contentHeight = (MediaQuery.of(context).size.height * headerRatio)
         .clamp(205.0, 235.0)
         .toDouble();
+    return MediaQuery.of(context).padding.top + contentHeight;
   }
 
   //詳細ページのAppBarもここを参照する
