@@ -13,7 +13,6 @@ class HabitCard extends StatefulWidget {
     required this.onEdit,
     required this.onDelete,
     this.categoryColor,
-    this.dragHandle,
   });
 
   final Habit habit;
@@ -24,7 +23,6 @@ class HabitCard extends StatefulWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final Color? categoryColor;
-  final Widget? dragHandle;
 
   @override
   State<HabitCard> createState() => _HabitCardState();
@@ -40,7 +38,11 @@ class _HabitCardState extends State<HabitCard> {
         ? const Color(0xff526FC5)
         : (widget.categoryColor ?? const Color(0xff526FC5));
 
-    return Container(
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      //カード本体のタップで編集する
+      onTap: widget.onEdit,
+      child: Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -85,21 +87,36 @@ class _HabitCardState extends State<HabitCard> {
                 ),
               ),
               if (habit.subtasks.isNotEmpty)
-                IconButton(
-                  tooltip: _expanded ? '閉じる' : 'サブタスクを開く',
-                  icon: Icon(
-                    _expanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => setState(() => _expanded = !_expanded),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${habit.subtasks.length}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xff81889B),
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Icon(
+                          _expanded
+                              ? Icons.expand_less_rounded
+                              : Icons.expand_more_rounded,
+                          size: 20,
+                          color: const Color(0xff81889B),
+                        ),
+                      ],
+                    ),
                   ),
-                  onPressed: () => setState(() => _expanded = !_expanded),
                 ),
-              IconButton(
-                tooltip: '編集',
-                icon: const Icon(Icons.edit_outlined, size: 20),
-                color: const Color(0xff526FC5),
-                onPressed: widget.onEdit,
-              ),
               IconButton(
                 tooltip: '削除',
                 icon: const Icon(Icons.delete_outline, size: 20),
@@ -111,7 +128,6 @@ class _HabitCardState extends State<HabitCard> {
                 activeColor: accentColor,
                 onChanged: (_) => widget.onChanged(),
               ),
-              if (widget.dragHandle != null) widget.dragHandle!,
             ],
           ),
           if (_expanded && habit.subtasks.isNotEmpty)
@@ -140,6 +156,7 @@ class _HabitCardState extends State<HabitCard> {
               ),
             ),
         ],
+      ),
       ),
     );
   }
