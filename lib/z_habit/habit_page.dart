@@ -495,9 +495,6 @@ class HabitPageState extends State<HabitPage> {
                                   0xff526FC5,
                             );
 
-                      final canReorder = !showCarryOverHeader &&
-                          carryOverHabits.isEmpty;
-
                       final sourceDate =
                           habitDisplaySourceDate(habit, selectedDate) ??
                               selectedDate;
