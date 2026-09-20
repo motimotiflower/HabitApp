@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.widget.RemoteViews
 import org.json.JSONArray
 import java.text.SimpleDateFormat
@@ -14,7 +15,31 @@ class TaskWidgetProvider : AppWidgetProvider() {
         ids.forEach { manager.updateAppWidget(it, build(context)) }
     }
 
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        if (intent.action != ACTION_TOGGLE_TASK) return
+
+        val taskId = intent.getStringExtra(EXTRA_ID) ?: return
+        val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        val raw = prefs.getString("flutter.tasks", null) ?: return
+        val array = JSONArray(raw)
+
+        // 押されたタスクの完了状態を反転する
+        for (i in 0 until array.length()) {
+            val item = array.getJSONObject(i)
+            if (item.optString("id") != taskId) continue
+            item.put("isDone", !item.optBoolean("isDone", false))
+            break
+        }
+
+        prefs.edit().putString("flutter.tasks", array.toString()).apply()
+        updateAll(context)
+    }
+
     companion object {
+        private const val ACTION_TOGGLE_TASK = "com.example.habitapp.TOGGLE_TASK"
+        private const val EXTRA_ID = "item_id"
+
         fun updateAll(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
             val component = ComponentName(context, TaskWidgetProvider::class.java)
@@ -30,7 +55,7 @@ class TaskWidgetProvider : AppWidgetProvider() {
 
             val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
             val raw = prefs.getString("flutter.tasks", null)
-            val tasks = mutableListOf<Pair<String, String?>>()
+            val tasks = mutableListOf<Triple<String, String?, String>>()
 
             if (raw != null) {
                 val array = JSONArray(raw)
@@ -38,7 +63,7 @@ class TaskWidgetProvider : AppWidgetProvider() {
                     val item = array.getJSONObject(i)
                     if (item.optBoolean("isDone", false)) continue
                     val deadline = item.optString("deadline").takeIf { it.isNotBlank() && it != "null" }
-                    tasks.add(item.optString("title") to deadline)
+                    tasks.add(Triple(item.optString("title"), deadline, item.optString("id")))
                 }
             }
 
@@ -51,17 +76,18 @@ class TaskWidgetProvider : AppWidgetProvider() {
                     else -> a.second!!.compareTo(b.second!!)
                 }
             })
+
             val input = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.JAPAN)
             val output = SimpleDateFormat("M/d", Locale.JAPAN)
-            val lines = tasks.take(5).map { (title, deadline) ->
+            val rows = tasks.take(5).map { (title, deadline, id) ->
                 val date = deadline?.let {
                     try { output.format(input.parse(it)!!) } catch (_: Exception) { "" }
                 } ?: ""
-                "□  $title" + if (date.isNotEmpty()) "   $date" else ""
+                WidgetRow("☐  $title" + if (date.isNotEmpty()) "   $date" else "", id)
             }
 
-            fillRows(views, lines, "未完了のタスクはありません")
-            views.setOnClickPendingIntent(R.id.widget_body, WidgetIntents.open(context, "task", 203))
+            fillRows(views, rows.map { it.text }, "未完了のタスクはありません")
+            bindToggleRows(context, views, rows, ACTION_TOGGLE_TASK, 2000)
             return views
         }
     }
