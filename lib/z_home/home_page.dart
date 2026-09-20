@@ -33,6 +33,8 @@ class HomePageState extends State<HomePage> {
   List<Habit> _todayHabits = [];
   List<Habit> _carryOverHabits = [];
   bool _carryOverExpanded = false;
+  //Homeで達成したやり残しは、別ページへ移るまで表示を残す
+  final Set<String> _sessionCarryOverIds = {};
   List<Task> _todayTasks = [];
   List<Memo> _pinnedMemos = [];
   Map<String, int> _categoryColors = {};
@@ -87,7 +89,8 @@ class HomePageState extends State<HomePage> {
     final carryOverHabits = habits.where((habit) {
       return habit.archivedAt == null &&
           !habitIsScheduledOn(habit, now) &&
-          habitShouldDisplayOn(habit, now);
+          (habitShouldDisplayOn(habit, now) ||
+              _sessionCarryOverIds.contains(habit.id));
     }).toList();
 
     //Homeには「締切が1週間以内」または「フラグ付き」の未完了タスクを表示
@@ -147,6 +150,8 @@ class HomePageState extends State<HomePage> {
   Future<void> _toggleHabit(Habit targetHabit) async {
     final habits = await HabitStorage.loadHabits();
     final completionKey = _habitCompletionKey(targetHabit);
+    final now = DateTime.now();
+    final wasCarryOver = !habitIsScheduledOn(targetHabit, now);
     bool? wasDone;
 
     for (final habit in habits) {
@@ -158,6 +163,11 @@ class HomePageState extends State<HomePage> {
     }
 
     await HabitStorage.saveHabits(habits);
+
+    //達成直後もこのHomeを離れるまではやり残し欄に残す
+    if (wasDone == false && wasCarryOver) {
+      _sessionCarryOverIds.add(targetHabit.id);
+    }
 
     if (wasDone != null) {
       final actionKey =
