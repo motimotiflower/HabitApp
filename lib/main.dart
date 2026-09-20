@@ -46,16 +46,15 @@ class MyApp extends StatelessWidget {
           //アプリ全体の基準色を青に統一
           seedColor: const Color(0xff526FC5),
         ),
-        //本文はゆるい手書き感のあるYomogiを使う
-        textTheme: GoogleFonts.yomogiTextTheme().copyWith(
-          //見出しはHachi Maru Popで少し印象を強くする
-          displayLarge: GoogleFonts.hachiMaruPop(),
-          displayMedium: GoogleFonts.hachiMaruPop(),
-          displaySmall: GoogleFonts.hachiMaruPop(),
-          headlineLarge: GoogleFonts.hachiMaruPop(),
-          headlineMedium: GoogleFonts.hachiMaruPop(),
-          headlineSmall: GoogleFonts.hachiMaruPop(),
-          titleLarge: GoogleFonts.hachiMaruPop(),
+        //TextStyleを個別指定している文字にもYomogiを引き継がせる
+        fontFamily: GoogleFonts.yomogi().fontFamily,
+        textTheme: GoogleFonts.yomogiTextTheme(),
+        //AppBarなど明確な見出しにはHachi Maru Popを使う
+        appBarTheme: AppBarTheme(
+          titleTextStyle: GoogleFonts.hachiMaruPop(
+            fontSize: 23,
+            color: Colors.white,
+          ),
         ),
       ),
 
