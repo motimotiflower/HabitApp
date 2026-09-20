@@ -27,6 +27,7 @@ class _HomeHabitRecordPageState
     final groups = <String, List<Habit>>{};
 
     for (final habit in widget.habits) {
+      if (habit.archivedAt != null) continue;
       final key =
           habit.category == '未設定' ? habit.title : habit.category;
 
