@@ -6,6 +6,7 @@ import 'package:habitapp/models/memo.dart';
 import 'package:habitapp/models/task.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
+import 'package:habitapp/z_habit/habit_schedule.dart';
 import 'package:habitapp/z_habit/sheets/add_habit_sheet.dart';
 import 'package:habitapp/z_habit/sheets/edit_habit_sheet.dart';
 import 'package:habitapp/z_home/home_habit_record_page.dart';
@@ -30,6 +31,8 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   List<Habit> _allHabits = [];
   List<Habit> _todayHabits = [];
+  List<Habit> _carryOverHabits = [];
+  bool _carryOverExpanded = false;
   List<Task> _todayTasks = [];
   List<Memo> _pinnedMemos = [];
   Map<String, int> _categoryColors = {};
@@ -77,11 +80,14 @@ class HomePageState extends State<HomePage> {
 
     final now = DateTime.now();
 
-    const days = ['月', '火', '水', '木', '金', '土', '日'];
-    final todayName = days[now.weekday - 1];
-
+    //習慣ページと同じ判定で今日分とやり残しを分ける
     final todayHabits = habits.where((habit) {
-      return habit.days.contains(todayName);
+      return habit.archivedAt == null && habitIsScheduledOn(habit, now);
+    }).toList();
+    final carryOverHabits = habits.where((habit) {
+      return habit.archivedAt == null &&
+          !habitIsScheduledOn(habit, now) &&
+          habitShouldDisplayOn(habit, now);
     }).toList();
 
     //Homeには「締切が1週間以内」または「フラグ付き」の未完了タスクを表示
@@ -112,6 +118,7 @@ class HomePageState extends State<HomePage> {
     setState(() {
       _allHabits = habits;
       _todayHabits = todayHabits;
+      _carryOverHabits = carryOverHabits;
       _todayTasks = todayTasks;
       _pinnedMemos = pinnedMemos;
       _categoryColors = categoryColors;
@@ -131,13 +138,9 @@ class HomePageState extends State<HomePage> {
 
   //共有設定を含め、今日の習慣が使う達成キーを返す
   String _habitCompletionKey(Habit habit) {
-    if (!habit.shareCompletion) return _todayKey();
-
     final now = DateTime.now();
-    final monday = now.subtract(Duration(days: now.weekday - 1));
-    return 'week-${monday.year}-'
-        '${monday.month.toString().padLeft(2, '0')}-'
-        '${monday.day.toString().padLeft(2, '0')}';
+    final sourceDate = habitDisplaySourceDate(habit, now) ?? now;
+    return habitCompletionKeyForDate(habit, sourceDate);
   }
 
   //Homeから習慣の達成状態を変更
@@ -261,7 +264,28 @@ class HomePageState extends State<HomePage> {
         return AddHabitSheet(
           onAddHabit: (habit) async {
             final habits = await HabitStorage.loadHabits();
-            habits.add(habit);
+            //Homeから追加した場合も今日を開始日にする
+            habits.add(
+              Habit(
+                id: habit.id,
+                title: habit.title,
+                icon: habit.icon,
+                iconAsset: habit.iconAsset,
+                days: habit.days,
+                category: habit.category,
+                notificationEnabled: habit.notificationEnabled,
+                notificationDays: habit.notificationDays,
+                notificationDate: habit.notificationDate,
+                notificationHour: habit.notificationHour,
+                notificationMinute: habit.notificationMinute,
+                completionHistory: habit.completionHistory,
+                completionDates: habit.completionDates,
+                shareCompletion: habit.shareCompletion,
+                carryOverIfIncomplete: habit.carryOverIfIncomplete,
+                startedAt: DateTime.now(),
+                subtasks: habit.subtasks,
+              ),
+            );
             await HabitStorage.saveHabits(habits);
             await reload();
           },
