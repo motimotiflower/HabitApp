@@ -4,7 +4,6 @@ import 'dart:math';
 class MainBackground extends StatelessWidget {
   const MainBackground({
     super.key,
-    required this.title,
     required this.showCalendar,
     this.onDaySelected,
     this.selectedDayIndex,
@@ -12,10 +11,8 @@ class MainBackground extends StatelessWidget {
     this.onPreviousWeek,
     this.onNextWeek,
     this.onToday,
-    this.onSettings,
   });
 
-  final String title;
   final bool showCalendar;
   final void Function(int)? onDaySelected;
   final int? selectedDayIndex;
@@ -23,7 +20,6 @@ class MainBackground extends StatelessWidget {
   final VoidCallback? onPreviousWeek;
   final VoidCallback? onNextWeek;
   final VoidCallback? onToday;
-  final VoidCallback? onSettings;
 
   //各メインページが共通で参照するヘッダー高さ
   static const double headerRatio = 0.31;
@@ -44,7 +40,6 @@ class MainBackground extends StatelessWidget {
     final height = headerHeight(context);
     final horizontalPadding =
         screenWidth > 700 ? 60.0 : screenWidth * 0.06;
-    final titleFontSize = min(screenWidth * 0.08, 36.0);
     final dateFontSize = min(screenWidth * 0.08, 18.0);
     final dayFontSize = min(screenWidth * 0.08, 16.0);
     final daySize = min(screenWidth * 0.09, 50.0);
@@ -82,40 +77,15 @@ class MainBackground extends StatelessWidget {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  //タイトルは少し下げ、下の部品はタイトル寄りにまとめる
-                  Padding(
-                    padding: const EdgeInsets.only(top: 18),
-                    child: Row(
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: titleFontSize,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: onToday,
-                          child: const Text(
-                            '今日',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: IconButton(
-                            tooltip: '設定',
-                            onPressed: onSettings,
-                            icon: const Icon(
-                              Icons.settings_outlined,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
+                  //タイトルは置かず、Habitだけ「今日」操作を残す
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: onToday,
+                      child: const Text(
+                        '今日',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
 
@@ -201,37 +171,7 @@ class MainBackground extends StatelessWidget {
                   ),
                 ],
               )
-            : Align(
-                alignment: Alignment.topCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Row(
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const Spacer(),
-                      SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: IconButton(
-                          tooltip: '設定',
-                          onPressed: onSettings,
-                          icon: const Icon(
-                            Icons.settings_outlined,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            : const SizedBox.shrink(),
         ),
       ),
     );
