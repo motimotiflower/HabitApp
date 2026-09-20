@@ -14,7 +14,6 @@ import 'package:habitapp/main/widgets/main_navigation_bar.dart';
 import 'package:habitapp/main/widgets/main_background.dart';
 import 'package:habitapp/main/widgets/adaptive_editor_panel.dart';
 import 'package:habitapp/models/page_info.dart';
-import 'package:habitapp/settings/settings_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -215,7 +214,6 @@ class _MainPageState extends State<MainPage> {
               children: [
                 //背景========================================
                 MainBackground(
-                  title: _pages[_currentIndex].title,
                   showCalendar: _pages[_currentIndex].showCalendar,
                   selectedDayIndex: _selectedDayIndex,
 
@@ -228,15 +226,6 @@ class _MainPageState extends State<MainPage> {
 
                   //今日に戻る
                   onToday: _goToToday,
-
-                  onSettings: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const SettingsPage(),
-                      ),
-                    );
-                  },
 
                   onDaySelected: (index) {
                     //Habitページの時だけ曜日変更を伝える
