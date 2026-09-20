@@ -65,7 +65,10 @@ class _MainPageState extends State<MainPage> {
       PageInfo(title: "Home", page: HomePage(key: _homePageKey)),
       PageInfo(
         title: "Habit",
-        page: HabitPage(key: _habitPageKey),
+        page: HabitPage(
+          key: _habitPageKey,
+          onToday: _goToToday,
+        ),
         showCalendar: true,
       ),
       PageInfo(
@@ -223,9 +226,6 @@ class _MainPageState extends State<MainPage> {
                   //週移動
                   onPreviousWeek: _goToPreviousWeek,
                   onNextWeek: _goToNextWeek,
-
-                  //今日に戻る
-                  onToday: _goToToday,
 
                   onDaySelected: (index) {
                     //Habitページの時だけ曜日変更を伝える
