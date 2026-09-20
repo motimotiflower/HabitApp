@@ -46,16 +46,8 @@ class MyApp extends StatelessWidget {
           //アプリ全体の基準色を青に統一
           seedColor: const Color(0xff526FC5),
         ),
-        //TextStyleを個別指定している文字にもYomogiを引き継がせる
-        fontFamily: GoogleFonts.yomogi().fontFamily,
-        textTheme: GoogleFonts.yomogiTextTheme(),
-        //AppBarなど明確な見出しにはHachi Maru Popを使う
-        appBarTheme: AppBarTheme(
-          titleTextStyle: GoogleFonts.hachiMaruPop(
-            fontSize: 23,
-            color: Colors.white,
-          ),
-        ),
+        //日本語も崩れにくいNoto Sans JPをアプリ全体に適用
+        textTheme: GoogleFonts.notoSansJpTextTheme(),
       ),
 
       //Firebaseのログイン状態から最初の画面を決める
