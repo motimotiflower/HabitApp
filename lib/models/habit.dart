@@ -22,6 +22,7 @@ class Habit {
   final int? notificationMinute;
   final Map<String, bool> completionHistory; //日付・週ごとの達成記録
   final bool shareCompletion; //選択曜日で達成状態を共有するか
+  final bool carryOverIfIncomplete; //未達成なら次の設定曜日まで表示するか
   final List<Subtask> subtasks; //親の下に表示するサブタスク
 
   Habit({
@@ -38,6 +39,7 @@ class Habit {
     this.notificationMinute,
     Map<String, bool>? completionHistory,
     this.shareCompletion = false,
+    this.carryOverIfIncomplete = false,
     this.subtasks = const [],
   })  : id = id ?? _createId(),
         completionHistory = completionHistory ?? {};
@@ -58,6 +60,7 @@ class Habit {
       'notificationMinute': notificationMinute,
       'completionHistory': completionHistory,
       'shareCompletion': shareCompletion,
+      'carryOverIfIncomplete': carryOverIfIncomplete,
       'subtasks': subtasks.map((subtask) => subtask.toJson()).toList(),
     };
   }
@@ -85,6 +88,7 @@ class Habit {
         json['completionHistory'] ?? {},
       ),
       shareCompletion: json['shareCompletion'] ?? false,
+      carryOverIfIncomplete: json['carryOverIfIncomplete'] ?? false,
       subtasks: (json['subtasks'] as List<dynamic>? ?? [])
           .map((item) => Subtask.fromJson(Map<String, dynamic>.from(item)))
           .toList(),
