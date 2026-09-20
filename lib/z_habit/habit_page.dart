@@ -373,20 +373,26 @@ class HabitPageState extends State<HabitPage> {
 
           //習慣が増えても一覧だけスクロールできる
           Expanded(
-            child: selectedDayHabits.isEmpty
-                ? const Center(
-                    child: Text(
-                      'この日の習慣はありません',
-                      style: TextStyle(
-                        color: Color(0xff81889B),
-                      ),
-                    ),
-                  )
-                : ListView.builder(
+            child: RefreshIndicator(
+              // 下に引っ張るとウィジェット側の変更を読み直す
+              onRefresh: reloadHabits,
+              child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     //右下の＋ボタンと最後のチェックが重ならないよう下に余白
                     padding: const EdgeInsets.only(bottom: 88),
-                    itemCount: selectedDayHabits.length,
+                    itemCount: selectedDayHabits.isEmpty ? 1 : selectedDayHabits.length,
                     itemBuilder: (context, index) {
+                      if (selectedDayHabits.isEmpty) {
+                        return const SizedBox(
+                          height: 320,
+                          child: Center(
+                            child: Text(
+                              'この日の習慣はありません',
+                              style: TextStyle(color: Color(0xff81889B)),
+                            ),
+                          ),
+                        );
+                      }
                       final habit = selectedDayHabits[index];
 
                       final categoryColor = habit.category == '未設定'
@@ -438,6 +444,7 @@ class HabitPageState extends State<HabitPage> {
                       );
                     },
                   ),
+            ),
           ),
         ],
       ),
