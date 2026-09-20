@@ -46,6 +46,9 @@ class HabitPageState extends State<HabitPage> {
   //やり残しが複数あるときだけ折りたたむ
   bool _carryOverExpanded = false;
 
+  //この画面で達成したやり残しは、ページを離れるまで表示を残す
+  final Set<String> _sessionCarryOverIds = {};
+
   //データの追加
   void addHabit(Habit habit) {
     //追加した日より前には習慣を表示しない
@@ -88,7 +91,7 @@ class HabitPageState extends State<HabitPage> {
     HabitStorage.saveHabits(habits);
   }
 
-  //記録を残したまま通常一覧から外す
+  //SnackBarから元に戻せるよう、変更前の位置も保持する
   Future<void> _archiveHabit(Habit habit) async {
     final index = habits.indexOf(habit);
     if (index == -1) return;
@@ -114,15 +117,42 @@ class HabitPageState extends State<HabitPage> {
     );
     setState(() => habits[index] = archived);
     await HabitStorage.saveHabits(habits);
+    if (!mounted) return;
+    _showUndoSnackBar('アーカイブしました', () async {
+      setState(() => habits[index] = habit);
+      await HabitStorage.saveHabits(habits);
+    });
   }
 
-  //データの削除
-  void _deleteHabit(Habit habit) {
-    setState(() {
-      habits.remove(habit);
+  Future<void> _deleteHabit(Habit habit) async {
+    final index = habits.indexOf(habit);
+    if (index == -1) return;
+    setState(() => habits.removeAt(index));
+    await HabitStorage.saveHabits(habits);
+    if (!mounted) return;
+    _showUndoSnackBar('削除しました', () async {
+      final insertIndex = index.clamp(0, habits.length);
+      setState(() => habits.insert(insertIndex, habit));
+      await HabitStorage.saveHabits(habits);
     });
+  }
 
-    HabitStorage.saveHabits(habits);
+  //画面下に数秒だけ「元に戻す」を表示する
+  void _showUndoSnackBar(String message, Future<void> Function() onUndo) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: '元に戻す',
+            onPressed: () {
+              onUndo();
+            },
+          ),
+        ),
+      );
   }
 
   Future<void> _addCategory(String name, int color) async {
@@ -296,18 +326,6 @@ class HabitPageState extends State<HabitPage> {
                 children: [
                   SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.archive_outlined),
-                      label: const Text('アーカイブ'),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _archiveHabit(habit);
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  SizedBox(
-                    width: double.infinity,
                     child: FilledButton(
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xff526FC5),
@@ -317,6 +335,18 @@ class HabitPageState extends State<HabitPage> {
                         _deleteHabit(habit);
                       },
                       child: const Text('削除'),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.archive_outlined),
+                      label: const Text('アーカイブ'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _archiveHabit(habit);
+                      },
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -434,7 +464,8 @@ class HabitPageState extends State<HabitPage> {
     final carryOverHabits = habits.where((habit) {
       return habit.archivedAt == null &&
           !habitIsScheduledOn(habit, selectedDate) &&
-          habitShouldDisplayOn(habit, selectedDate);
+          (habitShouldDisplayOn(habit, selectedDate) ||
+              _sessionCarryOverIds.contains(habit.id));
     }).toList();
 
     //やり残しは件数行で折りたたみ、通常習慣はその下に表示
@@ -641,9 +672,15 @@ class HabitPageState extends State<HabitPage> {
                         onChanged: () async {
                           final wasDone =
                               habit.completionHistory[completionKey] ?? false;
+                          final wasCarryOver =
+                              !habitIsScheduledOn(habit, selectedDate);
 
                           setState(() {
                             habit.completionHistory[completionKey] = !wasDone;
+                            //達成直後にやり残し欄から消えないよう画面内だけ保持
+                            if (wasCarryOver && !wasDone) {
+                              _sessionCarryOverIds.add(habit.id);
+                            }
                           });
 
                           await HabitStorage.saveHabits(habits);
