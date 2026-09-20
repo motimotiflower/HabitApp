@@ -619,8 +619,11 @@ class HomePageState extends State<HomePage> {
 
         if (isWide) {
           //Web版は白い2×2の土台を残す
-          return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
+          return RefreshIndicator(
+            // 下に引っ張るとHomeのデータをまとめて更新
+            onRefresh: reload,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
                 SizedBox(
@@ -701,6 +704,7 @@ class HomePageState extends State<HomePage> {
                 ),
               ],
             ),
+            ),
           );
         }
 
@@ -712,8 +716,11 @@ class HomePageState extends State<HomePage> {
               fit: BoxFit.cover,
             ),
           ),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
+          child: RefreshIndicator(
+            // 下に引っ張るとウィジェット側の変更も反映
+            onRefresh: reload,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.fromLTRB(
               16,
               MediaQuery.of(context).padding.top + 14,
@@ -760,6 +767,7 @@ class HomePageState extends State<HomePage> {
                 const SizedBox(height: 12),
                 memoCard,
               ],
+            ),
             ),
           ),
         );
