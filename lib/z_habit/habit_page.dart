@@ -121,8 +121,6 @@ class HabitPageState extends State<HabitPage> {
           ),
           shareCompletion: habit.shareCompletion,
           subtasks: habit.subtasks,
-          shareCompletion: habit.shareCompletion,
-          subtasks: habit.subtasks,
         );
       }).toList();
     });
@@ -154,8 +152,6 @@ class HabitPageState extends State<HabitPage> {
           completionHistory: Map<String, bool>.from(
             habit.completionHistory,
           ),
-          shareCompletion: habit.shareCompletion,
-          subtasks: habit.subtasks,
           shareCompletion: habit.shareCompletion,
           subtasks: habit.subtasks,
         );
