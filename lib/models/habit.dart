@@ -24,6 +24,8 @@ class Habit {
   final Map<String, String> completionDates; //実際に達成した日
   final bool shareCompletion; //選択曜日で達成状態を共有するか
   final bool carryOverIfIncomplete; //未達成なら次の設定曜日まで表示するか
+  final DateTime? startedAt; //この習慣を使い始めた日
+  final DateTime? archivedAt; //アーカイブした日。nullなら使用中
   final List<Subtask> subtasks; //親の下に表示するサブタスク
 
   Habit({
@@ -42,6 +44,8 @@ class Habit {
     Map<String, String>? completionDates,
     this.shareCompletion = false,
     this.carryOverIfIncomplete = false,
+    this.startedAt,
+    this.archivedAt,
     this.subtasks = const [],
   })  : id = id ?? _createId(),
         completionHistory = completionHistory ?? {},
@@ -65,6 +69,8 @@ class Habit {
       'completionDates': completionDates,
       'shareCompletion': shareCompletion,
       'carryOverIfIncomplete': carryOverIfIncomplete,
+      'startedAt': startedAt?.toIso8601String(),
+      'archivedAt': archivedAt?.toIso8601String(),
       'subtasks': subtasks.map((subtask) => subtask.toJson()).toList(),
     };
   }
@@ -96,6 +102,13 @@ class Habit {
       ),
       shareCompletion: json['shareCompletion'] ?? false,
       carryOverIfIncomplete: json['carryOverIfIncomplete'] ?? false,
+      //古いデータは開始日なしとして今まで通り表示する
+      startedAt: json['startedAt'] != null
+          ? DateTime.tryParse(json['startedAt'])
+          : null,
+      archivedAt: json['archivedAt'] != null
+          ? DateTime.tryParse(json['archivedAt'])
+          : null,
       subtasks: (json['subtasks'] as List<dynamic>? ?? [])
           .map((item) => Subtask.fromJson(Map<String, dynamic>.from(item)))
           .toList(),
