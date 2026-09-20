@@ -26,12 +26,12 @@ class MainBackground extends StatelessWidget {
   final VoidCallback? onSettings;
 
   //各メインページが共通で参照するヘッダー高さ
-  static const double headerRatio = 0.27;
+  static const double headerRatio = 0.31;
 
   static double headerHeight(BuildContext context) {
     //Habitページの内容量を基準に、上下の余白が近くなる高さへ統一
     return (MediaQuery.of(context).size.height * headerRatio)
-        .clamp(236.0, 278.0)
+        .clamp(270.0, 320.0)
         .toDouble();
   }
 
@@ -84,7 +84,7 @@ class MainBackground extends StatelessWidget {
                 children: [
                   //タイトルは少し下げ、下の部品はタイトル寄りにまとめる
                   Padding(
-                    padding: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.only(top: 18),
                     child: Row(
                       children: [
                         Text(
