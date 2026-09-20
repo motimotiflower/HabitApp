@@ -26,12 +26,12 @@ class MainBackground extends StatelessWidget {
   final VoidCallback? onSettings;
 
   //各メインページが共通で参照するヘッダー高さ
-  static const double headerRatio = 0.245;
+  static const double headerRatio = 0.27;
 
   static double headerHeight(BuildContext context) {
     //Habitページの内容量を基準に、上下の余白が近くなる高さへ統一
     return (MediaQuery.of(context).size.height * headerRatio)
-        .clamp(218.0, 250.0)
+        .clamp(236.0, 278.0)
         .toDouble();
   }
 
@@ -68,13 +68,15 @@ class MainBackground extends StatelessWidget {
           fit: BoxFit.cover,
         ),
       ),
-      child: Padding(
-        //上を少し詰めつつ、上下は同じ余白にする
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+        //ステータスバーの下に余白を確保してタイトルを配置
         padding: EdgeInsets.fromLTRB(
           horizontalPadding,
-          18,
+          14,
           horizontalPadding,
-          18,
+          14,
         ),
         child: showCalendar
             ? Column(
@@ -82,7 +84,7 @@ class MainBackground extends StatelessWidget {
                 children: [
                   //タイトルは少し下げ、下の部品はタイトル寄りにまとめる
                   Padding(
-                    padding: const EdgeInsets.only(top: 20),
+                    padding: const EdgeInsets.only(top: 12),
                     child: Row(
                       children: [
                         Text(
@@ -202,7 +204,7 @@ class MainBackground extends StatelessWidget {
             : Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 20),
+                  padding: const EdgeInsets.only(top: 12),
                   child: Row(
                     children: [
                       Text(
@@ -230,6 +232,7 @@ class MainBackground extends StatelessWidget {
                   ),
                 ),
               ),
+        ),
       ),
     );
   }
