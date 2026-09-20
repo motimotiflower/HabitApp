@@ -5,6 +5,7 @@ import 'package:habitapp/z_habit/widgets/habit_card.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
 import 'package:habitapp/main/widgets/adaptive_editor_panel.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
+import 'package:habitapp/z_habit/habit_schedule.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/z_habit/sheets/edit_habit_sheet.dart';
 import 'package:habitapp/z_home/home_habit_record_page.dart';
@@ -41,6 +42,9 @@ class HabitPageState extends State<HabitPage> {
   //ジャンル一覧と色
   List<String> _categories = [];
   Map<String, int> _categoryColors = {};
+
+  //やり残しが複数あるときだけ折りたたむ
+  bool _carryOverExpanded = false;
 
   //データの追加
   void addHabit(Habit habit) {
@@ -120,6 +124,7 @@ class HabitPageState extends State<HabitPage> {
             habit.completionHistory,
           ),
           shareCompletion: habit.shareCompletion,
+          carryOverIfIncomplete: habit.carryOverIfIncomplete,
           subtasks: habit.subtasks,
         );
       }).toList();
@@ -153,6 +158,7 @@ class HabitPageState extends State<HabitPage> {
             habit.completionHistory,
           ),
           shareCompletion: habit.shareCompletion,
+          carryOverIfIncomplete: habit.carryOverIfIncomplete,
           subtasks: habit.subtasks,
         );
       }).toList();
@@ -321,15 +327,24 @@ class HabitPageState extends State<HabitPage> {
 
     final selectedDay = days[selectedDayIndex];
 
-    //選択した曜日に実行する習慣だけ取得
-    final selectedDayHabits = habits.where((habit) {
-      return habit.days.contains(selectedDay);
-    }).toList();
-
     //表示中の週から、選択した曜日の日付を取得
     final selectedDate = displayedMonday.add(
       Duration(days: selectedDayIndex),
     );
+
+    //本来の習慣と「やり残し」を分け、やり残しを上に表示する
+    final scheduledHabits = habits.where((habit) {
+      return habitIsScheduledOn(habit, selectedDate);
+    }).toList();
+    final carryOverHabits = habits.where((habit) {
+      return !habitIsScheduledOn(habit, selectedDate) &&
+          habitShouldDisplayOn(habit, selectedDate);
+    }).toList();
+    final visibleCarryOvers = carryOverHabits.length <= 1 || _carryOverExpanded
+        ? carryOverHabits
+        : <Habit>[];
+    final selectedDayHabits = [...visibleCarryOvers, ...scheduledHabits];
+    final showCarryOverHeader = carryOverHabits.length > 1;
 
     //達成履歴で使用する日付キー
     final dateKey =
@@ -402,9 +417,13 @@ class HabitPageState extends State<HabitPage> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     //右下の＋ボタンと最後のチェックが重ならないよう下に余白
                     padding: const EdgeInsets.only(bottom: 88),
-                    itemCount: selectedDayHabits.isEmpty ? 1 : selectedDayHabits.length,
+                    itemCount: selectedDayHabits.isEmpty
+                        ? 1
+                        : selectedDayHabits.length + (showCarryOverHeader ? 1 : 0),
                     onReorder: (oldIndex, newIndex) async {
-                      if (selectedDayHabits.isEmpty) return;
+                      if (selectedDayHabits.isEmpty || showCarryOverHeader) {
+                        return;
+                      }
                       if (newIndex > oldIndex) newIndex--;
 
                       final moved = selectedDayHabits.removeAt(oldIndex);
@@ -436,7 +455,38 @@ class HabitPageState extends State<HabitPage> {
                           ),
                         );
                       }
-                      final habit = selectedDayHabits[index];
+                      if (showCarryOverHeader && index == 0) {
+                        return ListTile(
+                          key: const ValueKey('carry-over-header'),
+                          dense: true,
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 12),
+                          title: Text(
+                            'やり残し ${carryOverHabits.length}件',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xff526FC5),
+                            ),
+                          ),
+                          trailing: Icon(
+                            _carryOverExpanded
+                                ? Icons.expand_less_rounded
+                                : Icons.expand_more_rounded,
+                            color: const Color(0xff526FC5),
+                          ),
+                          onTap: () {
+                            setState(() {
+                              _carryOverExpanded = !_carryOverExpanded;
+                            });
+                          },
+                        );
+                      }
+
+                      final listIndex =
+                          index - (showCarryOverHeader ? 1 : 0);
+                      final habit = selectedDayHabits[listIndex];
+                      final canReorder = !showCarryOverHeader &&
+                          carryOverHabits.isEmpty;
 
                       final categoryColor = habit.category == '未設定'
                           ? null
@@ -445,13 +495,17 @@ class HabitPageState extends State<HabitPage> {
                                   0xff526FC5,
                             );
 
-                      final completionKey =
-                          habit.shareCompletion ? weekKey : dateKey;
+                      final canReorder = !showCarryOverHeader &&
+                          carryOverHabits.isEmpty;
 
-                      return ReorderableDelayedDragStartListener(
+                      final sourceDate =
+                          habitDisplaySourceDate(habit, selectedDate) ??
+                              selectedDate;
+                      final completionKey =
+                          habitCompletionKeyForDate(habit, sourceDate);
+
+                      final card = HabitCard(
                         key: ValueKey(habit.id),
-                        index: index,
-                        child: HabitCard(
                         habit: habit,
                         isDone:
                             habit.completionHistory[completionKey] ?? false,
@@ -517,7 +571,16 @@ class HabitPageState extends State<HabitPage> {
                         onDelete: () {
                           _showDeleteDialog(habit);
                         },
-                        ),
+                      );
+
+                      if (!canReorder) {
+                        return card;
+                      }
+
+                      return ReorderableDelayedDragStartListener(
+                        key: ValueKey(habit.id),
+                        index: index,
+                        child: card,
                       );
                     },
                   ),

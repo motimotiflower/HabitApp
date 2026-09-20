@@ -1,0 +1,69 @@
+import 'package:habitapp/models/habit.dart';
+
+const habitWeekdays = ['月', '火', '水', '木', '金', '土', '日'];
+
+//時刻を除いた日付だけにそろえる
+DateTime habitDateOnly(DateTime date) =>
+    DateTime(date.year, date.month, date.day);
+
+String habitDateKey(DateTime date) {
+  final value = habitDateOnly(date);
+  return '${value.year}-'
+      '${value.month.toString().padLeft(2, '0')}-'
+      '${value.day.toString().padLeft(2, '0')}';
+}
+
+DateTime habitMonday(DateTime date) {
+  final value = habitDateOnly(date);
+  return value.subtract(Duration(days: value.weekday - 1));
+}
+
+//指定日の達成状態が参照するキーを返す
+String habitCompletionKeyForDate(Habit habit, DateTime scheduledDate) {
+  if (!habit.shareCompletion) return habitDateKey(scheduledDate);
+
+  final monday = habitMonday(scheduledDate);
+  return 'week-${monday.year}-'
+      '${monday.month.toString().padLeft(2, '0')}-'
+      '${monday.day.toString().padLeft(2, '0')}';
+}
+
+bool habitIsScheduledOn(Habit habit, DateTime date) {
+  return habit.days.contains(habitWeekdays[date.weekday - 1]);
+}
+
+//その日以前で直近の設定曜日を探す
+DateTime? habitLatestScheduledDate(Habit habit, DateTime date) {
+  if (habit.days.isEmpty) return null;
+
+  final target = habitDateOnly(date);
+  for (var offset = 0; offset <= 7; offset++) {
+    final candidate = target.subtract(Duration(days: offset));
+    if (habitIsScheduledOn(habit, candidate)) return candidate;
+  }
+  return null;
+}
+
+//表示日に使う「元の設定日」。nullならその日は表示しない
+DateTime? habitDisplaySourceDate(Habit habit, DateTime date) {
+  final target = habitDateOnly(date);
+
+  //本来の設定日は常に表示する
+  if (habitIsScheduledOn(habit, target)) return target;
+  if (!habit.carryOverIfIncomplete) return null;
+
+  final source = habitLatestScheduledDate(habit, target);
+  if (source == null || source == target) return null;
+
+  final key = habitCompletionKeyForDate(habit, source);
+
+  //達成した翌日からは繰り越し表示を終了する
+  if (habit.completionHistory[key] ?? false) return null;
+
+  //次の設定曜日に来たら、その日の新しい習慣へ切り替わるため
+  //ここでは直近の設定日から次の設定日前までだけ繰り越す
+  return source;
+}
+
+bool habitShouldDisplayOn(Habit habit, DateTime date) =>
+    habitDisplaySourceDate(habit, date) != null;
