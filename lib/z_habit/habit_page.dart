@@ -581,16 +581,18 @@ class HabitPageState extends State<HabitPage> {
                                 ],
                               ),
                             ),
-                            InkWell(
-                              onTap: () => setState(() => _carryOverExpanded = !_carryOverExpanded),
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
-                                child: Text(
-                                  '${carryOverHabits.first.title} など${carryOverHabits.length}件',
-                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xffD95C5C)),
+                            //閉じている時だけ内容の要約を表示する
+                            if (!_carryOverExpanded)
+                              InkWell(
+                                onTap: () => setState(() => _carryOverExpanded = true),
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+                                  child: Text(
+                                    '${carryOverHabits.first.title} など${carryOverHabits.length}件',
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xffD95C5C)),
+                                  ),
                                 ),
                               ),
-                            ),
                           ],
                         );
                       }
