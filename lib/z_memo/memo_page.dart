@@ -275,11 +275,13 @@ class MemoPageState extends State<MemoPage> {
                       onTap: () {
                         _openRoom(memo);
                       },
-                      leading: const CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Color(0xffE8EDFC),
-                        backgroundImage: AssetImage(
-                          'assets/images/memo_icon.png',
+                      leading: const SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Icon(
+                          Icons.notes_rounded,
+                          size: 30,
+                          color: Color(0xff526FC5),
                         ),
                       ),
                       title: Row(
