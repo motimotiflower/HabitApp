@@ -438,8 +438,10 @@ class HabitPageState extends State<HabitPage> {
     }).toList();
 
     //やり残しは件数行で折りたたみ、通常習慣はその下に表示
-    final visibleCarryOvers =
-        _carryOverExpanded ? carryOverHabits : <Habit>[];
+    //閉じている時も先頭の1件だけ見せる
+    final visibleCarryOvers = _carryOverExpanded
+        ? carryOverHabits
+        : carryOverHabits.take(1).toList();
     final selectedDayHabits = [...visibleCarryOvers, ...scheduledHabits];
     final showCarryOverHeader = carryOverHabits.isNotEmpty;
     final showTodayHeader = scheduledHabits.isNotEmpty;
