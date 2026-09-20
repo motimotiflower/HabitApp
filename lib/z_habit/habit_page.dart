@@ -12,7 +12,12 @@ import 'package:habitapp/z_habit/sheets/habit_category_manage_sheet.dart';
 import 'package:habitapp/z_star/star_storage.dart';
 
 class HabitPage extends StatefulWidget {
-  const HabitPage({super.key});
+  const HabitPage({
+    super.key,
+    this.onToday,
+  });
+
+  final VoidCallback? onToday;
 
   @override
   State<HabitPage> createState() => HabitPageState();
@@ -340,6 +345,11 @@ class HabitPageState extends State<HabitPage> {
                 onPressed: _showCategoryManageSheet,
                 icon: const Icon(Icons.folder_outlined, size: 18),
                 label: const Text('ジャンル管理'),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton(
+                onPressed: widget.onToday,
+                child: const Text('今日'),
               ),
               const SizedBox(width: 8),
               SizedBox(
