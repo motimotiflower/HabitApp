@@ -209,6 +209,8 @@ class HabitPageState extends State<HabitPage> {
           ),
           shareCompletion: habit.shareCompletion,
           carryOverIfIncomplete: habit.carryOverIfIncomplete,
+          startedAt: habit.startedAt,
+          archivedAt: habit.archivedAt,
           subtasks: habit.subtasks,
         );
       }).toList();
