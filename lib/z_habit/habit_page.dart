@@ -115,7 +115,10 @@ class HabitPageState extends State<HabitPage> {
       shareCompletion: habit.shareCompletion,
       carryOverIfIncomplete: habit.carryOverIfIncomplete,
       startedAt: habit.startedAt,
-      archivedAt: DateTime.now(),
+      //実際の今日ではなく、カレンダーで開いている日からアーカイブ
+      archivedAt: displayedMonday.add(
+        Duration(days: selectedDayIndex),
+      ),
       subtasks: habit.subtasks,
     );
     setState(() => habits[index] = archived);
