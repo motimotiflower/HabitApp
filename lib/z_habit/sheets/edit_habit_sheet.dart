@@ -297,6 +297,16 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                       },
                     ),
 
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('未達成なら次の設定曜日まで表示'),
+                      subtitle: const Text('やり残しとして毎日1件だけ表示します'),
+                      value: _carryOverIfIncomplete,
+                      onChanged: (value) {
+                        setState(() => _carryOverIfIncomplete = value);
+                      },
+                    ),
+
                     const SizedBox(height: 12),
 
                     NotificationSettingsCard(
