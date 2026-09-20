@@ -618,22 +618,24 @@ class HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                InkWell(
-                  onTap: () {
-                    setState(() => _carryOverExpanded = !_carryOverExpanded);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Text(
-                      '${_carryOverHabits.first.title} など${_carryOverHabits.length}件',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xffD95C5C),
+                //閉じている時だけ内容の要約を表示する
+                if (!_carryOverExpanded)
+                  InkWell(
+                    onTap: () {
+                      setState(() => _carryOverExpanded = true);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Text(
+                        '${_carryOverHabits.first.title} など${_carryOverHabits.length}件',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xffD95C5C),
+                        ),
                       ),
                     ),
                   ),
-                ),
                 //閉じている時は1件だけ見せ、開くと残りも表示
                 ...(_carryOverExpanded
                         ? _carryOverHabits
