@@ -40,6 +40,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // 右上のDEBUGラベルを非表示にする
+      debugShowCheckedModeBanner: false,
+
       title: 'Habit App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
