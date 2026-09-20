@@ -86,6 +86,12 @@ class _TaskCardState extends State<TaskCard> {
                   color: const Color(0xff526FC5),
                   onPressed: widget.onEdit,
                 ),
+                IconButton(
+                  tooltip: '削除',
+                  icon: const Icon(Icons.delete_outline, size: 19),
+                  color: const Color(0xff526FC5),
+                  onPressed: widget.onDelete,
+                ),
                 Checkbox(
                   value: task.isDone,
                   activeColor: const Color(0xff526FC5),
@@ -114,14 +120,6 @@ class _TaskCardState extends State<TaskCard> {
                         ),
                         onChanged: (_) => widget.onSubtaskChanged(i),
                       ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: widget.onDelete,
-                        icon: const Icon(Icons.delete_outline, size: 18),
-                        label: const Text('削除'),
-                      ),
-                    ),
                   ],
                 ),
               ),
