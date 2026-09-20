@@ -145,6 +145,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
         ),
         shareCompletion: _shareCompletion,
         carryOverIfIncomplete: _carryOverIfIncomplete,
+        startedAt: widget.habit.startedAt,
+        archivedAt: widget.habit.archivedAt,
         subtasks: _subtasks,
       ),
     );
