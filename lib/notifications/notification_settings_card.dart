@@ -55,14 +55,7 @@ class NotificationSettingsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final usesDate = date != null;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xffDCE3F5)),
-      ),
-      child: Column(
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SwitchListTile(
@@ -209,7 +202,6 @@ class NotificationSettingsCard extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
+      );
   }
 }
