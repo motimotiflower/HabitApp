@@ -562,42 +562,38 @@ class HabitPageState extends State<HabitPage> {
                       var dataIndex = index;
 
                       if (showCarryOverHeader && dataIndex == 0) {
-                        return InkWell(
+                        return Column(
                           key: const ValueKey('carry-over-header'),
-                          onTap: () {
-                            setState(() {
-                              _carryOverExpanded = !_carryOverExpanded;
-                            });
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 10, 4, 8),
-                            child: Row(
-                              children: [
-                                Text(
-                                  'やり残し  ${carryOverHabits.length}件',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xff526FC5),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Expanded(
-                                  child: Divider(
-                                    thickness: 0.7,
-                                    color: Color(0xffCDD5F0),
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Icon(
-                                  _carryOverExpanded
-                                      ? Icons.expand_less_rounded
-                                      : Icons.expand_more_rounded,
-                                  color: const Color(0xff526FC5),
-                                ),
-                              ],
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(4, 10, 4, 4),
+                              child: Row(
+                                children: [
+                                  const Text('やり残し', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xffD95C5C))),
+                                  const SizedBox(width: 8),
+                                  const Expanded(child: Divider(thickness: 0.7, color: Color(0xffE5B7B7))),
+                                ],
+                              ),
                             ),
-                          ),
+                            InkWell(
+                              onTap: () => setState(() => _carryOverExpanded = !_carryOverExpanded),
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        '${carryOverHabits.first.title} など${carryOverHabits.length}件',
+                                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xffD95C5C)),
+                                      ),
+                                    ),
+                                    Icon(_carryOverExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded, color: const Color(0xffD95C5C)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         );
                       }
                       if (showCarryOverHeader) dataIndex--;
