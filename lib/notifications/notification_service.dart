@@ -113,6 +113,12 @@ class NotificationService {
     await _cancelSavedIds(_batchIdsKey);
   }
 
+  //データ初期化時に、HabitAppが予約した通知をすべて解除
+  static Future<void> cancelAllScheduled() async {
+    if (kIsWeb) return;
+    await _cancelAllScheduled();
+  }
+
   static Future<List<Habit>> _loadHabitsFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = prefs.getString('habits');
