@@ -10,7 +10,6 @@ class MainBackground extends StatelessWidget {
     this.displayedMonday,
     this.onPreviousWeek,
     this.onNextWeek,
-    this.onToday,
   });
 
   final bool showCalendar;
@@ -19,7 +18,6 @@ class MainBackground extends StatelessWidget {
   final DateTime? displayedMonday;
   final VoidCallback? onPreviousWeek;
   final VoidCallback? onNextWeek;
-  final VoidCallback? onToday;
 
   //各メインページが共通で参照するヘッダー高さ
   static const double headerRatio = 0.31;
@@ -77,17 +75,7 @@ class MainBackground extends StatelessWidget {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  //タイトルは置かず、Habitだけ「今日」操作を残す
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: onToday,
-                      child: const Text(
-                        '今日',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
+                  //上部にタイトルや操作ボタンは置かない
 
                   const SizedBox(height: 4),
 
