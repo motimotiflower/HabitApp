@@ -51,7 +51,10 @@ class HabitPageState extends State<HabitPage> {
 
   //データの追加
   void addHabit(Habit habit) {
-    //追加した日より前には習慣を表示しない
+    //実際の今日ではなく、カレンダーで今見ている日から表示を始める
+    final selectedDate = displayedMonday.add(
+      Duration(days: selectedDayIndex),
+    );
     final addedHabit = Habit(
       id: habit.id,
       title: habit.title,
@@ -68,7 +71,7 @@ class HabitPageState extends State<HabitPage> {
       completionDates: habit.completionDates,
       shareCompletion: habit.shareCompletion,
       carryOverIfIncomplete: habit.carryOverIfIncomplete,
-      startedAt: DateTime.now(),
+      startedAt: selectedDate,
       subtasks: habit.subtasks,
     );
     setState(() {
