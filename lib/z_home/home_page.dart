@@ -739,14 +739,6 @@ class HomePageState extends State<HomePage> {
                   height: headerHeight,
                   child: MainBackground(
                     showCalendar: false,
-                    onSettings: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const SettingsPage(),
-                        ),
-                      );
-                    },
                   ),
                 ),
                 Container(
