@@ -28,8 +28,20 @@ String habitCompletionKeyForDate(Habit habit, DateTime scheduledDate) {
       '${monday.day.toString().padLeft(2, '0')}';
 }
 
+bool habitIsActiveOn(Habit habit, DateTime date) {
+  final target = habitDateOnly(date);
+  final started = habit.startedAt == null ? null : habitDateOnly(habit.startedAt!);
+  final archived = habit.archivedAt == null ? null : habitDateOnly(habit.archivedAt!);
+
+  //作成前とアーカイブ後には新しい習慣を表示しない
+  if (started != null && target.isBefore(started)) return false;
+  if (archived != null && !target.isBefore(archived)) return false;
+  return true;
+}
+
 bool habitIsScheduledOn(Habit habit, DateTime date) {
-  return habit.days.contains(habitWeekdays[date.weekday - 1]);
+  return habitIsActiveOn(habit, date) &&
+      habit.days.contains(habitWeekdays[date.weekday - 1]);
 }
 
 //その日以前で直近の設定曜日を探す
@@ -50,7 +62,7 @@ DateTime? habitDisplaySourceDate(Habit habit, DateTime date) {
 
   //本来の設定日は常に表示する
   if (habitIsScheduledOn(habit, target)) return target;
-  if (!habit.carryOverIfIncomplete) return null;
+  if (!habit.carryOverIfIncomplete || !habitIsActiveOn(habit, target)) return null;
 
   final source = habitLatestScheduledDate(habit, target);
   if (source == null || source == target) return null;
