@@ -30,6 +30,7 @@ class TaskStorage {
   //保存されているタスク一覧を読み込む=================
   static Future<List<Task>> loadTasks() async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
 
     //保存されているJSON文字列を取得
     final jsonString = prefs.getString(_key);
