@@ -874,7 +874,7 @@ class HomePageState extends State<HomePage> {
                 ReorderableListView(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  buildDefaultDragHandles: true,
+                  buildDefaultDragHandles: false,
                   onReorder: (oldIndex, newIndex) async {
                     if (newIndex > oldIndex) newIndex--;
                     setState(() {
@@ -892,10 +892,15 @@ class HomePageState extends State<HomePage> {
                       'memo' => memoCard,
                       _ => const SizedBox.shrink(),
                     };
-                    return Padding(
+                    final index = _cardOrder.indexOf(id);
+                    return ReorderableDelayedDragStartListener(
                       key: ValueKey(id),
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: card,
+                      index: index,
+                      //ホームカード全体を長押しして並び替える
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: card,
+                      ),
                     );
                   }).toList(),
                 ),
