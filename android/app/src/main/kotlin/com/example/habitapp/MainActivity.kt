@@ -26,6 +26,10 @@ class MainActivity : FlutterActivity() {
                         TaskWidgetProvider.updateAll(this@MainActivity)
                         result.success(null)
                     }
+                    "refreshWidgetData" -> {
+                        // ウィジェット側で変更したSharedPreferencesをFlutter側に再読込させる
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }
