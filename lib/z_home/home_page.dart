@@ -636,11 +636,9 @@ class HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                //閉じている時は1件だけ見せ、開くと残りも表示
-                ...(_carryOverExpanded
-                        ? _carryOverHabits
-                        : _carryOverHabits.take(1))
-                    .map(habitRow),
+                //習慣項目は開いている時だけ表示する
+                if (_carryOverExpanded)
+                  ..._carryOverHabits.map(habitRow),
                 const SizedBox(height: 4),
               ],
               sectionTitle('今日の習慣'),
