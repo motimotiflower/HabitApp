@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:habitapp/models/habit.dart';
+import 'package:habitapp/models/subtask.dart';
+import 'package:habitapp/widgets/subtask_editor.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/notifications/notification_settings_card.dart';
 
 class AddHabitSheet extends StatefulWidget {
-  const AddHabitSheet({super.key, required this.onAddHabit});
+  const AddHabitSheet({
+    super.key,
+    required this.onAddHabit,
+    this.initialDayIndex,
+  });
 
   final void Function(Habit) onAddHabit;
+  final int? initialDayIndex;
 
   @override
   State<AddHabitSheet> createState() => _AddHabitSheetState();
@@ -27,6 +34,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   List<String> _notificationDays = [];
   DateTime? _notificationDate;
   TimeOfDay _notificationTime = const TimeOfDay(hour: 9, minute: 0);
+  bool _shareCompletion = false;
+  List<Subtask> _subtasks = [];
 
   //青系UIになじむジャンルカラー
   static const List<Color> _categoryPalette = [
@@ -53,6 +62,11 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   @override
   void initState() {
     super.initState();
+    //今見ていた曜日を最初から選択する
+    final initial = widget.initialDayIndex;
+    if (initial != null && initial >= 0 && initial < days.length) {
+      selectedDays.add(days[initial]);
+    }
     _loadCategories();
   }
 
@@ -310,6 +324,27 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                       ],
                     ),
 
+                    const SizedBox(height: 12),
+
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('選択した曜日で達成を共有'),
+                      subtitle: const Text('どれか1日で達成すると、その週は達成済みになります'),
+                      value: _shareCompletion,
+                      onChanged: (value) {
+                        setState(() => _shareCompletion = value);
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    SubtaskEditor(
+                      subtasks: _subtasks,
+                      onChanged: (value) {
+                        setState(() => _subtasks = value);
+                      },
+                    ),
+
                     const SizedBox(height: 18),
 
                     NotificationSettingsCard(
@@ -441,6 +476,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     notificationDate: _notificationDate,
                     notificationHour: _notificationTime.hour,
                     notificationMinute: _notificationTime.minute,
+                    shareCompletion: _shareCompletion,
+                    subtasks: _subtasks,
                   );
 
                   widget.onAddHabit(habit);
