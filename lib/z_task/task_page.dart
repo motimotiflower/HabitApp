@@ -311,7 +311,7 @@ class TaskPageState extends State<TaskPage> {
 
     return Positioned(
       //タイトルとの間を詰めつつ、下側にも余白を残す
-      top: headerHeight * 0.52,
+      top: MediaQuery.of(context).padding.top + 14,
       left: 20,
       right: 20,
       child: Column(
