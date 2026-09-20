@@ -119,6 +119,10 @@ class HabitPageState extends State<HabitPage> {
           completionHistory: Map<String, bool>.from(
             habit.completionHistory,
           ),
+          shareCompletion: habit.shareCompletion,
+          subtasks: habit.subtasks,
+          shareCompletion: habit.shareCompletion,
+          subtasks: habit.subtasks,
         );
       }).toList();
     });
@@ -150,6 +154,10 @@ class HabitPageState extends State<HabitPage> {
           completionHistory: Map<String, bool>.from(
             habit.completionHistory,
           ),
+          shareCompletion: habit.shareCompletion,
+          subtasks: habit.subtasks,
+          shareCompletion: habit.shareCompletion,
+          subtasks: habit.subtasks,
         );
       }).toList();
     });
@@ -333,6 +341,12 @@ class HabitPageState extends State<HabitPage> {
         '${selectedDate.month.toString().padLeft(2, '0')}-'
         '${selectedDate.day.toString().padLeft(2, '0')}';
 
+    //共有ONなら、その週は同じキーで達成状態を持つ
+    final weekKey =
+        'week-${displayedMonday.year}-'
+        '${displayedMonday.month.toString().padLeft(2, '0')}-'
+        '${displayedMonday.day.toString().padLeft(2, '0')}';
+
     return MainContent(
       overlap: 0,
       child: Column(
@@ -386,14 +400,35 @@ class HabitPageState extends State<HabitPage> {
             child: RefreshIndicator(
               // 下に引っ張るとウィジェット側の変更を読み直す
               onRefresh: reloadHabits,
-              child: ListView.builder(
+              child: ReorderableListView.builder(
                     physics: const AlwaysScrollableScrollPhysics(),
                     //右下の＋ボタンと最後のチェックが重ならないよう下に余白
                     padding: const EdgeInsets.only(bottom: 88),
                     itemCount: selectedDayHabits.isEmpty ? 1 : selectedDayHabits.length,
+                    onReorder: (oldIndex, newIndex) async {
+                      if (selectedDayHabits.isEmpty) return;
+                      if (newIndex > oldIndex) newIndex--;
+
+                      final moved = selectedDayHabits.removeAt(oldIndex);
+                      selectedDayHabits.insert(newIndex, moved);
+
+                      //表示中の習慣だけ順番を入れ替え、他曜日の習慣は残す
+                      final selectedIds =
+                          selectedDayHabits.map((habit) => habit.id).toSet();
+                      var selectedIndex = 0;
+                      setState(() {
+                        for (var i = 0; i < habits.length; i++) {
+                          if (selectedIds.contains(habits[i].id)) {
+                            habits[i] = selectedDayHabits[selectedIndex++];
+                          }
+                        }
+                      });
+                      await HabitStorage.saveHabits(habits);
+                    },
                     itemBuilder: (context, index) {
                       if (selectedDayHabits.isEmpty) {
                         return const SizedBox(
+                          key: ValueKey('empty'),
                           height: 320,
                           child: Center(
                             child: Text(
@@ -412,25 +447,30 @@ class HabitPageState extends State<HabitPage> {
                                   0xff526FC5,
                             );
 
+                      final completionKey =
+                          habit.shareCompletion ? weekKey : dateKey;
+
                       return HabitCard(
+                        key: ValueKey(habit.id),
                         habit: habit,
-                        isDone: habit.completionHistory[dateKey] ?? false,
+                        isDone:
+                            habit.completionHistory[completionKey] ?? false,
                         categoryColor: categoryColor,
 
                         //達成状態の変更
                         onChanged: () async {
                           final wasDone =
-                              habit.completionHistory[dateKey] ?? false;
+                              habit.completionHistory[completionKey] ?? false;
 
                           setState(() {
-                            habit.completionHistory[dateKey] = !wasDone;
+                            habit.completionHistory[completionKey] = !wasDone;
                           });
 
                           await HabitStorage.saveHabits(habits);
 
                           //達成で星の欠片+1、ガチャ前なら解除で取り消す
                           final actionKey =
-                              'habit|${habit.id}|$dateKey';
+                              'habit|${habit.id}|$completionKey';
 
                           if (!wasDone) {
                             await StarStorage.award(
@@ -441,6 +481,41 @@ class HabitPageState extends State<HabitPage> {
                             await StarStorage.revoke(actionKey);
                           }
                         },
+
+                        //サブタスクも親とは独立して達成できる
+                        subtaskIsDone: (subtaskIndex) {
+                          return habit.subtasks[subtaskIndex]
+                                  .completionHistory[completionKey] ??
+                              false;
+                        },
+                        onSubtaskChanged: (subtaskIndex) async {
+                          final subtask = habit.subtasks[subtaskIndex];
+                          final wasDone =
+                              subtask.completionHistory[completionKey] ?? false;
+                          setState(() {
+                            subtask.completionHistory[completionKey] = !wasDone;
+                          });
+                          await HabitStorage.saveHabits(habits);
+
+                          final actionKey =
+                              'habit-subtask|${habit.id}|${subtask.id}|$completionKey';
+                          if (!wasDone) {
+                            await StarStorage.award(
+                              actionKey: actionKey,
+                              source: 'habit-subtask',
+                            );
+                          } else {
+                            await StarStorage.revoke(actionKey);
+                          }
+                        },
+                        dragHandle: ReorderableDragStartListener(
+                          index: index,
+                          child: const Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Icon(Icons.drag_handle,
+                                color: Color(0xff81889B)),
+                          ),
+                        ),
 
                         //編集
                         onEdit: () {
