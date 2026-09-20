@@ -398,7 +398,7 @@ class HabitPageState extends State<HabitPage> {
               onRefresh: reloadHabits,
               child: ReorderableListView.builder(
                     //行を長押しして並び替える
-                    buildDefaultDragHandles: true,
+                    buildDefaultDragHandles: false,
                     physics: const AlwaysScrollableScrollPhysics(),
                     //右下の＋ボタンと最後のチェックが重ならないよう下に余白
                     padding: const EdgeInsets.only(bottom: 88),
@@ -448,8 +448,10 @@ class HabitPageState extends State<HabitPage> {
                       final completionKey =
                           habit.shareCompletion ? weekKey : dateKey;
 
-                      return HabitCard(
+                      return ReorderableDelayedDragStartListener(
                         key: ValueKey(habit.id),
+                        index: index,
+                        child: HabitCard(
                         habit: habit,
                         isDone:
                             habit.completionHistory[completionKey] ?? false,
@@ -515,6 +517,7 @@ class HabitPageState extends State<HabitPage> {
                         onDelete: () {
                           _showDeleteDialog(habit);
                         },
+                        ),
                       );
                     },
                   ),
