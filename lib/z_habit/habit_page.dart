@@ -347,11 +347,6 @@ class HabitPageState extends State<HabitPage> {
                 label: const Text('ジャンル管理'),
               ),
               const SizedBox(width: 8),
-              OutlinedButton(
-                onPressed: widget.onToday,
-                child: const Text('今日'),
-              ),
-              const SizedBox(width: 8),
               SizedBox(
                 height: 42,
                 child: FilledButton.icon(
@@ -375,6 +370,11 @@ class HabitPageState extends State<HabitPage> {
                     ),
                   ),
                 ),
+              ),
+              const Spacer(),
+              OutlinedButton(
+                onPressed: widget.onToday,
+                child: const Text('今日'),
               ),
             ],
           ),
