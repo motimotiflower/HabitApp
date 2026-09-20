@@ -496,93 +496,117 @@ class HomePageState extends State<HomePage> {
           ),
         );
 
-        final todayHabitCard = _HomeSectionCard(
-          title: '今日の習慣',
-          icon: Icons.auto_awesome,
-          minHeight: 128,
-          onAdd: _openAddHabit,
-          child: _todayHabits.isEmpty
-              ? const _EmptyText('今日の習慣はありません')
-              : Column(
-                  children: _todayHabits.map((habit) {
-                    final isDone = habit.completionHistory[
-                            _habitCompletionKey(habit)] ??
-                        false;
-                    final habitColor = habit.category == '未設定'
-                        ? const Color(0xff526FC5)
-                        : Color(
-                            _categoryColors[habit.category] ??
-                                0xff526FC5,
-                          );
+        Widget habitRow(Habit habit) {
+          final isDone =
+              habit.completionHistory[_habitCompletionKey(habit)] ?? false;
+          final habitColor = habit.category == '未設定'
+              ? const Color(0xff526FC5)
+              : Color(_categoryColors[habit.category] ?? 0xff526FC5);
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 3),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () => _openEditHabit(habit),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 8,
+                      ),
                       child: Row(
                         children: [
-                          //本文側だけを押すと編集。チェック欄とは分離する
+                          SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: habit.iconAsset != null
+                                ? Image.asset(habit.iconAsset!, fit: BoxFit.contain)
+                                : Icon(habit.icon, size: 24, color: habitColor),
+                          ),
+                          const SizedBox(width: 10),
                           Expanded(
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(10),
-                              onTap: () => _openEditHabit(habit),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                  vertical: 8,
-                                ),
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 36,
-                                      height: 36,
-                                      child: habit.iconAsset != null
-                                          ? Transform.scale(
-                                              scale: 1.12,
-                                              child: Image.asset(
-                                                habit.iconAsset!,
-                                                fit: BoxFit.contain,
-                                                filterQuality:
-                                                    FilterQuality.high,
-                                                isAntiAlias: true,
-                                              ),
-                                            )
-                                          : Icon(
-                                              habit.icon,
-                                              size: 24,
-                                              color: habitColor,
-                                            ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(
-                                        habit.title,
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
-                                          color:
-                                              const Color(0xff35415F),
-                                          decoration: isDone
-                                              ? TextDecoration.lineThrough
-                                              : null,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                            child: Text(
+                              habit.title,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xff35415F),
+                                decoration: isDone
+                                    ? TextDecoration.lineThrough
+                                    : null,
                               ),
                             ),
                           ),
-                          Checkbox(
-                            value: isDone,
-                            activeColor: habitColor,
-                            onChanged: (_) {
-                              _toggleHabit(habit);
-                            },
-                          ),
                         ],
                       ),
-                    );
-                  }).toList(),
+                    ),
+                  ),
                 ),
+                Checkbox(
+                  value: isDone,
+                  activeColor: habitColor,
+                  onChanged: (_) => _toggleHabit(habit),
+                ),
+              ],
+            ),
+          );
+        }
+
+        Widget sectionTitle(String title) {
+          return Row(
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xff526FC5),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Divider(color: Color(0xffCDD5F0), thickness: 0.7),
+              ),
+            ],
+          );
+        }
+
+        final todayHabitCard = _HomeSectionCard(
+          title: '習慣',
+          icon: Icons.auto_awesome,
+          minHeight: 128,
+          onAdd: _openAddHabit,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (_carryOverHabits.isNotEmpty) ...[
+                sectionTitle('やり残し'),
+                ListTile(
+                  dense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                  title: Text('${_carryOverHabits.length}件'),
+                  trailing: Icon(
+                    _carryOverExpanded
+                        ? Icons.expand_less_rounded
+                        : Icons.expand_more_rounded,
+                  ),
+                  onTap: () {
+                    setState(() => _carryOverExpanded = !_carryOverExpanded);
+                  },
+                ),
+                if (_carryOverExpanded)
+                  ..._carryOverHabits.map(habitRow),
+                const SizedBox(height: 4),
+              ],
+              sectionTitle('今日の習慣'),
+              if (_todayHabits.isEmpty)
+                const _EmptyText('今日の習慣はありません')
+              else
+                ..._todayHabits.map(habitRow),
+            ],
+          ),
         );
 
         final todayTaskCard = _HomeSectionCard(
