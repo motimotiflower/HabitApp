@@ -560,28 +560,42 @@ class HabitPageState extends State<HabitPage> {
                       var dataIndex = index;
 
                       if (showCarryOverHeader && dataIndex == 0) {
-                        return Column(
+                        return InkWell(
                           key: const ValueKey('carry-over-header'),
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _sectionTitle('やり残し'),
-                            ListTile(
-                              dense: true,
-                              contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                              title: Text('${carryOverHabits.length}件'),
-                              trailing: Icon(
-                                _carryOverExpanded
-                                    ? Icons.expand_less_rounded
-                                    : Icons.expand_more_rounded,
-                              ),
-                              onTap: () {
-                                setState(() {
-                                  _carryOverExpanded = !_carryOverExpanded;
-                                });
-                              },
+                          onTap: () {
+                            setState(() {
+                              _carryOverExpanded = !_carryOverExpanded;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 10, 4, 8),
+                            child: Row(
+                              children: [
+                                Text(
+                                  'やり残し  ${carryOverHabits.length}件',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xff526FC5),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Expanded(
+                                  child: Divider(
+                                    thickness: 0.7,
+                                    color: Color(0xffCDD5F0),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Icon(
+                                  _carryOverExpanded
+                                      ? Icons.expand_less_rounded
+                                      : Icons.expand_more_rounded,
+                                  color: const Color(0xff526FC5),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         );
                       }
                       if (showCarryOverHeader) dataIndex--;
