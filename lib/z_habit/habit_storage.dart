@@ -32,6 +32,7 @@ class HabitStorage {
   // 保存した習慣一覧を読み込む
   static Future<List<Habit>> loadHabits() async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
 
     // 保存してあるJSON文字列を取得
     final jsonString = prefs.getString(_key);
