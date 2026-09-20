@@ -48,8 +48,28 @@ class HabitPageState extends State<HabitPage> {
 
   //データの追加
   void addHabit(Habit habit) {
+    //追加した日より前には習慣を表示しない
+    final addedHabit = Habit(
+      id: habit.id,
+      title: habit.title,
+      icon: habit.icon,
+      iconAsset: habit.iconAsset,
+      days: habit.days,
+      category: habit.category,
+      notificationEnabled: habit.notificationEnabled,
+      notificationDays: habit.notificationDays,
+      notificationDate: habit.notificationDate,
+      notificationHour: habit.notificationHour,
+      notificationMinute: habit.notificationMinute,
+      completionHistory: habit.completionHistory,
+      completionDates: habit.completionDates,
+      shareCompletion: habit.shareCompletion,
+      carryOverIfIncomplete: habit.carryOverIfIncomplete,
+      startedAt: DateTime.now(),
+      subtasks: habit.subtasks,
+    );
     setState(() {
-      habits.add(habit);
+      habits.add(addedHabit);
     });
 
     HabitStorage.saveHabits(habits);
@@ -66,6 +86,34 @@ class HabitPageState extends State<HabitPage> {
     });
 
     HabitStorage.saveHabits(habits);
+  }
+
+  //記録を残したまま通常一覧から外す
+  Future<void> _archiveHabit(Habit habit) async {
+    final index = habits.indexOf(habit);
+    if (index == -1) return;
+    final archived = Habit(
+      id: habit.id,
+      title: habit.title,
+      icon: habit.icon,
+      iconAsset: habit.iconAsset,
+      days: habit.days,
+      category: habit.category,
+      notificationEnabled: habit.notificationEnabled,
+      notificationDays: habit.notificationDays,
+      notificationDate: habit.notificationDate,
+      notificationHour: habit.notificationHour,
+      notificationMinute: habit.notificationMinute,
+      completionHistory: Map<String, bool>.from(habit.completionHistory),
+      completionDates: Map<String, String>.from(habit.completionDates),
+      shareCompletion: habit.shareCompletion,
+      carryOverIfIncomplete: habit.carryOverIfIncomplete,
+      startedAt: habit.startedAt,
+      archivedAt: DateTime.now(),
+      subtasks: habit.subtasks,
+    );
+    setState(() => habits[index] = archived);
+    await HabitStorage.saveHabits(habits);
   }
 
   //データの削除
@@ -125,6 +173,8 @@ class HabitPageState extends State<HabitPage> {
           ),
           shareCompletion: habit.shareCompletion,
           carryOverIfIncomplete: habit.carryOverIfIncomplete,
+          startedAt: habit.startedAt,
+          archivedAt: habit.archivedAt,
           subtasks: habit.subtasks,
         );
       }).toList();
@@ -220,6 +270,10 @@ class HabitPageState extends State<HabitPage> {
         builder: (_) => HomeHabitRecordPage(
           habits: habits,
           categoryColors: _categoryColors,
+          onHabitsChanged: (updated) async {
+            setState(() => habits = updated);
+            await HabitStorage.saveHabits(habits);
+          },
         ),
       ),
     );
@@ -232,12 +286,24 @@ class HabitPageState extends State<HabitPage> {
       builder: (context) {
         return AlertDialog(
           title: const Text('習慣を削除'),
-          content: Text('「${habit.title}」を削除しますか？\n達成記録も削除されます。'),
+          content: Text('「${habit.title}」をどうしますか？'),
           actions: [
             SizedBox(
               width: double.infinity,
               child: Column(
                 children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.archive_outlined),
+                      label: const Text('アーカイブ'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _archiveHabit(habit);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 6),
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
@@ -334,10 +400,10 @@ class HabitPageState extends State<HabitPage> {
 
     //本来の習慣と「やり残し」を分け、やり残しを上に表示する
     final scheduledHabits = habits.where((habit) {
-      return habitIsScheduledOn(habit, selectedDate);
+      return habit.archivedAt == null && habitIsScheduledOn(habit, selectedDate);
     }).toList();
     final carryOverHabits = habits.where((habit) {
-      return !habitIsScheduledOn(habit, selectedDate) &&
+      return habit.archivedAt == null && !habitIsScheduledOn(habit, selectedDate) &&
           habitShouldDisplayOn(habit, selectedDate);
     }).toList();
     final visibleCarryOvers = carryOverHabits.length <= 1 || _carryOverExpanded
