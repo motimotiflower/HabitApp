@@ -9,9 +9,12 @@ class HomeWidgetBridge {
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return;
 
     try {
+      //SharedPreferencesの保存完了後にAndroid側へ再描画を依頼
       await _channel.invokeMethod<void>('updateWidgets');
     } on PlatformException {
-      // ウィジェット更新失敗でアプリ本体の保存は止めない
+      //ウィジェット更新失敗でアプリ本体の保存は止めない
+    } on MissingPluginException {
+      //Android側の準備前でも保存自体は成功させる
     }
   }
 }
