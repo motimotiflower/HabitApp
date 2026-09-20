@@ -247,6 +247,16 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                       ),
                     ),
 
+                    const SizedBox(height: 14),
+
+                    //タイトルのすぐ下でサブタスクを追加する
+                    SubtaskEditor(
+                      subtasks: _subtasks,
+                      onChanged: (value) {
+                        setState(() => _subtasks = value);
+                      },
+                    ),
+
                     const SizedBox(height: 18),
 
                     const Text("曜日", style: TextStyle(fontSize: 20)),
@@ -337,15 +347,6 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     ),
 
                     const SizedBox(height: 12),
-
-                    SubtaskEditor(
-                      subtasks: _subtasks,
-                      onChanged: (value) {
-                        setState(() => _subtasks = value);
-                      },
-                    ),
-
-                    const SizedBox(height: 18),
 
                     NotificationSettingsCard(
                       enabled: _notificationEnabled,
