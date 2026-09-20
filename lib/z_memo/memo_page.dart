@@ -198,12 +198,18 @@ class MemoPageState extends State<MemoPage> {
   Widget _buildHeaderSearch(BuildContext context) {
     final headerHeight = MainBackground.headerHeight(context);
 
+    const searchHeight = 48.0;
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    final visualHeight = headerHeight - statusBarHeight;
+
     return Positioned(
-      //タイトルとの間を少し詰める
-      top: MediaQuery.of(context).padding.top + 18,
+      //通知バーを除いたヘッダー領域の中央に配置
+      top: statusBarHeight + (visualHeight - searchHeight) / 2,
       left: 20,
       right: 20,
-      child: TextField(
+      child: SizedBox(
+        height: searchHeight,
+        child: TextField(
         onChanged: (value) {
           setState(() {
             _searchText = value;
@@ -232,6 +238,7 @@ class MemoPageState extends State<MemoPage> {
             borderSide: BorderSide.none,
           ),
         ),
+      ),
       ),
     );
   }
