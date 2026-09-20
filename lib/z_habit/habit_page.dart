@@ -5,6 +5,7 @@ import 'package:habitapp/z_habit/widgets/habit_card.dart';
 import 'package:habitapp/main/widgets/main_content.dart';
 import 'package:habitapp/main/widgets/adaptive_editor_panel.dart';
 import 'package:habitapp/z_habit/habit_storage.dart';
+import 'package:habitapp/z_habit/habit_schedule.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/z_habit/sheets/edit_habit_sheet.dart';
 import 'package:habitapp/z_home/home_habit_record_page.dart';
@@ -120,6 +121,7 @@ class HabitPageState extends State<HabitPage> {
             habit.completionHistory,
           ),
           shareCompletion: habit.shareCompletion,
+          carryOverIfIncomplete: habit.carryOverIfIncomplete,
           subtasks: habit.subtasks,
         );
       }).toList();
@@ -153,6 +155,7 @@ class HabitPageState extends State<HabitPage> {
             habit.completionHistory,
           ),
           shareCompletion: habit.shareCompletion,
+          carryOverIfIncomplete: habit.carryOverIfIncomplete,
           subtasks: habit.subtasks,
         );
       }).toList();
@@ -321,15 +324,15 @@ class HabitPageState extends State<HabitPage> {
 
     final selectedDay = days[selectedDayIndex];
 
-    //選択した曜日に実行する習慣だけ取得
-    final selectedDayHabits = habits.where((habit) {
-      return habit.days.contains(selectedDay);
-    }).toList();
-
     //表示中の週から、選択した曜日の日付を取得
     final selectedDate = displayedMonday.add(
       Duration(days: selectedDayIndex),
     );
+
+    //設定曜日に加え、未達成の繰り越し対象も表示する
+    final selectedDayHabits = habits.where((habit) {
+      return habitShouldDisplayOn(habit, selectedDate);
+    }).toList();
 
     //達成履歴で使用する日付キー
     final dateKey =
@@ -445,8 +448,11 @@ class HabitPageState extends State<HabitPage> {
                                   0xff526FC5,
                             );
 
+                      final sourceDate =
+                          habitDisplaySourceDate(habit, selectedDate) ??
+                              selectedDate;
                       final completionKey =
-                          habit.shareCompletion ? weekKey : dateKey;
+                          habitCompletionKeyForDate(habit, sourceDate);
 
                       return ReorderableDelayedDragStartListener(
                         key: ValueKey(habit.id),
