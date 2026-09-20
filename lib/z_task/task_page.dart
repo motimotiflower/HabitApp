@@ -447,22 +447,29 @@ class TaskPageState extends State<TaskPage> {
         //白いカード部分
         MainContent(
           overlap: 0,
-          child: visibleTasks.isEmpty
-              ? Center(
-                  child: Text(
-                    tasks.isEmpty
-                        ? 'タスクはまだありません'
-                        : 'この条件のタスクはありません',
-                    style: const TextStyle(
-                      color: Color(0xff81889B),
-                    ),
-                  ),
-                )
-              : ListView.builder(
+          child: RefreshIndicator(
+            // 下に引っ張るとウィジェット側の変更を読み直す
+            onRefresh: reloadTasks,
+            child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   //右下の＋ボタンと最後のチェックが重ならないよう下に余白
                   padding: const EdgeInsets.only(bottom: 88),
-                  itemCount: visibleTasks.length,
+                  itemCount: visibleTasks.isEmpty ? 1 : visibleTasks.length,
                   itemBuilder: (context, index) {
+                    if (visibleTasks.isEmpty) {
+                      return SizedBox(
+                        height: 320,
+                        child: Center(
+                          child: Text(
+                            tasks.isEmpty
+                                ? 'タスクはまだありません'
+                                : 'この条件のタスクはありません',
+                            style: const TextStyle(color: Color(0xff81889B)),
+                          ),
+                        ),
+                      );
+                    }
+
                     final task = visibleTasks[index];
 
                     return TaskCard(
@@ -498,6 +505,7 @@ class TaskPageState extends State<TaskPage> {
                     );
                   },
                 ),
+          ),
         ),
       ],
     );
