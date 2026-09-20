@@ -129,16 +129,27 @@ class HomePageState extends State<HomePage> {
         '${now.day.toString().padLeft(2, '0')}';
   }
 
+  //共有設定を含め、今日の習慣が使う達成キーを返す
+  String _habitCompletionKey(Habit habit) {
+    if (!habit.shareCompletion) return _todayKey();
+
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    return 'week-${monday.year}-'
+        '${monday.month.toString().padLeft(2, '0')}-'
+        '${monday.day.toString().padLeft(2, '0')}';
+  }
+
   //Homeから習慣の達成状態を変更
   Future<void> _toggleHabit(Habit targetHabit) async {
     final habits = await HabitStorage.loadHabits();
-    final dateKey = _todayKey();
+    final completionKey = _habitCompletionKey(targetHabit);
     bool? wasDone;
 
     for (final habit in habits) {
       if (habit.id == targetHabit.id) {
-        wasDone = habit.completionHistory[dateKey] ?? false;
-        habit.completionHistory[dateKey] = !wasDone;
+        wasDone = habit.completionHistory[completionKey] ?? false;
+        habit.completionHistory[completionKey] = !wasDone;
         break;
       }
     }
@@ -147,7 +158,7 @@ class HomePageState extends State<HomePage> {
 
     if (wasDone != null) {
       final actionKey =
-          'habit|${targetHabit.id}|$dateKey';
+          'habit|${targetHabit.id}|$completionKey';
 
       if (!wasDone) {
         await StarStorage.award(
@@ -470,8 +481,9 @@ class HomePageState extends State<HomePage> {
               ? const _EmptyText('今日の習慣はありません')
               : Column(
                   children: _todayHabits.map((habit) {
-                    final isDone =
-                        habit.completionHistory[dateKey] ?? false;
+                    final isDone = habit.completionHistory[
+                            _habitCompletionKey(habit)] ??
+                        false;
                     final habitColor = habit.category == '未設定'
                         ? const Color(0xff526FC5)
                         : Color(

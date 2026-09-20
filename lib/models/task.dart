@@ -1,4 +1,5 @@
 //タスクのデータの型
+import 'package:habitapp/models/subtask.dart';
 class Task {
   static int _idCounter = 0;
 
@@ -18,6 +19,7 @@ class Task {
   final int? notificationHour; //通知時刻
   final int? notificationMinute;
   bool isDone; //完了状態
+  final List<Subtask> subtasks; //親の下に表示するサブタスク
 
   Task({
     String? id,
@@ -32,6 +34,7 @@ class Task {
     this.notificationHour,
     this.notificationMinute,
     this.isDone = false,
+    this.subtasks = const [],
   }) : id = id ?? _createId();
 
   //Taskを保存しやすい形に変換
@@ -49,6 +52,7 @@ class Task {
       'notificationHour': notificationHour,
       'notificationMinute': notificationMinute,
       'isDone': isDone,
+      'subtasks': subtasks.map((subtask) => subtask.toJson()).toList(),
     };
   }
 
@@ -71,6 +75,9 @@ class Task {
       notificationHour: json['notificationHour'],
       notificationMinute: json['notificationMinute'],
       isDone: json['isDone'] ?? false,
+      subtasks: (json['subtasks'] as List<dynamic>? ?? [])
+          .map((item) => Subtask.fromJson(Map<String, dynamic>.from(item)))
+          .toList(),
     );
   }
 }

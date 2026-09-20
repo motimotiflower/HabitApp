@@ -97,6 +97,7 @@ class TaskPageState extends State<TaskPage> {
           notificationHour: task.notificationHour,
           notificationMinute: task.notificationMinute,
           isDone: task.isDone,
+          subtasks: task.subtasks,
         );
       }).toList();
 
@@ -131,6 +132,7 @@ class TaskPageState extends State<TaskPage> {
           notificationHour: task.notificationHour,
           notificationMinute: task.notificationMinute,
           isDone: task.isDone,
+          subtasks: task.subtasks,
         );
       }).toList();
 
@@ -495,6 +497,27 @@ class TaskPageState extends State<TaskPage> {
                           await StarStorage.award(
                             actionKey: actionKey,
                             source: 'task',
+                          );
+                        } else {
+                          await StarStorage.revoke(actionKey);
+                        }
+                      },
+                      onSubtaskChanged: (subtaskIndex) async {
+                        final subtask = task.subtasks[subtaskIndex];
+                        final wasDone = subtask.isDone;
+
+                        setState(() {
+                          subtask.isDone = !wasDone;
+                          _stickyTaskIds.add(task.id);
+                        });
+                        await TaskStorage.saveTasks(tasks);
+
+                        final actionKey =
+                            'task-subtask|${task.id}|${subtask.id}';
+                        if (!wasDone) {
+                          await StarStorage.award(
+                            actionKey: actionKey,
+                            source: 'task-subtask',
                           );
                         } else {
                           await StarStorage.revoke(actionKey);

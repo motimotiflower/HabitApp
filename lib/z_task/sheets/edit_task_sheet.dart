@@ -1,6 +1,8 @@
 //タスク編集画面
 import 'package:flutter/material.dart';
 import 'package:habitapp/models/task.dart';
+import 'package:habitapp/models/subtask.dart';
+import 'package:habitapp/widgets/subtask_editor.dart';
 import 'package:habitapp/z_task/category_storage.dart';
 import 'package:habitapp/notifications/notification_settings_card.dart';
 
@@ -31,6 +33,7 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
   List<String> _categories = [];
   late String _selectedCategory;
   String? _hoveredCategory;
+  late List<Subtask> _subtasks;
 
   @override
   void initState() {
@@ -42,6 +45,7 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
     _deadline = widget.task.deadline;
     _selectedCategory = widget.task.category;
     _isFlagged = widget.task.isFlagged;
+    _subtasks = List<Subtask>.from(widget.task.subtasks);
     _notificationEnabled = widget.task.notificationEnabled;
     _notificationDays = [...widget.task.notificationDays];
     _notificationDate = widget.task.notificationDate;
@@ -115,6 +119,7 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
         notificationHour: _notificationTime.hour,
         notificationMinute: _notificationTime.minute,
         isDone: widget.task.isDone,
+        subtasks: _subtasks,
       ),
     );
 
@@ -242,6 +247,15 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
                           });
                         },
                       ),
+
+                      SubtaskEditor(
+                        subtasks: _subtasks,
+                        onChanged: (value) {
+                          setState(() => _subtasks = value);
+                        },
+                      ),
+
+                      const SizedBox(height: 18),
 
                       NotificationSettingsCard(
                         enabled: _notificationEnabled,

@@ -1,6 +1,8 @@
 //習慣編集画面
 import 'package:flutter/material.dart';
 import 'package:habitapp/models/habit.dart';
+import 'package:habitapp/models/subtask.dart';
+import 'package:habitapp/widgets/subtask_editor.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/notifications/notification_settings_card.dart';
 
@@ -30,6 +32,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
   late List<String> _notificationDays;
   DateTime? _notificationDate;
   late TimeOfDay _notificationTime;
+  late bool _shareCompletion;
+  late List<Subtask> _subtasks;
 
   List<String> _categories = [];
   Map<String, int> _categoryColors = {};
@@ -65,6 +69,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
     _selectedCategory = widget.habit.category;
     _selectedIcon = widget.habit.icon;
     _notificationEnabled = widget.habit.notificationEnabled;
+    _shareCompletion = widget.habit.shareCompletion;
+    _subtasks = List<Subtask>.from(widget.habit.subtasks);
     _notificationDays = [...widget.habit.notificationDays];
     _notificationDate = widget.habit.notificationDate;
     _notificationTime = TimeOfDay(
@@ -135,6 +141,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
         completionHistory: Map<String, bool>.from(
           widget.habit.completionHistory,
         ),
+        shareCompletion: _shareCompletion,
+        subtasks: _subtasks,
       ),
     );
 
@@ -266,7 +274,28 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
 
                       const SizedBox(height: 18),
 
-                      NotificationSettingsCard(
+                      SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('選択した曜日で達成を共有'),
+                      subtitle: const Text('どれか1日で達成すると、その週は達成済みになります'),
+                      value: _shareCompletion,
+                      onChanged: (value) {
+                        setState(() => _shareCompletion = value);
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    SubtaskEditor(
+                      subtasks: _subtasks,
+                      onChanged: (value) {
+                        setState(() => _subtasks = value);
+                      },
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    NotificationSettingsCard(
                         enabled: _notificationEnabled,
                         days: _notificationDays,
                         date: _notificationDate,

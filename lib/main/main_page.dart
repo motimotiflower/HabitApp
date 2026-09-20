@@ -124,6 +124,7 @@ class _MainPageState extends State<MainPage> {
         mobileHeightFactor: 0.80,
         builder: (context) {
           return AddHabitSheet(
+            initialDayIndex: _selectedDayIndex,
             onAddHabit: (habit) {
               _habitPageKey.currentState?.addHabit(habit);
             },

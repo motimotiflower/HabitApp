@@ -1,6 +1,8 @@
 //タスク追加画面
 import 'package:flutter/material.dart';
 import 'package:habitapp/models/task.dart';
+import 'package:habitapp/models/subtask.dart';
+import 'package:habitapp/widgets/subtask_editor.dart';
 import 'package:habitapp/z_task/category_storage.dart';
 import 'package:habitapp/notifications/notification_settings_card.dart';
 
@@ -27,6 +29,7 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
   List<String> _categories = [];
   String _selectedCategory = '未設定';
   String? _hoveredCategory;
+  List<Subtask> _subtasks = [];
 
   @override
   void initState() {
@@ -89,6 +92,7 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
         notificationDate: _notificationDate,
         notificationHour: _notificationTime.hour,
         notificationMinute: _notificationTime.minute,
+        subtasks: _subtasks,
       ),
     );
 
@@ -217,6 +221,15 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
                           });
                         },
                       ),
+
+                      SubtaskEditor(
+                        subtasks: _subtasks,
+                        onChanged: (value) {
+                          setState(() => _subtasks = value);
+                        },
+                      ),
+
+                      const SizedBox(height: 18),
 
                       NotificationSettingsCard(
                         enabled: _notificationEnabled,
