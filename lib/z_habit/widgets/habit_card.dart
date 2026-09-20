@@ -100,6 +100,12 @@ class _HabitCardState extends State<HabitCard> {
                 color: const Color(0xff526FC5),
                 onPressed: widget.onEdit,
               ),
+              IconButton(
+                tooltip: '削除',
+                icon: const Icon(Icons.delete_outline, size: 20),
+                color: const Color(0xff526FC5),
+                onPressed: widget.onDelete,
+              ),
               Checkbox(
                 value: widget.isDone,
                 activeColor: accentColor,
@@ -131,16 +137,6 @@ class _HabitCardState extends State<HabitCard> {
                       onChanged: (_) => widget.onSubtaskChanged(i),
                     ),
                 ],
-              ),
-            ),
-          //削除は誤操作を避けるため編集と分けて下側に置く
-          if (_expanded)
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: widget.onDelete,
-                icon: const Icon(Icons.delete_outline, size: 18),
-                label: const Text('削除'),
               ),
             ),
         ],
