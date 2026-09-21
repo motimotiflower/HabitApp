@@ -383,13 +383,12 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     Builder(
                       builder: (context) {
                         //締切は「次の何曜日か」だけを選ぶ
-                        final selectedWeekdays = selectedDays
-                            .map((day) => days.indexOf(day) + 1)
-                            .where((weekday) => weekday > 0)
-                            .toList();
+                        //締切曜日は習慣の実行曜日とは別に、7曜日すべてから選べる
+                        final deadlineWeekdays =
+                            List<int>.generate(days.length, (index) => index + 1);
 
                         return DropdownButtonFormField<int?>(
-                          value: selectedWeekdays.contains(_deadlineWeekday)
+                          value: deadlineWeekdays.contains(_deadlineWeekday)
                               ? _deadlineWeekday
                               : null,
                           decoration: const InputDecoration(
@@ -400,22 +399,20 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                               value: null,
                               child: Text('設定なし'),
                             ),
-                            for (final weekday in selectedWeekdays)
+                            for (final weekday in deadlineWeekdays)
                               DropdownMenuItem<int?>(
                                 value: weekday,
                                 child: Text('次の${days[weekday - 1]}曜日'),
                               ),
                           ],
-                          onChanged: selectedDays.isEmpty
-                              ? null
-                              : (value) {
-                                  setState(() {
+                          onChanged: (value) {
+                            setState(() {
                                     _deadlineWeekday = value;
                                     //0は「次に来るその曜日」を表す
-                                    _deadlineWeekOffset =
-                                        value == null ? null : 0;
-                                  });
-                                },
+                              _deadlineWeekOffset =
+                                  value == null ? null : 0;
+                            });
+                          },
                         );
                       },
                     ),
