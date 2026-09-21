@@ -461,44 +461,55 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
                     const SizedBox(height: 18),
 
-                    const Text('習慣の締切', style: TextStyle(fontSize: 18)),
-                    const SizedBox(height: 6),
-                    Builder(
-                      builder: (context) {
-                        //締切は「次の何曜日か」だけを選ぶ
-                        //締切曜日は習慣の実行曜日とは別に、7曜日すべてから選べる
-                        final deadlineWeekdays =
-                            List<int>.generate(days.length, (index) => index + 1);
-
-                        return DropdownButtonFormField<int?>(
-                          value: deadlineWeekdays.contains(_deadlineWeekday)
-                              ? _deadlineWeekday
-                              : null,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                          ),
-                          items: [
-                            const DropdownMenuItem<int?>(
-                              value: null,
-                              child: Text('設定なし'),
-                            ),
-                            for (final weekday in deadlineWeekdays)
-                              DropdownMenuItem<int?>(
-                                value: weekday,
-                                child: Text('次の${days[weekday - 1]}曜日'),
-                              ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                                    _deadlineWeekday = value;
-                                    //0は「次に来るその曜日」を表す
-                              _deadlineWeekOffset =
-                                  value == null ? null : 0;
-                            });
-                          },
-                        );
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('習慣の締切'),
+                      value: _deadlineWeekday != null,
+                      onChanged: (enabled) {
+                        setState(() {
+                          if (enabled) {
+                            //ONにしたら次に来る曜日を初期値にする
+                            _deadlineWeekday ??= DateTime.now().weekday;
+                            _deadlineWeekOffset = 0;
+                          } else {
+                            _deadlineWeekday = null;
+                            _deadlineWeekOffset = null;
+                          }
+                        });
                       },
                     ),
+
+                    if (_deadlineWeekday != null) ...[
+                      const SizedBox(height: 6),
+                      Builder(
+                        builder: (context) {
+                          //締切は「次の何曜日か」を選ぶ
+                          final deadlineWeekdays =
+                              List<int>.generate(days.length, (index) => index + 1);
+
+                          return DropdownButtonFormField<int>(
+                            value: _deadlineWeekday,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                            items: [
+                              for (final weekday in deadlineWeekdays)
+                                DropdownMenuItem<int>(
+                                  value: weekday,
+                                  child: Text('次の${days[weekday - 1]}曜日'),
+                                ),
+                            ],
+                            onChanged: (value) {
+                              if (value == null) return;
+                              setState(() {
+                                _deadlineWeekday = value;
+                                _deadlineWeekOffset = 0;
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ],
 
                     const SizedBox(height: 12),
 
