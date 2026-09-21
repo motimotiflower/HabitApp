@@ -79,14 +79,13 @@ DateTime? habitDisplaySourceDate(Habit habit, DateTime date) {
   final source = habitLatestScheduledDate(habit, target);
   if (source == null || source == target) return null;
 
-  //「今週/来週 + 曜日」を元の設定日の週から毎回計算する
-  if (habit.deadlineWeekOffset != null && habit.deadlineWeekday != null) {
-    final sourceMonday = habitMonday(source);
-    final deadline = sourceMonday.add(
-      Duration(
-        days: habit.deadlineWeekOffset! * 7 + habit.deadlineWeekday! - 1,
-      ),
-    );
+  //締切は元の設定日から見て「次に来る指定曜日」まで
+  //同じ曜日を指定した場合は、その日の締切ではなく翌週まで繰り越す
+  if (habit.deadlineWeekday != null) {
+    var daysAhead = (habit.deadlineWeekday! - source.weekday + 7) % 7;
+    if (daysAhead == 0) daysAhead = 7;
+
+    final deadline = source.add(Duration(days: daysAhead));
     if (target.isAfter(deadline)) return null;
   }
 
