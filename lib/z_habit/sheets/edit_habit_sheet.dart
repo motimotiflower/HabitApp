@@ -318,6 +318,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                         ],
                       ),
 
+                    const SizedBox(height: 18),
+
                     //優先度は高・中・低の3段階
                     const Text('優先度', style: TextStyle(fontSize: 18)),
                     const SizedBox(height: 8),
@@ -359,6 +361,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                           );
                         }).toList(),
                       ),
+
+                    const SizedBox(height: 18),
                       SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: const Text('他の曜日と達成を共有'),
@@ -376,8 +380,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                         setState(() => _carryOverIfIncomplete = value);
                       },
                     ),
-
-                    const SizedBox(height: 12),
 
                     NotificationSettingsCard(
                         enabled: _notificationEnabled,
