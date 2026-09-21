@@ -15,9 +15,6 @@ class NotificationSettingsCard extends StatefulWidget {
     required this.onTimeChanged,
   });
 
-  static const _weekdays = ['月', '火', '水', '木', '金', '土', '日'];
-  static const _templateHours = [7, 9, 13, 19, 21];
-
   final bool enabled;
   final List<String> days;
   final DateTime? date;
@@ -27,31 +24,6 @@ class NotificationSettingsCard extends StatefulWidget {
   final ValueChanged<DateTime?> onDateChanged;
   final ValueChanged<TimeOfDay> onTimeChanged;
 
-  Future<void> _pickDate(BuildContext context) async {
-    final now = DateTime.now();
-    final selected = await showDatePicker(
-      context: context,
-      initialDate: date ?? now,
-      firstDate: DateTime(now.year, now.month, now.day),
-      lastDate: DateTime(now.year + 5),
-    );
-
-    if (selected != null) {
-      onDateChanged(selected);
-    }
-  }
-
-  Future<void> _pickCustomTime(BuildContext context) async {
-    final selected = await showTimePicker(
-      context: context,
-      initialTime: time,
-    );
-
-    if (selected != null) {
-      onTimeChanged(selected);
-    }
-  }
-
   @override
   State<NotificationSettingsCard> createState() =>
       _NotificationSettingsCardState();
@@ -59,6 +31,36 @@ class NotificationSettingsCard extends StatefulWidget {
 
 class _NotificationSettingsCardState extends State<NotificationSettingsCard> {
   bool _batchMode = false;
+
+  static const _weekdays = ['月', '火', '水', '木', '金', '土', '日'];
+  static const _templateHours = [7, 9, 13, 19, 21];
+
+  //日にちを選択
+  Future<void> _pickDate(BuildContext context) async {
+    final now = DateTime.now();
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: widget.date ?? now,
+      firstDate: DateTime(now.year, now.month, now.day),
+      lastDate: DateTime(now.year + 5),
+    );
+
+    if (selected != null) {
+      widget.onDateChanged(selected);
+    }
+  }
+
+  //通知時間を選択
+  Future<void> _pickCustomTime(BuildContext context) async {
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: widget.time,
+    );
+
+    if (selected != null) {
+      widget.onTimeChanged(selected);
+    }
+  }
 
   @override
   void initState() {
@@ -153,7 +155,7 @@ class _NotificationSettingsCardState extends State<NotificationSettingsCard> {
                           : const Color(0xff35415F),
                     ),
                     onSelected: (_) {
-                      final next = [...days];
+                      final next = <String>[...widget.days];
 
                       if (selected) {
                         next.remove(day);
