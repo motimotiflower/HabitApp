@@ -410,6 +410,26 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
                     const SizedBox(height: 18),
 
+                    Row(
+                      children: [
+                        const Text(
+                          'その他',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xff6B7280),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Container(
+                            height: 1,
+                            color: Color(0xffD9DDE8),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+
                     NotificationSettingsCard(
                       enabled: _notificationEnabled,
                       days: _notificationDays,
