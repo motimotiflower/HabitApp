@@ -198,6 +198,9 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      //追加画面と同じくタイトル文字を入力欄の外に出す
+                      const Text('タイトル', style: TextStyle(fontSize: 20)),
+                      const SizedBox(height: 8),
                       TextField(
                         controller: _titleController,
                         style: const TextStyle(
@@ -205,7 +208,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                           fontWeight: FontWeight.w600,
                         ),
                         decoration: InputDecoration(
-                          labelText: 'タイトル',
                           filled: true,
                           fillColor: Colors.white,
                           contentPadding: const EdgeInsets.symmetric(
@@ -297,9 +299,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                           );
                         }).toList(),
                       ),
-
-                      const SizedBox(height: 18),
-
                       const SizedBox(height: 18),
                       const Text('ジャンル', style: TextStyle(fontSize: 18)),
                       const SizedBox(height: 8),
@@ -312,8 +311,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                           ..._categories.map(_categoryChip),
                         ],
                       ),
-
-
 
                     //優先度は高・中・低の3段階
                     const Text('優先度', style: TextStyle(fontSize: 18)),
@@ -329,8 +326,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                         setState(() => _priority = value.first);
                       },
                     ),
-
-                    const SizedBox(height: 18),
                       const SizedBox(height: 18),
                       const Text('アイコン', style: TextStyle(fontSize: 18)),
                       const SizedBox(height: 8),
