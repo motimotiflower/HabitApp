@@ -12,6 +12,8 @@ class HabitCard extends StatefulWidget {
     required this.subtaskIsDone,
     required this.onEdit,
     required this.onDelete,
+    required this.onArchive,
+    required this.onSkip,
     this.categoryColor,
   });
 
@@ -22,6 +24,8 @@ class HabitCard extends StatefulWidget {
   final bool Function(int index) subtaskIsDone;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onArchive;
+  final VoidCallback onSkip;
   final Color? categoryColor;
 
   @override
@@ -117,11 +121,45 @@ class _HabitCardState extends State<HabitCard> {
                     ),
                   ),
                 ),
-              IconButton(
-                tooltip: '削除',
-                icon: const Icon(Icons.delete_outline, size: 20),
-                color: const Color(0xff526FC5),
-                onPressed: widget.onDelete,
+              //操作を3点メニューにまとめる
+              PopupMenuButton<String>(
+                tooltip: 'その他',
+                icon: const Icon(
+                  Icons.more_vert_rounded,
+                  size: 21,
+                  color: Color(0xff526FC5),
+                ),
+                onSelected: (value) {
+                  if (value == 'skip') widget.onSkip();
+                  if (value == 'archive') widget.onArchive();
+                  if (value == 'delete') widget.onDelete();
+                },
+                itemBuilder: (context) => const [
+                  PopupMenuItem(
+                    value: 'skip',
+                    child: ListTile(
+                      leading: Icon(Icons.skip_next_rounded),
+                      title: Text('この日をスキップ'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'archive',
+                    child: ListTile(
+                      leading: Icon(Icons.archive_outlined),
+                      title: Text('アーカイブ'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: ListTile(
+                      leading: Icon(Icons.delete_outline),
+                      title: Text('削除'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
               ),
               Checkbox(
                 value: widget.isDone,
