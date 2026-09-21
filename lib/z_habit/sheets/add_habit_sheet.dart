@@ -408,6 +408,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                       }).toList(),
                     ),
 
+                    const SizedBox(height: 18),
+
                     NotificationSettingsCard(
                       enabled: _notificationEnabled,
                       days: _notificationDays,
