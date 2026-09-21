@@ -379,33 +379,59 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     const SizedBox(height: 18),
                     const Text('習慣の締切', style: TextStyle(fontSize: 18)),
                     const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _endDate == null
-                                ? '設定なし'
-                                : '${_endDate!.year}年${_endDate!.month}月${_endDate!.day}日',
+                    Builder(
+                      builder: (context) {
+                        //選択した曜日の「今週〜来週」だけを締切候補にする
+                        final today = DateTime.now();
+                        final base = DateTime(today.year, today.month, today.day);
+                        final monday =
+                            base.subtract(Duration(days: base.weekday - 1));
+                        final candidates = <DateTime>[];
+
+                        for (var offset = 0; offset < 14; offset++) {
+                          final date = monday.add(Duration(days: offset));
+                          final weekday = days[date.weekday - 1];
+                          if (selectedDays.contains(weekday) &&
+                              !date.isBefore(base)) {
+                            candidates.add(date);
+                          }
+                        }
+
+                        return DropdownButtonFormField<DateTime?>(
+                          value: candidates.any((date) =>
+                                  _endDate != null &&
+                                  DateUtils.isSameDay(date, _endDate))
+                              ? candidates.firstWhere((date) =>
+                                  DateUtils.isSameDay(date, _endDate))
+                              : null,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: _endDate ?? DateTime.now(),
-                              firstDate: DateTime(2020),
-                              lastDate: DateTime(2100),
-                            );
-                            if (picked != null) setState(() => _endDate = picked);
-                          },
-                          child: const Text('設定'),
-                        ),
-                        if (_endDate != null)
-                          TextButton(
-                            onPressed: () => setState(() => _endDate = null),
-                            child: const Text('解除'),
-                          ),
-                      ],
+                          hint: const Text('設定なし'),
+                          items: [
+                            const DropdownMenuItem<DateTime?>(
+                              value: null,
+                              child: Text('設定なし'),
+                            ),
+                            ...candidates.map((date) {
+                              final weekLabel =
+                                  date.isBefore(monday.add(const Duration(days: 7)))
+                                      ? '今週'
+                                      : '来週';
+                              final weekday = days[date.weekday - 1];
+                              return DropdownMenuItem<DateTime?>(
+                                value: date,
+                                child: Text(
+                                  '$weekLabelの$weekday曜日  ${date.month}/${date.day}',
+                                ),
+                              );
+                            }),
+                          ],
+                          onChanged: selectedDays.isEmpty
+                              ? null
+                              : (value) => setState(() => _endDate = value),
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 12),
