@@ -297,9 +297,6 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                         child: const Text("毎日"),
                       ),
                     ),
-                      ],
-                    ),
-
 
                     const SizedBox(height: 12),
 
