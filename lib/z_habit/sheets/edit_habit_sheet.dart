@@ -304,8 +304,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
 
                       SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('選択した曜日で達成を共有'),
-                      subtitle: const Text('どれか1日で達成すると、その週は達成済みになります'),
+                      title: const Text('他の曜日と達成を共有'),
                       value: _shareCompletion,
                       onChanged: (value) {
                         setState(() => _shareCompletion = value);
@@ -314,8 +313,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
 
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('未達成なら次の設定曜日まで表示'),
-                      subtitle: const Text('やり残しとして毎日1件だけ表示します'),
+                      title: const Text('やり残しの表示'),
                       value: _carryOverIfIncomplete,
                       onChanged: (value) {
                         setState(() => _carryOverIfIncomplete = value);
