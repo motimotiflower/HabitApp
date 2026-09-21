@@ -157,9 +157,13 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
       },
     );
 
-    controller.dispose();
+    //showDialogの終了直後はTextFieldがまだ破棄処理中のことがあるため、
+    //controllerは次のフレームで破棄して編集時のエラーを防ぐ
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.dispose();
+    });
 
-    if (editedText == null) return;
+    if (!mounted || editedText == null) return;
 
     //画像だけの投稿は空文字のままでも残せる
     if (editedText.isEmpty && message.imageBase64 == null) return;
@@ -293,10 +297,12 @@ class _MemoRoomPageState extends State<MemoRoomPage> {
       });
     }
 
+    if (!mounted || index >= _memo.messages.length) return;
+
     if (value == 'edit') {
-      _editMessage(index);
+      await _editMessage(index);
     } else if (value == 'delete') {
-      _deleteMessage(index);
+      await _deleteMessage(index);
     }
   }
 
