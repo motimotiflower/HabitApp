@@ -70,50 +70,49 @@ class _HabitCardState extends State<HabitCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            habit.title,
-                            style: TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xff35415F),
-                              decoration: widget.isDone
-                                  ? TextDecoration.lineThrough
-                                  : null,
+                    Text(
+                      habit.title,
+                      style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xff35415F),
+                        decoration:
+                            widget.isDone ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                    if (habit.category != '未設定' || habit.priority >= 2) ...[
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          if (habit.category != '未設定')
+                            Text(
+                              habit.category,
+                              style: TextStyle(fontSize: 12, color: accentColor),
                             ),
-                          ),
-                        ),
-                        //高・中だけ表示して、一覧をすっきり保つ
-                        if (habit.priority >= 2) ...[
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.flag_rounded,
-                            size: 15,
-                            color: habit.priority == 3
-                                ? const Color(0xff526FC5)
-                                : const Color(0xffA8B1C9),
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            habit.priority == 3 ? '高' : '中',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                          //優先度はジャンルと同じ補助情報の行に表示する
+                          if (habit.priority >= 2) ...[
+                            if (habit.category != '未設定')
+                              const SizedBox(width: 10),
+                            Icon(
+                              Icons.flag_rounded,
+                              size: 14,
                               color: habit.priority == 3
                                   ? const Color(0xff526FC5)
                                   : const Color(0xffA8B1C9),
                             ),
-                          ),
+                            const SizedBox(width: 2),
+                            Text(
+                              habit.priority == 3 ? '高' : '中',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: habit.priority == 3
+                                    ? const Color(0xff526FC5)
+                                    : const Color(0xffA8B1C9),
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                    if (habit.category != '未設定') ...[
-                      const SizedBox(height: 5),
-                      Text(
-                        habit.category,
-                        style: TextStyle(fontSize: 12, color: accentColor),
                       ),
                     ],
                   ],
