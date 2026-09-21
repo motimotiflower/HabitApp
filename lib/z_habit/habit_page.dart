@@ -71,6 +71,10 @@ class HabitPageState extends State<HabitPage> {
       completionDates: habit.completionDates,
       shareCompletion: habit.shareCompletion,
       carryOverIfIncomplete: habit.carryOverIfIncomplete,
+      priority: habit.priority,
+      endDate: habit.endDate,
+      carryOverDays: habit.carryOverDays,
+      skippedDates: List<String>.from(habit.skippedDates),
       startedAt: selectedDate,
       subtasks: habit.subtasks,
     );
@@ -114,6 +118,10 @@ class HabitPageState extends State<HabitPage> {
       completionDates: Map<String, String>.from(habit.completionDates),
       shareCompletion: habit.shareCompletion,
       carryOverIfIncomplete: habit.carryOverIfIncomplete,
+      priority: habit.priority,
+      endDate: habit.endDate,
+      carryOverDays: habit.carryOverDays,
+      skippedDates: List<String>.from(habit.skippedDates),
       startedAt: habit.startedAt,
       //実際の今日ではなく、カレンダーで開いている日からアーカイブ
       archivedAt: displayedMonday.add(
@@ -125,6 +133,52 @@ class HabitPageState extends State<HabitPage> {
     await HabitStorage.saveHabits(habits);
     if (!mounted) return;
     _showUndoSnackBar('アーカイブしました', () async {
+      setState(() => habits[index] = habit);
+      await HabitStorage.saveHabits(habits);
+    });
+  }
+
+  //指定した設定日だけをスキップする
+  Future<void> _skipHabit(Habit habit, DateTime date) async {
+    final index = habits.indexOf(habit);
+    if (index == -1) return;
+
+    final key = habitDateKey(date);
+    if (habit.skippedDates.contains(key)) return;
+
+    final skipped = Habit(
+      id: habit.id,
+      title: habit.title,
+      icon: habit.icon,
+      iconAsset: habit.iconAsset,
+      days: habit.days,
+      category: habit.category,
+      notificationEnabled: habit.notificationEnabled,
+      notificationDays: habit.notificationDays,
+      notificationDate: habit.notificationDate,
+      notificationHour: habit.notificationHour,
+      notificationMinute: habit.notificationMinute,
+      completionHistory: Map<String, bool>.from(habit.completionHistory),
+      completionDates: Map<String, String>.from(habit.completionDates),
+      shareCompletion: habit.shareCompletion,
+      carryOverIfIncomplete: habit.carryOverIfIncomplete,
+      priority: habit.priority,
+      endDate: habit.endDate,
+      carryOverDays: habit.carryOverDays,
+      skippedDates: [...habit.skippedDates, key],
+      startedAt: habit.startedAt,
+      archivedAt: habit.archivedAt,
+      subtasks: habit.subtasks,
+    );
+
+    setState(() {
+      habits[index] = skipped;
+      _sessionCarryOverIds.remove(habit.id);
+    });
+    await HabitStorage.saveHabits(habits);
+
+    if (!mounted) return;
+    _showUndoSnackBar('この日をスキップしました', () async {
       setState(() => habits[index] = habit);
       await HabitStorage.saveHabits(habits);
     });
@@ -215,6 +269,10 @@ class HabitPageState extends State<HabitPage> {
           ),
           shareCompletion: habit.shareCompletion,
           carryOverIfIncomplete: habit.carryOverIfIncomplete,
+          priority: habit.priority,
+          endDate: habit.endDate,
+          carryOverDays: habit.carryOverDays,
+          skippedDates: List<String>.from(habit.skippedDates),
           startedAt: habit.startedAt,
           archivedAt: habit.archivedAt,
           subtasks: habit.subtasks,
@@ -251,6 +309,10 @@ class HabitPageState extends State<HabitPage> {
           ),
           shareCompletion: habit.shareCompletion,
           carryOverIfIncomplete: habit.carryOverIfIncomplete,
+          priority: habit.priority,
+          endDate: habit.endDate,
+          carryOverDays: habit.carryOverDays,
+          skippedDates: List<String>.from(habit.skippedDates),
           startedAt: habit.startedAt,
           archivedAt: habit.archivedAt,
           subtasks: habit.subtasks,
@@ -323,59 +385,25 @@ class HabitPageState extends State<HabitPage> {
     );
   }
 
-  //削除確認
+  //削除は完全削除なので最後に確認する
   void _showDeleteDialog(Habit habit) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('習慣を削除'),
-          content: Text('「${habit.title}」をどうしますか？'),
+          content: Text('「${habit.title}」を完全に削除しますか？'),
           actions: [
-            SizedBox(
-              width: double.infinity,
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xff526FC5),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _deleteHabit(habit);
-                      },
-                      child: const Text('削除'),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.archive_outlined),
-                      label: const Text('アーカイブ'),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _archiveHabit(habit);
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xff526FC5),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('キャンセル'),
-                    ),
-                  ),
-                ],
-              ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('キャンセル'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _deleteHabit(habit);
+              },
+              child: const Text('削除'),
             ),
           ],
         );
@@ -473,12 +501,15 @@ class HabitPageState extends State<HabitPage> {
       return habit.archivedAt == null &&
           habitIsScheduledOn(habit, selectedDate);
     }).toList();
+    scheduledHabits.sort((a, b) => b.priority.compareTo(a.priority));
+
     final carryOverHabits = habits.where((habit) {
       return habit.archivedAt == null &&
           !habitIsScheduledOn(habit, selectedDate) &&
           (habitShouldDisplayOn(habit, selectedDate) ||
               _sessionCarryOverIds.contains(habit.id));
     }).toList();
+    carryOverHabits.sort((a, b) => b.priority.compareTo(a.priority));
 
     //やり残しは件数行で折りたたみ、通常習慣はその下に表示
     //閉じている時は要約だけ、開いた時に全件を表示する
@@ -564,28 +595,8 @@ class HabitPageState extends State<HabitPage> {
                         : selectedDayHabits.length +
                             (showCarryOverHeader ? 1 : 0) +
                             (showTodayHeader ? 1 : 0),
-                    onReorder: (oldIndex, newIndex) async {
-                      if (selectedDayHabits.isEmpty || showCarryOverHeader) {
-                        return;
-                      }
-                      if (newIndex > oldIndex) newIndex--;
-
-                      final moved = selectedDayHabits.removeAt(oldIndex);
-                      selectedDayHabits.insert(newIndex, moved);
-
-                      //表示中の習慣だけ順番を入れ替え、他曜日の習慣は残す
-                      final selectedIds =
-                          selectedDayHabits.map((habit) => habit.id).toSet();
-                      var selectedIndex = 0;
-                      setState(() {
-                        for (var i = 0; i < habits.length; i++) {
-                          if (selectedIds.contains(habits[i].id)) {
-                            habits[i] = selectedDayHabits[selectedIndex++];
-                          }
-                        }
-                      });
-                      await HabitStorage.saveHabits(habits);
-                    },
+                    //表示順は優先度で決まるため手動並び替えは行わない
+                    onReorder: (_, __) {},
                     itemBuilder: (context, index) {
                       if (selectedDayHabits.isEmpty &&
                           !showCarryOverHeader &&
@@ -658,8 +669,6 @@ class HabitPageState extends State<HabitPage> {
                       }
 
                       final habit = selectedDayHabits[dataIndex];
-                      final canReorder = carryOverHabits.isEmpty;
-
                       final categoryColor = habit.category == '未設定'
                           ? null
                           : Color(
@@ -742,21 +751,19 @@ class HabitPageState extends State<HabitPage> {
                           _showEditSheet(habit);
                         },
 
-                        //削除
+                        //3点メニューから各操作を行う
+                        onSkip: () {
+                          _skipHabit(habit, sourceDate);
+                        },
+                        onArchive: () {
+                          _archiveHabit(habit);
+                        },
                         onDelete: () {
                           _showDeleteDialog(habit);
                         },
                       );
 
-                      if (!canReorder) {
-                        return card;
-                      }
-
-                      return ReorderableDelayedDragStartListener(
-                        key: ValueKey(habit.id),
-                        index: index,
-                        child: card,
-                      );
+                      return card;
                     },
                   ),
             ),
