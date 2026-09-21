@@ -382,49 +382,38 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     const SizedBox(height: 6),
                     Builder(
                       builder: (context) {
-                        //実際の日付ではなく「今週/来週 + 曜日」を保存する
+                        //締切は「次の何曜日か」だけを選ぶ
                         final selectedWeekdays = selectedDays
                             .map((day) => days.indexOf(day) + 1)
                             .where((weekday) => weekday > 0)
                             .toList();
 
-                        final currentValue =
-                            _deadlineWeekOffset == null || _deadlineWeekday == null
-                                ? null
-                                : '${_deadlineWeekOffset!}-${_deadlineWeekday!}';
-
-                        return DropdownButtonFormField<String?>(
-                          value: currentValue,
+                        return DropdownButtonFormField<int?>(
+                          value: selectedWeekdays.contains(_deadlineWeekday)
+                              ? _deadlineWeekday
+                              : null,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                           ),
                           items: [
-                            const DropdownMenuItem<String?>(
+                            const DropdownMenuItem<int?>(
                               value: null,
                               child: Text('設定なし'),
                             ),
-                            for (final weekOffset in [0, 1])
-                              for (final weekday in selectedWeekdays)
-                                DropdownMenuItem<String?>(
-                                  value: '$weekOffset-$weekday',
-                                  child: Text(
-                                    '${weekOffset == 0 ? '今週' : '来週'}の'
-                                    '${days[weekday - 1]}曜日',
-                                  ),
-                                ),
+                            for (final weekday in selectedWeekdays)
+                              DropdownMenuItem<int?>(
+                                value: weekday,
+                                child: Text('次の${days[weekday - 1]}曜日'),
+                              ),
                           ],
                           onChanged: selectedDays.isEmpty
                               ? null
                               : (value) {
                                   setState(() {
-                                    if (value == null) {
-                                      _deadlineWeekOffset = null;
-                                      _deadlineWeekday = null;
-                                      return;
-                                    }
-                                    final parts = value.split('-');
-                                    _deadlineWeekOffset = int.parse(parts[0]);
-                                    _deadlineWeekday = int.parse(parts[1]);
+                                    _deadlineWeekday = value;
+                                    //0は「次に来るその曜日」を表す
+                                    _deadlineWeekOffset =
+                                        value == null ? null : 0;
                                   });
                                 },
                         );
