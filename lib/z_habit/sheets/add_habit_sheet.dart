@@ -4,6 +4,7 @@ import 'package:habitapp/models/subtask.dart';
 import 'package:habitapp/widgets/subtask_editor.dart';
 import 'package:habitapp/z_habit/habit_category_storage.dart';
 import 'package:habitapp/notifications/notification_settings_card.dart';
+import 'package:habitapp/notifications/notification_preference_storage.dart';
 
 class AddHabitSheet extends StatefulWidget {
   const AddHabitSheet({
@@ -152,7 +153,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xff526FC5),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     final value = controller.text.trim();
                     if (value.isEmpty) return;
                     Navigator.pop(dialogContext, value);
@@ -528,7 +529,12 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     return;
                   }
 
+                  final notificationSettings =
+                      await NotificationPreferenceStorage.load();
+
+                  //まとめ通知では個別の日付・曜日を使わないので入力チェックをしない
                   if (_notificationEnabled &&
+                      notificationSettings.mode != GlobalNotificationMode.batch &&
                       _notificationDate == null &&
                       _notificationDays.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
