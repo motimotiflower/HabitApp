@@ -419,8 +419,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                       },
                     ),
 
-                    const SizedBox(height: 18),
-
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: const Text('習慣の締切'),
