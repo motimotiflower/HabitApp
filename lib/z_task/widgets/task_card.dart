@@ -52,11 +52,15 @@ class _TaskCardState extends State<TaskCard> {
                     color: Color(0xff526FC5)),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        task.title,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    //タイトル部分をタップすると編集画面を開く
+                    onTap: widget.onEdit,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          task.title,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -65,11 +69,16 @@ class _TaskCardState extends State<TaskCard> {
                               task.isDone ? TextDecoration.lineThrough : null,
                         ),
                       ),
-                      if (task.deadline != null)
-                        Text(_deadlineText(),
+                        if (task.deadline != null)
+                          Text(
+                            _deadlineText(),
                             style: const TextStyle(
-                                fontSize: 11, color: Color(0xff81889B))),
-                    ],
+                              fontSize: 11,
+                              color: Color(0xff81889B),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
                 if (task.subtasks.isNotEmpty)
@@ -89,14 +98,9 @@ class _TaskCardState extends State<TaskCard> {
                     color: Color(0xff526FC5),
                   ),
                   onSelected: (value) {
-                    if (value == 'edit') widget.onEdit();
                     if (value == 'delete') widget.onDelete();
                   },
                   itemBuilder: (context) => const [
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: Text('編集'),
-                    ),
                     PopupMenuItem(
                       value: 'delete',
                       child: Text('削除'),
