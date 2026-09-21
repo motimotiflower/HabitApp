@@ -25,7 +25,9 @@ class Habit {
   final bool shareCompletion; //選択曜日で達成状態を共有するか
   final bool carryOverIfIncomplete; //未達成なら次の設定曜日まで表示するか
   final int priority; //優先度 1:低 2:中 3:高
-  final DateTime? endDate; //習慣そのものの終了日（この日を含む）
+  final DateTime? endDate; //旧形式の締切。古い保存データとの互換用
+  final int? deadlineWeekOffset; //締切: 0=今週、1=来週
+  final int? deadlineWeekday; //締切曜日: DateTime.monday〜sunday
   final int? carryOverDays; //やり残しを表示する最大日数。nullなら従来通り
   final List<String> skippedDates; //スキップした設定日 yyyy-MM-dd
   final DateTime? startedAt; //この習慣を使い始めた日
@@ -50,6 +52,8 @@ class Habit {
     this.carryOverIfIncomplete = false,
     this.priority = 2,
     this.endDate,
+    this.deadlineWeekOffset,
+    this.deadlineWeekday,
     this.carryOverDays,
     this.skippedDates = const [],
     this.startedAt,
@@ -79,6 +83,8 @@ class Habit {
       'carryOverIfIncomplete': carryOverIfIncomplete,
       'priority': priority,
       'endDate': endDate?.toIso8601String(),
+      'deadlineWeekOffset': deadlineWeekOffset,
+      'deadlineWeekday': deadlineWeekday,
       'carryOverDays': carryOverDays,
       'skippedDates': skippedDates,
       'startedAt': startedAt?.toIso8601String(),
@@ -116,6 +122,8 @@ class Habit {
       carryOverIfIncomplete: json['carryOverIfIncomplete'] ?? false,
       priority: json['priority'] ?? 2,
       endDate: json['endDate'] != null ? DateTime.tryParse(json['endDate']) : null,
+      deadlineWeekOffset: json['deadlineWeekOffset'],
+      deadlineWeekday: json['deadlineWeekday'],
       carryOverDays: json['carryOverDays'],
       skippedDates: List<String>.from(json['skippedDates'] ?? []),
       //古いデータは開始日なしとして今まで通り表示する
