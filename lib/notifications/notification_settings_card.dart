@@ -87,17 +87,8 @@ class _NotificationSettingsCardState extends State<NotificationSettingsCard> {
         children: [
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            secondary: const Icon(
-              Icons.notifications_outlined,
-              color: Color(0xff526FC5),
-            ),
-            title: const Text(
-              '通知',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            //共有・やり残しと同じ書式にそろえる
+            title: const Text('通知'),
             value: widget.enabled,
             onChanged: widget.onEnabledChanged,
           ),
