@@ -344,8 +344,11 @@ class NotificationService {
     List<Task> tasks,
     GlobalNotificationSettings settings,
   ) async {
-    final weekdayItems = <int, List<String>>{};
-    final dateItems = <String, List<String>>{};
+    //まとめ通知では習慣とタスクを別の行に表示する
+    final weekdayHabits = <int, List<String>>{};
+    final weekdayTasks = <int, List<String>>{};
+    final dateHabits = <String, List<String>>{};
+    final dateTasks = <String, List<String>>{};
     final dateValues = <String, DateTime>{};
 
     for (final habit in habits) {
@@ -356,16 +359,16 @@ class NotificationService {
         final key = '${date.year}-${date.month}-${date.day}';
 
         dateValues[key] = date;
-        dateItems.putIfAbsent(key, () => []).add('習慣：${habit.title}');
+        dateHabits.putIfAbsent(key, () => []).add(habit.title);
       } else {
         final targetDays = habit.notificationDays.isNotEmpty
             ? habit.notificationDays
             : habit.days;
 
         for (final day in targetDays) {
-          weekdayItems
+          weekdayHabits
               .putIfAbsent(_weekdayNumber(day), () => [])
-              .add('習慣：${habit.title}');
+              .add(habit.title);
         }
       }
     }
@@ -378,12 +381,12 @@ class NotificationService {
         final key = '${date.year}-${date.month}-${date.day}';
 
         dateValues[key] = date;
-        dateItems.putIfAbsent(key, () => []).add('タスク：${task.title}');
+        dateTasks.putIfAbsent(key, () => []).add(task.title);
       } else {
         for (final day in task.notificationDays) {
-          weekdayItems
+          weekdayTasks
               .putIfAbsent(_weekdayNumber(day), () => [])
-              .add('タスク：${task.title}');
+              .add(task.title);
         }
       }
     }
@@ -397,9 +400,9 @@ class NotificationService {
       final minute =
           int.tryParse(parts.length > 1 ? parts[1] : '') ?? 0;
 
-      for (final entry in weekdayItems.entries) {
-        final weekday = entry.key;
+      final weekdays = {...weekdayHabits.keys, ...weekdayTasks.keys};
 
+      for (final weekday in weekdays) {
         var scheduled = tz.TZDateTime(
           tz.local,
           now.year,
@@ -421,7 +424,12 @@ class NotificationService {
         await _plugin.zonedSchedule(
           id: id,
           title: '今日のリマインダー',
-          body: entry.value.join('・'),
+          body: [
+            if (weekdayHabits[weekday]?.isNotEmpty ?? false)
+              '習慣 ：${weekdayHabits[weekday]!.join('・')}',
+            if (weekdayTasks[weekday]?.isNotEmpty ?? false)
+              'タスク：${weekdayTasks[weekday]!.join('・')}',
+          ].join('\n'),
           scheduledDate: scheduled,
           notificationDetails: _details,
           androidScheduleMode:
@@ -433,8 +441,10 @@ class NotificationService {
         ids.add(id.toString());
       }
 
-      for (final entry in dateItems.entries) {
-        final date = dateValues[entry.key]!;
+      final dateKeys = {...dateHabits.keys, ...dateTasks.keys};
+
+      for (final key in dateKeys) {
+        final date = dateValues[key]!;
 
         final scheduled = tz.TZDateTime(
           tz.local,
@@ -448,13 +458,18 @@ class NotificationService {
         if (!scheduled.isAfter(now)) continue;
 
         final id = _stableId(
-          'batch|date|${entry.key}|$hour|$minute',
+          'batch|date|$key|$hour|$minute',
         );
 
         await _plugin.zonedSchedule(
           id: id,
           title: '今日のリマインダー',
-          body: entry.value.join('・'),
+          body: [
+            if (dateHabits[key]?.isNotEmpty ?? false)
+              '習慣 ：${dateHabits[key]!.join('・')}',
+            if (dateTasks[key]?.isNotEmpty ?? false)
+              'タスク：${dateTasks[key]!.join('・')}',
+          ].join('\n'),
           scheduledDate: scheduled,
           notificationDetails: _details,
           androidScheduleMode:
@@ -468,4 +483,5 @@ class NotificationService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(_batchIdsKey, ids);
   }
+
 }
