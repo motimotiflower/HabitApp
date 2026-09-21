@@ -262,6 +262,88 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
                     const SizedBox(height: 18),
 
+                    const Text("曜日", style: TextStyle(fontSize: 20)),
+                    const SizedBox(height: 12),
+
+                    SizedBox(
+                      width: 80,
+                      height: 40,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xffC8D0E8)),
+                          backgroundColor:
+                              selectedDays.length == days.length
+                                  ? const Color(0xff526FC5)
+                                  : Colors.white,
+                          foregroundColor:
+                              selectedDays.length == days.length
+                                  ? Colors.white
+                                  : const Color(0xff36498C),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            if (selectedDays.length == days.length) {
+                              selectedDays.clear();
+                            } else {
+                              selectedDays
+                                ..clear()
+                                ..addAll(days);
+                            }
+                          });
+                        },
+                        child: const Text("毎日"),
+                      ),
+                    ),
+                      ],
+                    ),
+
+
+                    const SizedBox(height: 12),
+
+
+
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final day in days)
+                          SizedBox(
+                            width: dayButtonSize,
+                            height: dayButtonSize,
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                  color: Color(0xffC8D0E8),
+                                ),
+                                backgroundColor: selectedDays.contains(day)
+                                    ? const Color(0xff526FC5)
+                                    : Colors.white,
+                                foregroundColor: selectedDays.contains(day)
+                                    ? Colors.white
+                                    : const Color(0xff36498C),
+                                shape: const CircleBorder(),
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  if (selectedDays.contains(day)) {
+                                    selectedDays.remove(day);
+                                  } else {
+                                    selectedDays.add(day);
+                                  }
+                                });
+                              },
+                              child: Text(day),
+                            ),
+                          ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
                     const Text("ジャンル", style: TextStyle(fontSize: 20)),
                     const SizedBox(height: 8),
 
@@ -325,87 +407,6 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                         );
                       }).toList(),
                     ),
-
-                    Row(
-                      children: [
-                        const Text("曜日", style: TextStyle(fontSize: 20)),
-                        const SizedBox(width: 12),
-                        SizedBox(
-                          width: 80,
-                          height: 40,
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Color(0xffC8D0E8)),
-                              backgroundColor:
-                                  selectedDays.length == days.length
-                                      ? const Color(0xff526FC5)
-                                      : Colors.white,
-                              foregroundColor:
-                                  selectedDays.length == days.length
-                                      ? Colors.white
-                                      : const Color(0xff36498C),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                if (selectedDays.length == days.length) {
-                                  selectedDays.clear();
-                                } else {
-                                  selectedDays
-                                    ..clear()
-                                    ..addAll(days);
-                                }
-                              });
-                            },
-                            child: const Text("毎日"),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-
-
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        for (final day in days)
-                          SizedBox(
-                            width: dayButtonSize,
-                            height: dayButtonSize,
-                            child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(
-                                  color: Color(0xffC8D0E8),
-                                ),
-                                backgroundColor: selectedDays.contains(day)
-                                    ? const Color(0xff526FC5)
-                                    : Colors.white,
-                                foregroundColor: selectedDays.contains(day)
-                                    ? Colors.white
-                                    : const Color(0xff36498C),
-                                shape: const CircleBorder(),
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size.zero,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  if (selectedDays.contains(day)) {
-                                    selectedDays.remove(day);
-                                  } else {
-                                    selectedDays.add(day);
-                                  }
-                                });
-                              },
-                              child: Text(day),
-                            ),
-                          ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
 
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
