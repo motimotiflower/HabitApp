@@ -30,7 +30,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   String _selectedCategory = '未設定';
   String? _hoveredCategory;
   IconData _selectedIcon = Icons.check;
-  bool _notificationEnabled = false;
+  bool _notificationEnabled = true; //新しい習慣は通知を初期ONにする
   List<String> _notificationDays = [];
   DateTime? _notificationDate;
   TimeOfDay _notificationTime = const TimeOfDay(hour: 9, minute: 0);
