@@ -516,7 +516,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                   backgroundColor: const Color(0xff526FC5),
                   foregroundColor: Colors.white,
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (titleController.text.trim().isEmpty) return;
 
                   //曜日が1つも選ばれていない場合は保存しない
