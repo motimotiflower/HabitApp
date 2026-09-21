@@ -74,16 +74,17 @@ DateTime? habitDisplaySourceDate(Habit habit, DateTime date) {
   if (habitIsBaseScheduledOn(habit, target)) {
     return habitIsSkippedOn(habit, target) ? null : target;
   }
-  if (!habit.carryOverIfIncomplete || !habitIsActiveOn(habit, target)) return null;
+  if (!habit.carryOverIfIncomplete) return null;
+
+  //締切後には新しい習慣は作らない。やり残しも締切日を過ぎたら終了
+  final end = habit.endDate == null ? null : habitDateOnly(habit.endDate!);
+  if (end != null && target.isAfter(end)) return null;
+  if (!habitIsActiveOn(habit, target)) return null;
 
   final source = habitLatestScheduledDate(habit, target);
   if (source == null || source == target) return null;
   //元の設定日をスキップしていたら、やり残しにも出さない
   if (habitIsSkippedOn(habit, source)) return null;
-
-  //表示期限がある場合は、その日数を超えたらやり残しから消す
-  if (habit.carryOverDays != null &&
-      target.difference(source).inDays > habit.carryOverDays!) return null;
 
   //まだ実際に来ていない設定日は、未来のやり残しにしない
   final today = habitDateOnly(DateTime.now());
