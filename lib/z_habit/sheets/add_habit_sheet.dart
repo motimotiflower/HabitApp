@@ -407,6 +407,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                       }).toList(),
                     ),
 
+                    const SizedBox(height: 18),
+
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: const Text('他の曜日と達成を共有'),
@@ -424,8 +426,6 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                         setState(() => _carryOverIfIncomplete = value);
                       },
                     ),
-
-                    const SizedBox(height: 12),
 
                     NotificationSettingsCard(
                       enabled: _notificationEnabled,
