@@ -36,7 +36,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
   late bool _carryOverIfIncomplete;
   late int _priority;
   DateTime? _endDate;
-  int? _carryOverDays;
   late List<Subtask> _subtasks;
 
   List<String> _categories = [];
@@ -77,7 +76,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
     _carryOverIfIncomplete = widget.habit.carryOverIfIncomplete;
     _priority = widget.habit.priority;
     _endDate = widget.habit.endDate;
-    _carryOverDays = widget.habit.carryOverDays;
     _subtasks = List<Subtask>.from(widget.habit.subtasks);
     _notificationDays = [...widget.habit.notificationDays];
     _notificationDate = widget.habit.notificationDate;
@@ -153,7 +151,7 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
         carryOverIfIncomplete: _carryOverIfIncomplete,
         priority: _priority,
         endDate: _endDate,
-        carryOverDays: _carryOverDays,
+        carryOverDays: null,
         skippedDates: List<String>.from(widget.habit.skippedDates),
         completionDates: Map<String, String>.from(widget.habit.completionDates),
         startedAt: widget.habit.startedAt,
@@ -368,28 +366,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                           ),
                       ],
                     ),
-
-                    if (_carryOverIfIncomplete) ...[
-                      const SizedBox(height: 14),
-                      const Text('やり残しの表示期限', style: TextStyle(fontSize: 18)),
-                      const SizedBox(height: 6),
-                      DropdownButtonFormField<int>(
-                        value: _carryOverDays ?? 0,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                        items: const [
-                          DropdownMenuItem(value: 0, child: Text('今まで通り（次の設定曜日まで）')),
-                          DropdownMenuItem(value: 1, child: Text('1日')),
-                          DropdownMenuItem(value: 2, child: Text('2日')),
-                          DropdownMenuItem(value: 3, child: Text('3日')),
-                          DropdownMenuItem(value: 7, child: Text('7日')),
-                        ],
-                        onChanged: (value) {
-                          setState(() => _carryOverDays = value == 0 ? null : value);
-                        },
-                      ),
-                    ],
 
                     const SizedBox(height: 12),
 
