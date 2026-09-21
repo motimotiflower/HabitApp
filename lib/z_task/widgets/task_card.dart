@@ -80,17 +80,28 @@ class _TaskCardState extends State<TaskCard> {
                         : Icons.keyboard_arrow_down),
                     onPressed: () => setState(() => _expanded = !_expanded),
                   ),
-                IconButton(
-                  tooltip: '編集',
-                  icon: const Icon(Icons.edit_outlined, size: 19),
-                  color: const Color(0xff526FC5),
-                  onPressed: widget.onEdit,
-                ),
-                IconButton(
-                  tooltip: '削除',
-                  icon: const Icon(Icons.delete_outline, size: 19),
-                  color: const Color(0xff526FC5),
-                  onPressed: widget.onDelete,
+                //習慣カードと同じく操作を3点メニューにまとめる
+                PopupMenuButton<String>(
+                  tooltip: '操作',
+                  icon: const Icon(
+                    Icons.more_vert,
+                    size: 20,
+                    color: Color(0xff526FC5),
+                  ),
+                  onSelected: (value) {
+                    if (value == 'edit') widget.onEdit();
+                    if (value == 'delete') widget.onDelete();
+                  },
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Text('編集'),
+                    ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Text('削除'),
+                    ),
+                  ],
                 ),
                 Checkbox(
                   value: task.isDone,
