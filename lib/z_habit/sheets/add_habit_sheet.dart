@@ -226,9 +226,9 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                         color: Color(0xff263A70),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
 
-                    const SizedBox(height: 6),
+                    //見出しと入力欄が重ならないよう余白をそろえる
                     const Text("タイトル", style: TextStyle(fontSize: 20)),
                     const SizedBox(height: 8),
 
@@ -300,8 +300,6 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
                     const SizedBox(height: 12),
 
-
-
                     Wrap(
                       spacing: 8,
                       children: [
@@ -357,8 +355,6 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                         ),
                       ],
                     ),
-
-
 
                     const SizedBox(height: 18),
 
