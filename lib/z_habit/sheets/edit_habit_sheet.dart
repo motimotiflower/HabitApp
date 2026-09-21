@@ -199,7 +199,13 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       //追加画面と同じくタイトル文字を入力欄の外に出す
-                      const Text('タイトル', style: TextStyle(fontSize: 20)),
+                      const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 2),
+                      child: Text(
+                        'タイトル',
+                        style: TextStyle(fontSize: 20, height: 1.3),
+                      ),
+                    ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: _titleController,
