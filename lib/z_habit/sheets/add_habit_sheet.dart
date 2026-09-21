@@ -229,7 +229,13 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     const SizedBox(height: 24),
 
                     //見出しと入力欄が重ならないよう余白をそろえる
-                    const Text("タイトル", style: TextStyle(fontSize: 20)),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 2),
+                      child: Text(
+                        'タイトル',
+                        style: TextStyle(fontSize: 20, height: 1.3),
+                      ),
+                    ),
                     const SizedBox(height: 8),
 
                     TextField(
