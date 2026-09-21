@@ -1,7 +1,8 @@
 //通知の曜日・日にち・時間をまとめて選ぶ共通UI
 import 'package:flutter/material.dart';
+import 'package:habitapp/notifications/notification_preference_storage.dart';
 
-class NotificationSettingsCard extends StatelessWidget {
+class NotificationSettingsCard extends StatefulWidget {
   const NotificationSettingsCard({
     super.key,
     required this.enabled,
@@ -52,8 +53,32 @@ class NotificationSettingsCard extends StatelessWidget {
   }
 
   @override
+  State<NotificationSettingsCard> createState() =>
+      _NotificationSettingsCardState();
+}
+
+class _NotificationSettingsCardState extends State<NotificationSettingsCard> {
+  bool _batchMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationMode();
+  }
+
+  //まとめ通知中か確認して個別の詳細設定を隠す
+  Future<void> _loadNotificationMode() async {
+    final settings = await NotificationPreferenceStorage.load();
+    if (!mounted) return;
+
+    setState(() {
+      _batchMode = settings.mode == GlobalNotificationMode.batch;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final usesDate = date != null;
+    final usesDate = widget.date != null;
 
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,11 +96,11 @@ class NotificationSettingsCard extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            value: enabled,
-            onChanged: onEnabledChanged,
+            value: widget.enabled,
+            onChanged: widget.onEnabledChanged,
           ),
 
-          if (enabled) ...[
+          if (widget.enabled && !_batchMode) ...[
             const SizedBox(height: 10),
             const Text(
               '通知するタイミング',
@@ -94,14 +119,14 @@ class NotificationSettingsCard extends StatelessWidget {
                   label: const Text('曜日'),
                   selected: !usesDate,
                   onSelected: (_) {
-                    onDateChanged(null);
+                    widget.onDateChanged(null);
                   },
                 ),
                 ChoiceChip(
                   label: const Text('日にち'),
                   selected: usesDate,
                   onSelected: (_) {
-                    onDaysChanged([]);
+                    widget.onDaysChanged([]);
                     _pickDate(context);
                   },
                 ),
@@ -115,7 +140,7 @@ class NotificationSettingsCard extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: _weekdays.map((day) {
-                  final selected = days.contains(day);
+                  final selected = widget.days.contains(day);
 
                   return ChoiceChip(
                     label: Text(day),
@@ -136,7 +161,7 @@ class NotificationSettingsCard extends StatelessWidget {
                         next.add(day);
                       }
 
-                      onDaysChanged(next);
+                      widget.onDaysChanged(next);
                     },
                   );
                 }).toList(),
@@ -149,7 +174,7 @@ class NotificationSettingsCard extends StatelessWidget {
                   color: Color(0xff526FC5),
                 ),
                 title: Text(
-                  '${date!.year}年${date!.month}月${date!.day}日',
+                  '${widget.date!.year}年${widget.date!.month}月${widget.date!.day}日',
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _pickDate(context),
@@ -172,7 +197,7 @@ class NotificationSettingsCard extends StatelessWidget {
               children: [
                 ..._templateHours.map((hour) {
                   final selected =
-                      time.hour == hour && time.minute == 0;
+                      widget.time.hour == hour && widget.time.minute == 0;
 
                   return ChoiceChip(
                     label: Text('${hour.toString().padLeft(2, '0')}:00'),
@@ -185,16 +210,16 @@ class NotificationSettingsCard extends StatelessWidget {
                           : const Color(0xff35415F),
                     ),
                     onSelected: (_) {
-                      onTimeChanged(TimeOfDay(hour: hour, minute: 0));
+                      widget.onTimeChanged(TimeOfDay(hour: hour, minute: 0));
                     },
                   );
                 }),
                 ActionChip(
                   avatar: const Icon(Icons.tune, size: 18),
                   label: Text(
-                    _templateHours.contains(time.hour) && time.minute == 0
+                    _templateHours.contains(widget.time.hour) && widget.time.minute == 0
                         ? 'カスタマイズ'
-                        : time.format(context),
+                        : widget.time.format(context),
                   ),
                   onPressed: () => _pickCustomTime(context),
                 ),
