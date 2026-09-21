@@ -35,7 +35,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
   late bool _shareCompletion;
   late bool _carryOverIfIncomplete;
   late int _priority;
-  DateTime? _endDate;
+  int? _deadlineWeekOffset;
+  int? _deadlineWeekday;
   late List<Subtask> _subtasks;
 
   List<String> _categories = [];
@@ -75,7 +76,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
     _shareCompletion = widget.habit.shareCompletion;
     _carryOverIfIncomplete = widget.habit.carryOverIfIncomplete;
     _priority = widget.habit.priority;
-    _endDate = widget.habit.endDate;
+    _deadlineWeekOffset = widget.habit.deadlineWeekOffset;
+    _deadlineWeekday = widget.habit.deadlineWeekday;
     _subtasks = List<Subtask>.from(widget.habit.subtasks);
     _notificationDays = [...widget.habit.notificationDays];
     _notificationDate = widget.habit.notificationDate;
@@ -150,7 +152,9 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
         shareCompletion: _shareCompletion,
         carryOverIfIncomplete: _carryOverIfIncomplete,
         priority: _priority,
-        endDate: _endDate,
+        endDate: null,
+                    deadlineWeekOffset: _deadlineWeekOffset,
+                    deadlineWeekday: _deadlineWeekday,
         carryOverDays: null,
         skippedDates: List<String>.from(widget.habit.skippedDates),
         completionDates: Map<String, String>.from(widget.habit.completionDates),
@@ -340,55 +344,51 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                     const SizedBox(height: 6),
                     Builder(
                       builder: (context) {
-                        //選択した曜日の「今週〜来週」だけを締切候補にする
-                        final today = DateTime.now();
-                        final base = DateTime(today.year, today.month, today.day);
-                        final monday =
-                            base.subtract(Duration(days: base.weekday - 1));
-                        final candidates = <DateTime>[];
+                        //実際の日付ではなく「今週/来週 + 曜日」を保存する
+                        final selectedWeekdays = _selectedDays
+                            .map((day) => days.indexOf(day) + 1)
+                            .where((weekday) => weekday > 0)
+                            .toList();
 
-                        for (var offset = 0; offset < 14; offset++) {
-                          final date = monday.add(Duration(days: offset));
-                          final weekday = days[date.weekday - 1];
-                          if (_selectedDays.contains(weekday) &&
-                              !date.isBefore(base)) {
-                            candidates.add(date);
-                          }
-                        }
+                        final currentValue =
+                            _deadlineWeekOffset == null || _deadlineWeekday == null
+                                ? null
+                                : '${_deadlineWeekOffset!}-${_deadlineWeekday!}';
 
-                        return DropdownButtonFormField<DateTime?>(
-                          value: candidates.any((date) =>
-                                  _endDate != null &&
-                                  DateUtils.isSameDay(date, _endDate))
-                              ? candidates.firstWhere((date) =>
-                                  DateUtils.isSameDay(date, _endDate))
-                              : null,
+                        return DropdownButtonFormField<String?>(
+                          value: currentValue,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                           ),
-                          hint: const Text('設定なし'),
                           items: [
-                            const DropdownMenuItem<DateTime?>(
+                            const DropdownMenuItem<String?>(
                               value: null,
                               child: Text('設定なし'),
                             ),
-                            ...candidates.map((date) {
-                              final weekLabel =
-                                  date.isBefore(monday.add(const Duration(days: 7)))
-                                      ? '今週'
-                                      : '来週';
-                              final weekday = days[date.weekday - 1];
-                              return DropdownMenuItem<DateTime?>(
-                                value: date,
-                                child: Text(
-                                  '$weekLabelの$weekday曜日  ${date.month}/${date.day}',
+                            for (final weekOffset in [0, 1])
+                              for (final weekday in selectedWeekdays)
+                                DropdownMenuItem<String?>(
+                                  value: '$weekOffset-$weekday',
+                                  child: Text(
+                                    '${weekOffset == 0 ? '今週' : '来週'}の'
+                                    '${days[weekday - 1]}曜日',
+                                  ),
                                 ),
-                              );
-                            }),
                           ],
                           onChanged: _selectedDays.isEmpty
                               ? null
-                              : (value) => setState(() => _endDate = value),
+                              : (value) {
+                                  setState(() {
+                                    if (value == null) {
+                                      _deadlineWeekOffset = null;
+                                      _deadlineWeekday = null;
+                                      return;
+                                    }
+                                    final parts = value.split('-');
+                                    _deadlineWeekOffset = int.parse(parts[0]);
+                                    _deadlineWeekday = int.parse(parts[1]);
+                                  });
+                                },
                         );
                       },
                     ),
