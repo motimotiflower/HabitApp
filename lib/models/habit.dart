@@ -24,6 +24,10 @@ class Habit {
   final Map<String, String> completionDates; //実際に達成した日
   final bool shareCompletion; //選択曜日で達成状態を共有するか
   final bool carryOverIfIncomplete; //未達成なら次の設定曜日まで表示するか
+  final int priority; //優先度 1:低 2:中 3:高
+  final DateTime? endDate; //習慣そのものの終了日（この日を含む）
+  final int? carryOverDays; //やり残しを表示する最大日数。nullなら従来通り
+  final List<String> skippedDates; //スキップした設定日 yyyy-MM-dd
   final DateTime? startedAt; //この習慣を使い始めた日
   final DateTime? archivedAt; //アーカイブした日。nullなら使用中
   final List<Subtask> subtasks; //親の下に表示するサブタスク
@@ -44,6 +48,10 @@ class Habit {
     Map<String, String>? completionDates,
     this.shareCompletion = false,
     this.carryOverIfIncomplete = false,
+    this.priority = 2,
+    this.endDate,
+    this.carryOverDays,
+    this.skippedDates = const [],
     this.startedAt,
     this.archivedAt,
     this.subtasks = const [],
@@ -69,6 +77,10 @@ class Habit {
       'completionDates': completionDates,
       'shareCompletion': shareCompletion,
       'carryOverIfIncomplete': carryOverIfIncomplete,
+      'priority': priority,
+      'endDate': endDate?.toIso8601String(),
+      'carryOverDays': carryOverDays,
+      'skippedDates': skippedDates,
       'startedAt': startedAt?.toIso8601String(),
       'archivedAt': archivedAt?.toIso8601String(),
       'subtasks': subtasks.map((subtask) => subtask.toJson()).toList(),
@@ -102,6 +114,10 @@ class Habit {
       ),
       shareCompletion: json['shareCompletion'] ?? false,
       carryOverIfIncomplete: json['carryOverIfIncomplete'] ?? false,
+      priority: json['priority'] ?? 2,
+      endDate: json['endDate'] != null ? DateTime.tryParse(json['endDate']) : null,
+      carryOverDays: json['carryOverDays'],
+      skippedDates: List<String>.from(json['skippedDates'] ?? []),
       //古いデータは開始日なしとして今まで通り表示する
       startedAt: json['startedAt'] != null
           ? DateTime.tryParse(json['startedAt'])
