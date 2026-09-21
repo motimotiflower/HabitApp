@@ -56,8 +56,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
   final List<IconData> _icons = const [
     Icons.menu_book_rounded,
     Icons.water_drop_rounded,
-    Icons.fitness_center_rounded,
-    Icons.self_improvement_rounded,
     Icons.favorite_rounded,
     Icons.star_rounded,
     Icons.music_note_rounded,
@@ -302,6 +300,64 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
 
                       const SizedBox(height: 18),
 
+                      const SizedBox(height: 18),
+                      const Text('ジャンル', style: TextStyle(fontSize: 18)),
+                      const SizedBox(height: 8),
+
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _categoryChip('未設定'),
+                          ..._categories.map(_categoryChip),
+                        ],
+                      ),
+
+
+
+                    //優先度は高・中・低の3段階
+                    const Text('優先度', style: TextStyle(fontSize: 18)),
+                    const SizedBox(height: 8),
+                    SegmentedButton<int>(
+                      segments: const [
+                        ButtonSegment(value: 1, label: Text('低')),
+                        ButtonSegment(value: 2, label: Text('中')),
+                        ButtonSegment(value: 3, label: Text('高')),
+                      ],
+                      selected: {_priority},
+                      onSelectionChanged: (value) {
+                        setState(() => _priority = value.first);
+                      },
+                    ),
+
+                    const SizedBox(height: 18),
+                      const SizedBox(height: 18),
+                      const Text('アイコン', style: TextStyle(fontSize: 18)),
+                      const SizedBox(height: 8),
+
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: _icons.map((icon) {
+                          final selected = _selectedIcon == icon;
+
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(24),
+                            onTap: () => setState(() => _selectedIcon = icon),
+                            child: CircleAvatar(
+                              backgroundColor: selected
+                                  ? const Color(0xff526FC5)
+                                  : const Color(0xffE8EDFC),
+                              child: Icon(
+                                icon,
+                                color: selected
+                                    ? Colors.white
+                                    : const Color(0xff526FC5),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
                       SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: const Text('他の曜日と達成を共有'),
@@ -322,22 +378,37 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
 
                     const SizedBox(height: 12),
 
-                    //優先度は高・中・低の3段階
-                    const Text('優先度', style: TextStyle(fontSize: 18)),
-                    const SizedBox(height: 8),
-                    SegmentedButton<int>(
-                      segments: const [
-                        ButtonSegment(value: 1, label: Text('低')),
-                        ButtonSegment(value: 2, label: Text('中')),
-                        ButtonSegment(value: 3, label: Text('高')),
-                      ],
-                      selected: {_priority},
-                      onSelectionChanged: (value) {
-                        setState(() => _priority = value.first);
-                      },
-                    ),
+                    NotificationSettingsCard(
+                        enabled: _notificationEnabled,
+                        days: _notificationDays,
+                        date: _notificationDate,
+                        time: _notificationTime,
+                        onEnabledChanged: (value) {
+                          setState(() {
+                            _notificationEnabled = value;
+                          });
+                        },
+                        onDaysChanged: (value) {
+                          setState(() {
+                            _notificationDays = value;
+                            _notificationDate = null;
+                          });
+                        },
+                        onDateChanged: (value) {
+                          setState(() {
+                            _notificationDate = value;
+                            if (value != null) {
+                              _notificationDays = [];
+                            }
+                          });
+                        },
+                        onTimeChanged: (value) {
+                          setState(() {
+                            _notificationTime = value;
+                          });
+                        },
+                      ),
 
-                    const SizedBox(height: 18),
                     const Text('習慣の締切', style: TextStyle(fontSize: 18)),
                     const SizedBox(height: 6),
                     Builder(
@@ -379,79 +450,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
 
                     const SizedBox(height: 12),
 
-                    NotificationSettingsCard(
-                        enabled: _notificationEnabled,
-                        days: _notificationDays,
-                        date: _notificationDate,
-                        time: _notificationTime,
-                        onEnabledChanged: (value) {
-                          setState(() {
-                            _notificationEnabled = value;
-                          });
-                        },
-                        onDaysChanged: (value) {
-                          setState(() {
-                            _notificationDays = value;
-                            _notificationDate = null;
-                          });
-                        },
-                        onDateChanged: (value) {
-                          setState(() {
-                            _notificationDate = value;
-                            if (value != null) {
-                              _notificationDays = [];
-                            }
-                          });
-                        },
-                        onTimeChanged: (value) {
-                          setState(() {
-                            _notificationTime = value;
-                          });
-                        },
-                      ),
-
-                      const SizedBox(height: 18),
-                      const Text('ジャンル', style: TextStyle(fontSize: 18)),
-                      const SizedBox(height: 8),
-
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _categoryChip('未設定'),
-                          ..._categories.map(_categoryChip),
-                        ],
-                      ),
-
-
-
-                      const SizedBox(height: 18),
-                      const Text('アイコン', style: TextStyle(fontSize: 18)),
-                      const SizedBox(height: 8),
-
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: _icons.map((icon) {
-                          final selected = _selectedIcon == icon;
-
-                          return InkWell(
-                            borderRadius: BorderRadius.circular(24),
-                            onTap: () => setState(() => _selectedIcon = icon),
-                            child: CircleAvatar(
-                              backgroundColor: selected
-                                  ? const Color(0xff526FC5)
-                                  : const Color(0xffE8EDFC),
-                              child: Icon(
-                                icon,
-                                color: selected
-                                    ? Colors.white
-                                    : const Color(0xff526FC5),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
                     ],
                   ),
                 ),
