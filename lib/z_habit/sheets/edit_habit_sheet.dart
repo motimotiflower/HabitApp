@@ -368,6 +368,8 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                         }).toList(),
                       ),
 
+                    const SizedBox(height: 18),
+
                     NotificationSettingsCard(
                         enabled: _notificationEnabled,
                         days: _notificationDays,
