@@ -267,6 +267,7 @@ class HabitPageState extends State<HabitPage> {
           completionHistory: Map<String, bool>.from(
             habit.completionHistory,
           ),
+          completionDates: Map<String, String>.from(habit.completionDates),
           shareCompletion: habit.shareCompletion,
           carryOverIfIncomplete: habit.carryOverIfIncomplete,
           priority: habit.priority,
@@ -307,6 +308,7 @@ class HabitPageState extends State<HabitPage> {
           completionHistory: Map<String, bool>.from(
             habit.completionHistory,
           ),
+          completionDates: Map<String, String>.from(habit.completionDates),
           shareCompletion: habit.shareCompletion,
           carryOverIfIncomplete: habit.carryOverIfIncomplete,
           priority: habit.priority,
