@@ -413,19 +413,21 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                       const SizedBox(height: 14),
                       const Text('やり残しの表示期限', style: TextStyle(fontSize: 18)),
                       const SizedBox(height: 6),
-                      DropdownButtonFormField<int?>(
-                        value: _carryOverDays,
+                      DropdownButtonFormField<int>(
+                        value: _carryOverDays ?? 0,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                         ),
                         items: const [
-                          DropdownMenuItem<int?>(value: null, child: Text('今まで通り（次の設定曜日まで）')),
-                          DropdownMenuItem<int?>(value: 1, child: Text('1日')),
-                          DropdownMenuItem<int?>(value: 2, child: Text('2日')),
-                          DropdownMenuItem<int?>(value: 3, child: Text('3日')),
-                          DropdownMenuItem<int?>(value: 7, child: Text('7日')),
+                          DropdownMenuItem(value: 0, child: Text('今まで通り（次の設定曜日まで）')),
+                          DropdownMenuItem(value: 1, child: Text('1日')),
+                          DropdownMenuItem(value: 2, child: Text('2日')),
+                          DropdownMenuItem(value: 3, child: Text('3日')),
+                          DropdownMenuItem(value: 7, child: Text('7日')),
                         ],
-                        onChanged: (value) => setState(() => _carryOverDays = value),
+                        onChanged: (value) {
+                          setState(() => _carryOverDays = value == 0 ? null : value);
+                        },
                       ),
                     ],
 
