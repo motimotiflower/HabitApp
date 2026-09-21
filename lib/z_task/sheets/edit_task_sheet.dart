@@ -5,6 +5,7 @@ import 'package:habitapp/models/subtask.dart';
 import 'package:habitapp/widgets/subtask_editor.dart';
 import 'package:habitapp/z_task/category_storage.dart';
 import 'package:habitapp/notifications/notification_settings_card.dart';
+import 'package:habitapp/notifications/notification_preference_storage.dart';
 
 class EditTaskSheet extends StatefulWidget {
   const EditTaskSheet({
@@ -91,12 +92,17 @@ class _EditTaskSheetState extends State<EditTaskSheet> {
   }
 
     //編集内容を保存する
-  void _saveTask() {
+  Future<void> _saveTask() async {
     final title = _titleController.text.trim();
 
     if (title.isEmpty) return;
 
+    final notificationSettings =
+        await NotificationPreferenceStorage.load();
+
+    //まとめ通知では個別の日付・曜日を使わないので入力チェックをしない
     if (_notificationEnabled &&
+        notificationSettings.mode != GlobalNotificationMode.batch &&
         _notificationDate == null &&
         _notificationDays.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
