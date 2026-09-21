@@ -369,6 +369,29 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                       ),
 
                     const SizedBox(height: 18),
+  
+
+                    const SizedBox(height: 18),
+
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('他の曜日と達成を共有'),
+                      value: _shareCompletion,
+                      onChanged: (value) {
+                        setState(() => _shareCompletion = value);
+                      },
+                    ),
+
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('やり残しの表示'),
+                      value: _carryOverIfIncomplete,
+                      onChanged: (value) {
+                        setState(() => _carryOverIfIncomplete = value);
+                      },
+                    ),
+
+                    const SizedBox(height: 18),
                       SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: const Text('他の曜日と達成を共有'),
