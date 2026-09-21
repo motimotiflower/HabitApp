@@ -34,6 +34,9 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
   late TimeOfDay _notificationTime;
   late bool _shareCompletion;
   late bool _carryOverIfIncomplete;
+  late int _priority;
+  DateTime? _endDate;
+  int? _carryOverDays;
   late List<Subtask> _subtasks;
 
   List<String> _categories = [];
@@ -72,6 +75,9 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
     _notificationEnabled = widget.habit.notificationEnabled;
     _shareCompletion = widget.habit.shareCompletion;
     _carryOverIfIncomplete = widget.habit.carryOverIfIncomplete;
+    _priority = widget.habit.priority;
+    _endDate = widget.habit.endDate;
+    _carryOverDays = widget.habit.carryOverDays;
     _subtasks = List<Subtask>.from(widget.habit.subtasks);
     _notificationDays = [...widget.habit.notificationDays];
     _notificationDate = widget.habit.notificationDate;
@@ -145,6 +151,11 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
         ),
         shareCompletion: _shareCompletion,
         carryOverIfIncomplete: _carryOverIfIncomplete,
+        priority: _priority,
+        endDate: _endDate,
+        carryOverDays: _carryOverDays,
+        skippedDates: List<String>.from(widget.habit.skippedDates),
+        completionDates: Map<String, String>.from(widget.habit.completionDates),
         startedAt: widget.habit.startedAt,
         archivedAt: widget.habit.archivedAt,
         subtasks: _subtasks,
@@ -308,6 +319,75 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                         setState(() => _carryOverIfIncomplete = value);
                       },
                     ),
+
+                    const SizedBox(height: 12),
+
+                    //優先度は高・中・低の3段階
+                    const Text('優先度', style: TextStyle(fontSize: 18)),
+                    const SizedBox(height: 8),
+                    SegmentedButton<int>(
+                      segments: const [
+                        ButtonSegment(value: 1, label: Text('低')),
+                        ButtonSegment(value: 2, label: Text('中')),
+                        ButtonSegment(value: 3, label: Text('高')),
+                      ],
+                      selected: {_priority},
+                      onSelectionChanged: (value) {
+                        setState(() => _priority = value.first);
+                      },
+                    ),
+
+                    const SizedBox(height: 18),
+                    const Text('習慣の締切', style: TextStyle(fontSize: 18)),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _endDate == null
+                                ? '設定なし'
+                                : '${_endDate!.year}年${_endDate!.month}月${_endDate!.day}日',
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: _endDate ?? DateTime.now(),
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) setState(() => _endDate = picked);
+                          },
+                          child: const Text('設定'),
+                        ),
+                        if (_endDate != null)
+                          TextButton(
+                            onPressed: () => setState(() => _endDate = null),
+                            child: const Text('解除'),
+                          ),
+                      ],
+                    ),
+
+                    if (_carryOverIfIncomplete) ...[
+                      const SizedBox(height: 14),
+                      const Text('やり残しの表示期限', style: TextStyle(fontSize: 18)),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<int?>(
+                        value: _carryOverDays,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                        ),
+                        items: const [
+                          DropdownMenuItem<int?>(value: null, child: Text('今まで通り（次の設定曜日まで）')),
+                          DropdownMenuItem<int?>(value: 1, child: Text('1日')),
+                          DropdownMenuItem<int?>(value: 2, child: Text('2日')),
+                          DropdownMenuItem<int?>(value: 3, child: Text('3日')),
+                          DropdownMenuItem<int?>(value: 7, child: Text('7日')),
+                        ],
+                        onChanged: (value) => setState(() => _carryOverDays = value),
+                      ),
+                    ],
 
                     const SizedBox(height: 12),
 
