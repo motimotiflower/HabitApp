@@ -55,8 +55,6 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
   final List<IconData> _icons = const [
     Icons.menu_book_rounded,
     Icons.water_drop_rounded,
-    Icons.fitness_center_rounded,
-    Icons.self_improvement_rounded,
     Icons.favorite_rounded,
     Icons.star_rounded,
     Icons.music_note_rounded,
@@ -230,6 +228,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     ),
                     const SizedBox(height: 16),
 
+                    const SizedBox(height: 6),
                     const Text("タイトル", style: TextStyle(fontSize: 20)),
                     const SizedBox(height: 8),
 
@@ -263,43 +262,111 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
                     const SizedBox(height: 18),
 
-                    const Text("曜日", style: TextStyle(fontSize: 20)),
-                    const SizedBox(height: 12),
+                    const Text("ジャンル", style: TextStyle(fontSize: 20)),
+                    const SizedBox(height: 8),
 
-                    SizedBox(
-                      width: 80,
-                      height: 40,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xffC8D0E8)),
-                          backgroundColor:
-                              selectedDays.length == days.length
-                                  ? const Color(0xff526FC5)
-                                  : Colors.white,
-                          foregroundColor:
-                              selectedDays.length == days.length
-                                  ? Colors.white
-                                  : const Color(0xff36498C),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _categoryChip('未設定'),
+                        ..._categories.map(_categoryChip),
+                        ActionChip(
+                          avatar: const Icon(Icons.add, size: 18),
+                          label: const Text('追加'),
+                          onPressed: _addCategory,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            if (selectedDays.length == days.length) {
-                              selectedDays.clear();
-                            } else {
-                              selectedDays
-                                ..clear()
-                                ..addAll(days);
-                            }
-                          });
-                        },
-                        child: const Text("毎日"),
-                      ),
+                      ],
                     ),
 
+
+
+                    const SizedBox(height: 18),
+
+                    //優先度は高・中・低の3段階
+                    const Text('優先度', style: TextStyle(fontSize: 18)),
+                    const SizedBox(height: 8),
+                    SegmentedButton<int>(
+                      segments: const [
+                        ButtonSegment(value: 1, label: Text('低')),
+                        ButtonSegment(value: 2, label: Text('中')),
+                        ButtonSegment(value: 3, label: Text('高')),
+                      ],
+                      selected: {_priority},
+                      onSelectionChanged: (value) {
+                        setState(() => _priority = value.first);
+                      },
+                    ),
+
+                    const SizedBox(height: 18),
+                    const Text("アイコン", style: TextStyle(fontSize: 20)),
+                    const SizedBox(height: 8),
+
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: _icons.map((icon) {
+                        final selected = _selectedIcon == icon;
+
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(24),
+                          onTap: () => setState(() => _selectedIcon = icon),
+                          child: CircleAvatar(
+                            backgroundColor: selected
+                                ? const Color(0xff526FC5)
+                                : const Color(0xffE8EDFC),
+                            child: Icon(
+                              icon,
+                              color: selected
+                                  ? Colors.white
+                                  : const Color(0xff526FC5),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+
+                    Row(
+                      children: [
+                        const Text("曜日", style: TextStyle(fontSize: 20)),
+                        const SizedBox(width: 12),
+                        SizedBox(
+                          width: 80,
+                          height: 40,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xffC8D0E8)),
+                              backgroundColor:
+                                  selectedDays.length == days.length
+                                      ? const Color(0xff526FC5)
+                                      : Colors.white,
+                              foregroundColor:
+                                  selectedDays.length == days.length
+                                      ? Colors.white
+                                      : const Color(0xff36498C),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                if (selectedDays.length == days.length) {
+                                  selectedDays.clear();
+                                } else {
+                                  selectedDays
+                                    ..clear()
+                                    ..addAll(days);
+                                }
+                              });
+                            },
+                            child: const Text("毎日"),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 12),
+
+
 
                     Wrap(
                       spacing: 8,
@@ -360,22 +427,39 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
 
                     const SizedBox(height: 12),
 
-                    //優先度は高・中・低の3段階
-                    const Text('優先度', style: TextStyle(fontSize: 18)),
-                    const SizedBox(height: 8),
-                    SegmentedButton<int>(
-                      segments: const [
-                        ButtonSegment(value: 1, label: Text('低')),
-                        ButtonSegment(value: 2, label: Text('中')),
-                        ButtonSegment(value: 3, label: Text('高')),
-                      ],
-                      selected: {_priority},
-                      onSelectionChanged: (value) {
-                        setState(() => _priority = value.first);
+                    NotificationSettingsCard(
+                      enabled: _notificationEnabled,
+                      days: _notificationDays,
+                      date: _notificationDate,
+                      time: _notificationTime,
+                      onEnabledChanged: (value) {
+                        setState(() {
+                          _notificationEnabled = value;
+                        });
+                      },
+                      onDaysChanged: (value) {
+                        setState(() {
+                          _notificationDays = value;
+                          _notificationDate = null;
+                        });
+                      },
+                      onDateChanged: (value) {
+                        setState(() {
+                          _notificationDate = value;
+                          if (value != null) {
+                            _notificationDays = [];
+                          }
+                        });
+                      },
+                      onTimeChanged: (value) {
+                        setState(() {
+                          _notificationTime = value;
+                        });
                       },
                     ),
 
                     const SizedBox(height: 18),
+
                     const Text('習慣の締切', style: TextStyle(fontSize: 18)),
                     const SizedBox(height: 6),
                     Builder(
@@ -416,87 +500,6 @@ class _AddHabitSheetState extends State<AddHabitSheet> {
                     ),
 
                     const SizedBox(height: 12),
-
-                    NotificationSettingsCard(
-                      enabled: _notificationEnabled,
-                      days: _notificationDays,
-                      date: _notificationDate,
-                      time: _notificationTime,
-                      onEnabledChanged: (value) {
-                        setState(() {
-                          _notificationEnabled = value;
-                        });
-                      },
-                      onDaysChanged: (value) {
-                        setState(() {
-                          _notificationDays = value;
-                          _notificationDate = null;
-                        });
-                      },
-                      onDateChanged: (value) {
-                        setState(() {
-                          _notificationDate = value;
-                          if (value != null) {
-                            _notificationDays = [];
-                          }
-                        });
-                      },
-                      onTimeChanged: (value) {
-                        setState(() {
-                          _notificationTime = value;
-                        });
-                      },
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    const Text("ジャンル", style: TextStyle(fontSize: 20)),
-                    const SizedBox(height: 8),
-
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _categoryChip('未設定'),
-                        ..._categories.map(_categoryChip),
-                        ActionChip(
-                          avatar: const Icon(Icons.add, size: 18),
-                          label: const Text('追加'),
-                          onPressed: _addCategory,
-                        ),
-                      ],
-                    ),
-
-
-
-                    const SizedBox(height: 18),
-
-                    const Text("アイコン", style: TextStyle(fontSize: 20)),
-                    const SizedBox(height: 8),
-
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: _icons.map((icon) {
-                        final selected = _selectedIcon == icon;
-
-                        return InkWell(
-                          borderRadius: BorderRadius.circular(24),
-                          onTap: () => setState(() => _selectedIcon = icon),
-                          child: CircleAvatar(
-                            backgroundColor: selected
-                                ? const Color(0xff526FC5)
-                                : const Color(0xffE8EDFC),
-                            child: Icon(
-                              icon,
-                              color: selected
-                                  ? Colors.white
-                                  : const Color(0xff526FC5),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
 
                     const SizedBox(height: 20),
                   ],
