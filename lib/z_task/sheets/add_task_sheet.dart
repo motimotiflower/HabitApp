@@ -5,6 +5,7 @@ import 'package:habitapp/models/subtask.dart';
 import 'package:habitapp/widgets/subtask_editor.dart';
 import 'package:habitapp/z_task/category_storage.dart';
 import 'package:habitapp/notifications/notification_settings_card.dart';
+import 'package:habitapp/notifications/notification_preference_storage.dart';
 
 class AddTaskSheet extends StatefulWidget {
   const AddTaskSheet({super.key, required this.onAddTask});
@@ -66,12 +67,17 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
 
   //通知時刻を選ぶ
     //タスクを追加する
-  void _addTask() {
+  Future<void> _addTask() async {
     final title = _titleController.text.trim();
 
     if (title.isEmpty) return;
 
+    final notificationSettings =
+        await NotificationPreferenceStorage.load();
+
+    //まとめ通知では個別の日付・曜日を使わないので入力チェックをしない
     if (_notificationEnabled &&
+        notificationSettings.mode != GlobalNotificationMode.batch &&
         _notificationDate == null &&
         _notificationDays.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
