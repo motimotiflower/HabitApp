@@ -32,12 +32,10 @@ bool habitIsActiveOn(Habit habit, DateTime date) {
   final target = habitDateOnly(date);
   final started = habit.startedAt == null ? null : habitDateOnly(habit.startedAt!);
   final archived = habit.archivedAt == null ? null : habitDateOnly(habit.archivedAt!);
-  final ended = habit.endDate == null ? null : habitDateOnly(habit.endDate!);
-
-  //作成前・アーカイブ後・終了日より後には新しい習慣を表示しない
+  //締切は繰り返しルールなので、習慣そのものは終了させない
+  //作成前・アーカイブ後には新しい習慣を表示しない
   if (started != null && target.isBefore(started)) return false;
   if (archived != null && !target.isBefore(archived)) return false;
-  if (ended != null && target.isAfter(ended)) return false;
   return true;
 }
 
@@ -76,13 +74,22 @@ DateTime? habitDisplaySourceDate(Habit habit, DateTime date) {
   }
   if (!habit.carryOverIfIncomplete) return null;
 
-  //締切後には新しい習慣は作らない。やり残しも締切日を過ぎたら終了
-  final end = habit.endDate == null ? null : habitDateOnly(habit.endDate!);
-  if (end != null && target.isAfter(end)) return null;
   if (!habitIsActiveOn(habit, target)) return null;
 
   final source = habitLatestScheduledDate(habit, target);
   if (source == null || source == target) return null;
+
+  //「今週/来週 + 曜日」を元の設定日の週から毎回計算する
+  if (habit.deadlineWeekOffset != null && habit.deadlineWeekday != null) {
+    final sourceMonday = habitMonday(source);
+    final deadline = sourceMonday.add(
+      Duration(
+        days: habit.deadlineWeekOffset! * 7 + habit.deadlineWeekday! - 1,
+      ),
+    );
+    if (target.isAfter(deadline)) return null;
+  }
+
   //元の設定日をスキップしていたら、やり残しにも出さない
   if (habitIsSkippedOn(habit, source)) return null;
 
