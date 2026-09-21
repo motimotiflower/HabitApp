@@ -368,11 +368,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                         }).toList(),
                       ),
 
-                    const SizedBox(height: 18),
-  
-
-                    const SizedBox(height: 18),
-
                     NotificationSettingsCard(
                         enabled: _notificationEnabled,
                         days: _notificationDays,
@@ -403,9 +398,6 @@ class _EditHabitSheetState extends State<EditHabitSheet> {
                           });
                         },
                       ),
-
-
-                    const SizedBox(height: 18),
 
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
