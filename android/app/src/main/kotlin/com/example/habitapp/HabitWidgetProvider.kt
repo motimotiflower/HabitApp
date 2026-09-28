@@ -67,7 +67,6 @@ class HabitWidgetProvider : AppWidgetProvider() {
             val raw = prefs.getString("flutter.habits", null)
             val weekdays = arrayOf("月", "火", "水", "木", "金", "土", "日")
             val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.JAPAN)
-            val output = SimpleDateFormat("M/d", Locale.JAPAN)
             val today = formatter.format(Date())
             val calendar = Calendar.getInstance()
             val day = weekdays[calendar.get(Calendar.DAY_OF_WEEK).let { if (it == 1) 6 else it - 2 }]
@@ -112,28 +111,13 @@ class HabitWidgetProvider : AppWidgetProvider() {
 
                     if (sourceKey == null) continue
                     val done = item.optJSONObject("completionHistory")?.optBoolean(sourceKey, false) ?: false
-
-                    var deadlineText = ""
-                    if (item.has("deadlineWeekday") && !item.isNull("deadlineWeekday")) {
-                        val deadlineWeekday = item.optInt("deadlineWeekday")
-                        val sourceDate = formatter.parse(sourceKey)
-                        if (sourceDate != null) {
-                            val sourceCalendar = Calendar.getInstance().apply { time = sourceDate }
-                            val sourceDartWeekday = sourceCalendar.get(Calendar.DAY_OF_WEEK).let { if (it == 1) 7 else it - 1 }
-                            var daysAhead = (deadlineWeekday - sourceDartWeekday + 7) % 7
-                            if (daysAhead == 0) daysAhead = 7
-                            sourceCalendar.add(Calendar.DAY_OF_YEAR, daysAhead)
-                            deadlineText = "  ${output.format(sourceCalendar.time)}まで"
-                        }
-                    }
-
                     val priority = item.optInt("priority", 2)
                     candidates.add(
                         Triple(
                             priority,
                             i,
                             WidgetRow(
-                                (if (done) "☑  " else "☐  ") + item.optString("title") + deadlineText,
+                                (if (done) "☑  " else "☐  ") + item.optString("title"),
                                 item.optString("id"),
                                 sourceKey
                             )
