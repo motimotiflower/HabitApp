@@ -6,7 +6,8 @@ import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
 
-data class WidgetRow(val text: String, val id: String)
+//sourceKeyは、やり残しの場合に元の設定日の達成記録を更新するために使う
+data class WidgetRow(val text: String, val id: String, val sourceKey: String? = null)
 
 object WidgetIntents {
     fun open(context: Context, action: String, requestCode: Int): PendingIntent {
@@ -22,17 +23,19 @@ object WidgetIntents {
         )
     }
 
-    // ホーム画面上で完了状態を切り替えるBroadcastを作る
+    //ホーム画面上で完了状態を切り替えるBroadcastを作る
     fun toggle(
         context: Context,
         receiver: Class<*>,
         action: String,
         itemId: String,
+        sourceKey: String?,
         requestCode: Int
     ): PendingIntent {
         val intent = Intent(context, receiver).apply {
             this.action = action
             putExtra("item_id", itemId)
+            if (sourceKey != null) putExtra("source_key", sourceKey)
         }
         return PendingIntent.getBroadcast(
             context,
@@ -74,7 +77,14 @@ fun bindToggleRows(
             val receiver = if (action.contains("HABIT")) HabitWidgetProvider::class.java else TaskWidgetProvider::class.java
             views.setOnClickPendingIntent(
                 viewId,
-                WidgetIntents.toggle(context, receiver, action, rows[index].id, requestCodeBase + index)
+                WidgetIntents.toggle(
+                    context,
+                    receiver,
+                    action,
+                    rows[index].id,
+                    rows[index].sourceKey,
+                    requestCodeBase + index
+                )
             )
         }
     }
