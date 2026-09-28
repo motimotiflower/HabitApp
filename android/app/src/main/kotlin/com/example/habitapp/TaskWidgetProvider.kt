@@ -32,7 +32,8 @@ class TaskWidgetProvider : AppWidgetProvider() {
             break
         }
 
-        prefs.edit().putString("flutter.tasks", array.toString()).apply()
+        // 保存完了後にウィジェットを描き直す
+        prefs.edit().putString("flutter.tasks", array.toString()).commit()
         updateAll(context)
     }
 
@@ -50,6 +51,9 @@ class TaskWidgetProvider : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.widget_list)
             views.setTextViewText(R.id.widget_title, "タスク")
             views.setTextViewText(R.id.widget_add, "＋")
+
+            // 余白はタスクページ、＋はタスク追加画面を開く
+            views.setOnClickPendingIntent(R.id.widget_body, WidgetIntents.open(context, "task", 200))
             views.setOnClickPendingIntent(R.id.widget_title, WidgetIntents.open(context, "task", 201))
             views.setOnClickPendingIntent(R.id.widget_add, WidgetIntents.open(context, "task_add", 202))
 
