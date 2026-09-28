@@ -27,7 +27,7 @@ class HabitWidgetProvider : AppWidgetProvider() {
         val array = JSONArray(raw)
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.JAPAN).format(Date())
 
-        // 押された習慣の「今日」の達成状態だけを反転する
+        //押された習慣の「今日」の達成状態だけを反転する
         for (i in 0 until array.length()) {
             val item = array.getJSONObject(i)
             if (item.optString("id") != habitId) continue
@@ -37,7 +37,7 @@ class HabitWidgetProvider : AppWidgetProvider() {
             break
         }
 
-        // commitで保存を完了してから、すぐウィジェットを描き直す
+        //保存完了後にすぐウィジェットを描き直す
         prefs.edit().putString("flutter.habits", array.toString()).commit()
         updateAll(context)
     }
@@ -57,7 +57,7 @@ class HabitWidgetProvider : AppWidgetProvider() {
             views.setTextViewText(R.id.widget_title, "今日の習慣")
             views.setTextViewText(R.id.widget_add, "＋")
 
-            // 余白を押したときは習慣ページを開く
+            //余白を押したときは習慣ページを開く
             views.setOnClickPendingIntent(R.id.widget_body, WidgetIntents.open(context, "habit", 100))
             views.setOnClickPendingIntent(R.id.widget_title, WidgetIntents.open(context, "habit", 101))
             views.setOnClickPendingIntent(R.id.widget_add, WidgetIntents.open(context, "habit_add", 102))
@@ -66,8 +66,8 @@ class HabitWidgetProvider : AppWidgetProvider() {
             val raw = prefs.getString("flutter.habits", null)
             val weekdays = arrayOf("月", "火", "水", "木", "金", "土", "日")
             val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.JAPAN)
-            val todayDate = Date()
-            val today = formatter.format(todayDate)
+            val output = SimpleDateFormat("M/d", Locale.JAPAN)
+            val today = formatter.format(Date())
             val calendar = Calendar.getInstance()
             val day = weekdays[calendar.get(Calendar.DAY_OF_WEEK).let { if (it == 1) 6 else it - 2 }]
             val rows = mutableListOf<WidgetRow>()
@@ -99,7 +99,6 @@ class HabitWidgetProvider : AppWidgetProvider() {
                     if (scheduled(day) && !isSkipped(today)) {
                         sourceKey = today
                     } else if (item.optBoolean("carryOverIfIncomplete", false)) {
-                        // 直近の設定日から次の設定日前までだけ、未達成を引き継ぐ
                         for (offset in 1..7) {
                             val previous = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -offset) }
                             val previousDay = weekdays[previous.get(Calendar.DAY_OF_WEEK).let { if (it == 1) 6 else it - 2 }]
@@ -114,17 +113,36 @@ class HabitWidgetProvider : AppWidgetProvider() {
                     val done = item.optJSONObject("completionHistory")?.optBoolean(sourceKey, false) ?: false
                     if (sourceKey != today && done) continue
 
+                    //元の設定日から、この回の締切日を計算する
+                    var deadlineText = ""
+                    if (item.has("deadlineWeekday") && !item.isNull("deadlineWeekday")) {
+                        val deadlineWeekday = item.optInt("deadlineWeekday")
+                        val sourceDate = formatter.parse(sourceKey)
+                        if (sourceDate != null) {
+                            val sourceCalendar = Calendar.getInstance().apply { time = sourceDate }
+                            val sourceDartWeekday = sourceCalendar.get(Calendar.DAY_OF_WEEK).let { if (it == 1) 7 else it - 1 }
+                            var daysAhead = (deadlineWeekday - sourceDartWeekday + 7) % 7
+                            if (daysAhead == 0) daysAhead = 7
+                            sourceCalendar.add(Calendar.DAY_OF_YEAR, daysAhead)
+                            deadlineText = "  ${output.format(sourceCalendar.time)}まで"
+                        }
+                    }
+
                     val priority = item.optInt("priority", 2)
                     candidates.add(
                         Triple(
                             priority,
                             i,
-                            WidgetRow((if (done) "☑  " else "☐  ") + item.optString("title"), item.optString("id"))
+                            WidgetRow(
+                                (if (done) "☑  " else "☐  ") +
+                                    item.optString("title") + deadlineText,
+                                item.optString("id")
+                            )
                         )
                     )
                 }
 
-                // アプリと同じく優先度順。同じ優先度は保存順を保つ
+                //アプリと同じく優先度順。同じ優先度は保存順を保つ
                 candidates.sortWith(compareByDescending<Triple<Int, Int, WidgetRow>> { it.first }.thenBy { it.second })
                 rows.addAll(candidates.take(5).map { it.third })
             }
