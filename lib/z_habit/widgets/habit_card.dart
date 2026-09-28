@@ -88,9 +88,7 @@ class _HabitCardState extends State<HabitCard> {
                               : null,
                         ),
                       ),
-                      if (habit.category != '未設定' ||
-                          habit.priority >= 2 ||
-                          deadlineLabel != null) ...[
+                      if (habit.category != '未設定' || habit.priority >= 2 || deadlineLabel != null) ...[
                         const SizedBox(height: 5),
                         Wrap(
                           spacing: 10,
@@ -98,42 +96,24 @@ class _HabitCardState extends State<HabitCard> {
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             if (habit.category != '未設定')
-                              Text(
-                                habit.category,
-                                style: TextStyle(fontSize: 12, color: accentColor),
-                              ),
+                              Text(habit.category, style: TextStyle(fontSize: 12, color: accentColor)),
                             if (habit.priority >= 2)
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    Icons.flag_rounded,
-                                    size: 14,
-                                    color: habit.priority == 3
-                                        ? const Color(0xff526FC5)
-                                        : const Color(0xffA8B1C9),
-                                  ),
+                                  Icon(Icons.flag_rounded, size: 14, color: habit.priority == 3 ? const Color(0xff526FC5) : const Color(0xffA8B1C9)),
                                   const SizedBox(width: 2),
                                   Text(
                                     habit.priority == 3 ? '高' : '中',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: habit.priority == 3
-                                          ? const Color(0xff526FC5)
-                                          : const Color(0xffA8B1C9),
-                                    ),
+                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: habit.priority == 3 ? const Color(0xff526FC5) : const Color(0xffA8B1C9)),
                                   ),
                                 ],
                               ),
                             if (deadlineLabel != null)
                               Text(
                                 deadlineLabel,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xff81889B),
-                                ),
+                                //締切は一覧から見つけやすいよう赤で表示
+                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xffD95C5C)),
                               ),
                           ],
                         ),
@@ -157,7 +137,6 @@ class _HabitCardState extends State<HabitCard> {
                       ),
                     ),
                   ),
-                //操作を3点メニューにまとめる
                 PopupMenuButton<String>(
                   tooltip: 'その他',
                   icon: const Icon(Icons.more_vert_rounded, size: 21, color: Color(0xff526FC5)),
