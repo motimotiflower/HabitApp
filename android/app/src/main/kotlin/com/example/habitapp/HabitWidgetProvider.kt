@@ -1,6 +1,5 @@
 package com.example.habitapp
 
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
@@ -38,7 +37,8 @@ class HabitWidgetProvider : AppWidgetProvider() {
             break
         }
 
-        prefs.edit().putString("flutter.habits", array.toString()).apply()
+        // commitで保存を完了してから、すぐウィジェットを描き直す
+        prefs.edit().putString("flutter.habits", array.toString()).commit()
         updateAll(context)
     }
 
@@ -56,6 +56,9 @@ class HabitWidgetProvider : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.widget_list)
             views.setTextViewText(R.id.widget_title, "今日の習慣")
             views.setTextViewText(R.id.widget_add, "＋")
+
+            // 余白を押したときは習慣ページを開く
+            views.setOnClickPendingIntent(R.id.widget_body, WidgetIntents.open(context, "habit", 100))
             views.setOnClickPendingIntent(R.id.widget_title, WidgetIntents.open(context, "habit", 101))
             views.setOnClickPendingIntent(R.id.widget_add, WidgetIntents.open(context, "habit_add", 102))
 
@@ -96,7 +99,7 @@ class HabitWidgetProvider : AppWidgetProvider() {
                     if (scheduled(day) && !isSkipped(today)) {
                         sourceKey = today
                     } else if (item.optBoolean("carryOverIfIncomplete", false)) {
-                        //直近の設定日から次の設定日前までだけ、未達成を引き継ぐ
+                        // 直近の設定日から次の設定日前までだけ、未達成を引き継ぐ
                         for (offset in 1..7) {
                             val previous = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -offset) }
                             val previousDay = weekdays[previous.get(Calendar.DAY_OF_WEEK).let { if (it == 1) 6 else it - 2 }]
@@ -121,7 +124,7 @@ class HabitWidgetProvider : AppWidgetProvider() {
                     )
                 }
 
-                //アプリと同じく優先度順。同じ優先度は保存順を保つ
+                // アプリと同じく優先度順。同じ優先度は保存順を保つ
                 candidates.sortWith(compareByDescending<Triple<Int, Int, WidgetRow>> { it.first }.thenBy { it.second })
                 rows.addAll(candidates.take(5).map { it.third })
             }
