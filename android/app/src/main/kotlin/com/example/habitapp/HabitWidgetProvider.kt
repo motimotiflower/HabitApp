@@ -22,22 +22,23 @@ class HabitWidgetProvider : AppWidgetProvider() {
         if (intent.action != ACTION_TOGGLE_HABIT) return
 
         val habitId = intent.getStringExtra(EXTRA_ID) ?: return
+        val sourceKey = intent.getStringExtra(EXTRA_SOURCE_KEY)
+            ?: SimpleDateFormat("yyyy-MM-dd", Locale.JAPAN).format(Date())
         val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
         val raw = prefs.getString("flutter.habits", null) ?: return
         val array = JSONArray(raw)
-        val today = SimpleDateFormat("yyyy-MM-dd", Locale.JAPAN).format(Date())
 
-        //押された習慣の「今日」の達成状態だけを反転する
+        //ウィジェットに表示していた回の達成状態を反転する
         for (i in 0 until array.length()) {
             val item = array.getJSONObject(i)
             if (item.optString("id") != habitId) continue
             val history = item.optJSONObject("completionHistory")
                 ?: org.json.JSONObject().also { item.put("completionHistory", it) }
-            history.put(today, !history.optBoolean(today, false))
+            history.put(sourceKey, !history.optBoolean(sourceKey, false))
             break
         }
 
-        //保存完了後にすぐウィジェットを描き直す
+        //チェック後も項目を消さず、チェック表示だけ更新する
         prefs.edit().putString("flutter.habits", array.toString()).commit()
         updateAll(context)
     }
@@ -45,6 +46,7 @@ class HabitWidgetProvider : AppWidgetProvider() {
     companion object {
         private const val ACTION_TOGGLE_HABIT = "com.example.habitapp.TOGGLE_HABIT"
         private const val EXTRA_ID = "item_id"
+        private const val EXTRA_SOURCE_KEY = "source_key"
 
         fun updateAll(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
@@ -57,7 +59,6 @@ class HabitWidgetProvider : AppWidgetProvider() {
             views.setTextViewText(R.id.widget_title, "今日の習慣")
             views.setTextViewText(R.id.widget_add, "＋")
 
-            //余白を押したときは習慣ページを開く
             views.setOnClickPendingIntent(R.id.widget_body, WidgetIntents.open(context, "habit", 100))
             views.setOnClickPendingIntent(R.id.widget_title, WidgetIntents.open(context, "habit", 101))
             views.setOnClickPendingIntent(R.id.widget_add, WidgetIntents.open(context, "habit_add", 102))
@@ -111,9 +112,7 @@ class HabitWidgetProvider : AppWidgetProvider() {
 
                     if (sourceKey == null) continue
                     val done = item.optJSONObject("completionHistory")?.optBoolean(sourceKey, false) ?: false
-                    if (sourceKey != today && done) continue
 
-                    //元の設定日から、この回の締切日を計算する
                     var deadlineText = ""
                     if (item.has("deadlineWeekday") && !item.isNull("deadlineWeekday")) {
                         val deadlineWeekday = item.optInt("deadlineWeekday")
@@ -134,15 +133,14 @@ class HabitWidgetProvider : AppWidgetProvider() {
                             priority,
                             i,
                             WidgetRow(
-                                (if (done) "☑  " else "☐  ") +
-                                    item.optString("title") + deadlineText,
-                                item.optString("id")
+                                (if (done) "☑  " else "☐  ") + item.optString("title") + deadlineText,
+                                item.optString("id"),
+                                sourceKey
                             )
                         )
                     )
                 }
 
-                //アプリと同じく優先度順。同じ優先度は保存順を保つ
                 candidates.sortWith(compareByDescending<Triple<Int, Int, WidgetRow>> { it.first }.thenBy { it.second })
                 rows.addAll(candidates.take(5).map { it.third })
             }
