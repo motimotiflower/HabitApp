@@ -18,6 +18,24 @@ DateTime habitMonday(DateTime date) {
   return value.subtract(Duration(days: value.weekday - 1));
 }
 
+//元の設定日から、この回の締切日を求める
+DateTime? habitDeadlineForSourceDate(Habit habit, DateTime sourceDate) {
+  if (habit.deadlineWeekday == null) return habit.endDate;
+
+  final source = habitDateOnly(sourceDate);
+  var daysAhead = (habit.deadlineWeekday! - source.weekday + 7) % 7;
+  //同じ曜日なら当日ではなく翌週を締切にする
+  if (daysAhead == 0) daysAhead = 7;
+  return source.add(Duration(days: daysAhead));
+}
+
+//一覧表示用の短い締切表記
+String? habitDeadlineLabel(Habit habit, DateTime sourceDate) {
+  final deadline = habitDeadlineForSourceDate(habit, sourceDate);
+  if (deadline == null) return null;
+  return '${deadline.month}/${deadline.day}まで';
+}
+
 //指定日の達成状態が参照するキーを返す
 String habitCompletionKeyForDate(Habit habit, DateTime scheduledDate) {
   if (!habit.shareCompletion) return habitDateKey(scheduledDate);
@@ -79,15 +97,9 @@ DateTime? habitDisplaySourceDate(Habit habit, DateTime date) {
   final source = habitLatestScheduledDate(habit, target);
   if (source == null || source == target) return null;
 
-  //締切は元の設定日から見て「次に来る指定曜日」まで
-  //同じ曜日を指定した場合は、その日の締切ではなく翌週まで繰り越す
-  if (habit.deadlineWeekday != null) {
-    var daysAhead = (habit.deadlineWeekday! - source.weekday + 7) % 7;
-    if (daysAhead == 0) daysAhead = 7;
-
-    final deadline = source.add(Duration(days: daysAhead));
-    if (target.isAfter(deadline)) return null;
-  }
+  //締切を過ぎたやり残しは表示しない
+  final deadline = habitDeadlineForSourceDate(habit, source);
+  if (deadline != null && target.isAfter(deadline)) return null;
 
   //元の設定日をスキップしていたら、やり残しにも出さない
   if (habitIsSkippedOn(habit, source)) return null;
