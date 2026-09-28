@@ -38,7 +38,7 @@ class HabitWidgetProvider : AppWidgetProvider() {
             break
         }
 
-        //チェック後も項目を消さず、チェック表示だけ更新する
+        //チェック直後は表示を残し、次の通常更新でやり残し判定を整理する
         prefs.edit().putString("flutter.habits", array.toString()).commit()
         updateAll(context)
     }
@@ -83,6 +83,7 @@ class HabitWidgetProvider : AppWidgetProvider() {
                     if (startedAt != null && startedAt.substringBefore("T") > today) continue
                     if (archivedAt != null && archivedAt.substringBefore("T") <= today) continue
 
+                    val history = item.optJSONObject("completionHistory")
                     val skipped = item.optJSONArray("skippedDates") ?: JSONArray()
                     fun isSkipped(key: String): Boolean {
                         for (j in 0 until skipped.length()) if (skipped.optString(j) == key) return true
@@ -97,20 +98,24 @@ class HabitWidgetProvider : AppWidgetProvider() {
 
                     var sourceKey: String? = null
                     if (scheduled(day) && !isSkipped(today)) {
+                        //今日の設定分は、達成済みでも今日中は表示する
                         sourceKey = today
                     } else if (item.optBoolean("carryOverIfIncomplete", false)) {
+                        //やり残しは「直近の未達成回」だけを候補にする
                         for (offset in 1..7) {
                             val previous = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -offset) }
                             val previousDay = weekdays[previous.get(Calendar.DAY_OF_WEEK).let { if (it == 1) 6 else it - 2 }]
                             val key = formatter.format(previous.time)
                             if (!scheduled(previousDay)) continue
-                            if (!isSkipped(key)) sourceKey = key
+                            if (isSkipped(key)) continue
+                            if (history?.optBoolean(key, false) == true) continue
+                            sourceKey = key
                             break
                         }
                     }
 
                     if (sourceKey == null) continue
-                    val done = item.optJSONObject("completionHistory")?.optBoolean(sourceKey, false) ?: false
+                    val done = history?.optBoolean(sourceKey, false) ?: false
                     val priority = item.optInt("priority", 2)
                     candidates.add(
                         Triple(
